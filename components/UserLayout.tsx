@@ -28,20 +28,35 @@ export default function UserLayout({
         const parsedUser = JSON.parse(userStr);
         setUser(parsedUser);
         
-        // Verify token is valid by calling /auth/me (but don't fail on network errors)
+        // Verify token is valid by calling /auth/me
+        // fetchUser() will return null only on 401, otherwise returns cached user
         try {
           const { fetchUser } = await import("@/lib/auth-check");
           const freshUser = await fetchUser();
-          if (freshUser) {
-            setUser(freshUser);
+          
+          if (!freshUser) {
+            // fetchUser returned null = 401 error = token invalid
+            console.warn("[UserLayout] Token invalid (401), redirecting to login");
+            router.push("/login");
+            return;
           }
-        } catch (err) {
-          // If fetchUser fails but we have cached user, continue anyway
-          // Only redirect if token is actually invalid (401)
-          console.warn("Could not verify token, using cached user:", err);
+          
+          // Update with fresh user data
+          setUser(freshUser);
+        } catch (err: any) {
+          // Only redirect if it's a 401 error
+          const is401 = err?.message?.includes("401") || err?.response?.status === 401;
+          if (is401) {
+            console.warn("[UserLayout] 401 error, redirecting to login");
+            router.push("/login");
+            return;
+          }
+          
+          // For other errors, use cached user
+          console.warn("[UserLayout] Network error, using cached user:", err?.message);
         }
       } catch (error) {
-        console.error("Failed to parse user:", error);
+        console.error("[UserLayout] Failed to parse user:", error);
         router.push("/login");
         return;
       }

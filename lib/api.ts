@@ -46,16 +46,26 @@ apiClient.interceptors.response.use(
         const currentPath = window.location.pathname;
         
         // Don't redirect if we're already on login or signup pages
-        if (currentPath !== "/login" && currentPath !== "/signup") {
+        // Also don't redirect if this is a /auth/me call (let UserLayout handle it)
+        const isAuthMe = originalRequest.url?.includes('/auth/me');
+        
+        if (currentPath !== "/login" && currentPath !== "/signup" && !isAuthMe) {
+          console.warn("[API Interceptor] 401 error, clearing token and redirecting");
           localStorage.removeItem("token");
           localStorage.removeItem("user");
           
           // Use a small delay to prevent race conditions
           setTimeout(() => {
-            if (window.location.pathname !== "/login") {
+            if (window.location.pathname !== "/login" && window.location.pathname !== "/signup") {
               window.location.href = "/login";
             }
           }, 100);
+        } else if (isAuthMe) {
+          // For /auth/me, just clear token but don't redirect
+          // Let UserLayout handle the redirect
+          console.warn("[API Interceptor] 401 on /auth/me, clearing token (UserLayout will handle redirect)");
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
         }
       }
 

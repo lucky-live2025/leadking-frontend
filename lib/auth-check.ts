@@ -72,18 +72,24 @@ export async function fetchUser(): Promise<User | null> {
     } catch (error: any) {
       console.error("[fetchUser] Failed to fetch user:", error);
       
-      // Only clear localStorage if it's a 401 (unauthorized) error
-      if (error.message?.includes("401") || error.message?.includes("Unauthorized")) {
-        console.log("[fetchUser] 401 Unauthorized - clearing token and user");
+      // Check if it's a 401 error (token invalid/expired)
+      const is401 = error.message?.includes("401") || 
+                   error.message?.includes("Unauthorized") ||
+                   error.response?.status === 401;
+      
+      if (is401) {
+        console.log("[fetchUser] 401 Unauthorized - token invalid or expired");
+        // Only clear if we're sure it's a 401
         localStorage.removeItem("token");
         localStorage.removeItem("user");
         return null;
       }
       
-      // For other errors, return cached user from localStorage
+      // For network errors or other issues, return cached user
+      // This prevents redirect loops on temporary network issues
       const cachedUser = getUserFromStorage();
       if (cachedUser) {
-        console.warn("[fetchUser] Using cached user data due to fetch error:", error.message);
+        console.warn("[fetchUser] Using cached user data due to fetch error (non-401):", error.message);
         return cachedUser;
       }
       
