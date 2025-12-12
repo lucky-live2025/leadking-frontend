@@ -54,11 +54,11 @@ export default function DashboardLeadsPage() {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-8 py-8">
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-white mb-4"></div>
-            <div className="text-lg text-white">Loading leads...</div>
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
+            <div className="text-lg text-gray-900">Loading leads...</div>
           </div>
         </div>
       </div>
@@ -67,22 +67,22 @@ export default function DashboardLeadsPage() {
 
   if (error) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="bg-red-500/20 border border-red-500 rounded-lg p-6">
-          <h2 className="text-xl font-bold text-red-400 mb-2">Error</h2>
-          <p className="text-red-300">{error}</p>
+      <div className="container mx-auto px-8 py-8">
+        <div className="bg-red-50 border border-red-200 rounded-xl p-6 shadow-md">
+          <h2 className="text-xl font-bold text-red-900 mb-2">Error</h2>
+          <p className="text-red-700">{error}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6 text-white">My Leads</h1>
+    <div className="container mx-auto px-8 py-8">
+      <h1 className="text-3xl font-bold mb-8 text-gray-900">My Leads</h1>
       
       {leads.length === 0 ? (
-        <div className="rounded-lg p-8 text-center" style={{ backgroundColor: "#111827" }}>
-          <p className="text-gray-300 text-lg">No leads found</p>
+        <div className="bg-white rounded-xl p-8 text-center shadow-md border border-gray-200">
+          <p className="text-gray-600 text-lg">No leads found</p>
         </div>
       ) : (
         <LeadTable leads={leads} onRowClick={handleRowClick} />
@@ -90,4 +90,3 @@ export default function DashboardLeadsPage() {
     </div>
   );
 }
-

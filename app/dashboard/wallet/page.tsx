@@ -51,43 +51,43 @@ export default function WalletPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0A1628] p-8">
+    <div className="container mx-auto px-8 py-8">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold text-white mb-8">Wallet Settings</h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-8">Wallet Settings</h1>
 
         {error && (
-          <div className="bg-red-500/20 border border-red-500 text-red-200 p-4 rounded-lg mb-6">
+          <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl mb-6 shadow-md">
             {error}
           </div>
         )}
 
         {message && (
-          <div className="bg-green-500/20 border border-green-500 text-green-200 p-4 rounded-lg mb-6">
+          <div className="bg-green-50 border border-green-200 text-green-700 p-4 rounded-xl mb-6 shadow-md">
             {message}
           </div>
         )}
 
-        <div className="bg-[#111827] rounded-lg p-6">
+        <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200">
           {wallet ? (
             <div>
-              <h2 className="text-xl font-semibold text-white mb-4">Connected Wallet</h2>
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">Connected Wallet</h2>
               <div className="space-y-4">
                 <div>
-                  <label className="text-gray-400 text-sm">Address</label>
-                  <p className="text-white font-mono break-all">{wallet.address}</p>
+                  <label className="text-gray-600 text-sm font-semibold block mb-2">Address</label>
+                  <p className="text-gray-900 font-mono break-all bg-gray-50 p-3 rounded-lg">{wallet.address}</p>
                 </div>
                 <div>
-                  <label className="text-gray-400 text-sm">Network</label>
-                  <p className="text-white">{wallet.network}</p>
+                  <label className="text-gray-600 text-sm font-semibold block mb-2">Network</label>
+                  <p className="text-gray-900">{wallet.network}</p>
                 </div>
                 <div>
-                  <label className="text-gray-400 text-sm">Verified</label>
-                  <p className="text-white">{wallet.verified ? "Yes" : "No"}</p>
+                  <label className="text-gray-600 text-sm font-semibold block mb-2">Verified</label>
+                  <p className="text-gray-900">{wallet.verified ? "Yes" : "No"}</p>
                 </div>
                 <button
                   onClick={handleDisconnect}
                   disabled={loading}
-                  className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
+                  className="px-6 py-2 bg-red-600 text-white rounded-xl font-semibold hover:bg-red-700 transition-colors shadow-md disabled:opacity-50"
                 >
                   Disconnect Wallet
                 </button>
@@ -95,14 +95,14 @@ export default function WalletPage() {
             </div>
           ) : (
             <div>
-              <h2 className="text-xl font-semibold text-white mb-4">Connect Your Wallet</h2>
-              <p className="text-gray-400 mb-6">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">Connect Your Wallet</h2>
+              <p className="text-gray-600 mb-6">
                 Connect your Ethereum wallet to enable USDT payments for subscriptions.
               </p>
               <button
                 onClick={handleConnect}
                 disabled={loading}
-                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                className="px-6 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors shadow-md disabled:opacity-50"
               >
                 {loading ? "Connecting..." : "Connect Wallet"}
               </button>
@@ -113,4 +113,3 @@ export default function WalletPage() {
     </div>
   );
 }
-

@@ -49,23 +49,23 @@ export default function DashboardCampaignsPage() {
     switch (status?.toUpperCase()) {
       case "ACTIVE":
       case "LAUNCHED":
-        return "bg-green-500/20 text-green-400";
+        return "bg-green-100 text-green-700 border border-green-200";
       case "PAUSED":
-        return "bg-yellow-500/20 text-yellow-400";
+        return "bg-yellow-100 text-yellow-700 border border-yellow-200";
       case "COMPLETED":
-        return "bg-blue-500/20 text-blue-400";
+        return "bg-blue-100 text-blue-700 border border-blue-200";
       default:
-        return "bg-gray-500/20 text-gray-400";
+        return "bg-gray-100 text-gray-700 border border-gray-200";
     }
   };
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-8 py-8">
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-white mb-4"></div>
-            <div className="text-lg text-white">Loading campaigns...</div>
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
+            <div className="text-lg text-gray-900">Loading campaigns...</div>
           </div>
         </div>
       </div>
@@ -74,35 +74,33 @@ export default function DashboardCampaignsPage() {
 
   if (error) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="bg-red-500/20 border border-red-500 rounded-lg p-6">
-          <h2 className="text-xl font-bold text-red-400 mb-2">Error</h2>
-          <p className="text-red-300">{error}</p>
+      <div className="container mx-auto px-8 py-8">
+        <div className="bg-red-50 border border-red-200 rounded-xl p-6 shadow-md">
+          <h2 className="text-xl font-bold text-red-900 mb-2">Error</h2>
+          <p className="text-red-700">{error}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-white">My Campaigns</h1>
+    <div className="container mx-auto px-8 py-8">
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold text-gray-900">My Campaigns</h1>
         <Link
           href="/dashboard/campaigns/create"
-          className="px-6 py-3 text-white rounded-lg font-semibold hover:opacity-90 transition"
-          style={{ backgroundColor: "#2563eb" }}
+          className="px-6 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors shadow-md"
         >
           Create Campaign
         </Link>
       </div>
 
       {campaigns.length === 0 ? (
-        <div className="rounded-lg p-8 text-center" style={{ backgroundColor: "#111827" }}>
-          <p className="text-gray-300 text-lg mb-4">No campaigns found</p>
+        <div className="bg-white rounded-xl p-8 text-center shadow-md border border-gray-200">
+          <p className="text-gray-600 text-lg mb-4">No campaigns found</p>
           <Link
             href="/dashboard/campaigns/create"
-            className="px-6 py-3 text-white rounded-lg font-semibold inline-block hover:opacity-90 transition"
-            style={{ backgroundColor: "#2563eb" }}
+            className="px-6 py-3 bg-blue-600 text-white rounded-xl font-semibold inline-block hover:bg-blue-700 transition-colors shadow-md"
           >
             Create Your First Campaign
           </Link>
@@ -113,19 +111,18 @@ export default function DashboardCampaignsPage() {
             <Link
               key={campaign.id}
               href={`/dashboard/campaigns/${campaign.id}`}
-              className="rounded-lg p-6 hover:opacity-90 transition"
-              style={{ backgroundColor: "#111827" }}
+              className="bg-white rounded-xl p-6 shadow-md border border-gray-200 hover:shadow-lg hover:border-blue-300 transition-all"
             >
               <div className="flex justify-between items-start mb-4">
-                <h3 className="text-xl font-semibold text-white">{campaign.name}</h3>
-                <span className={`px-3 py-1 rounded text-sm font-medium ${getStatusColor(campaign.status)}`}>
+                <h3 className="text-xl font-semibold text-gray-900">{campaign.name}</h3>
+                <span className={`px-3 py-1 rounded-lg text-sm font-medium ${getStatusColor(campaign.status)}`}>
                   {campaign.status}
                 </span>
               </div>
               {campaign.budget && (
-                <p className="text-gray-400 mb-2">Budget: ${campaign.budget}</p>
+                <p className="text-gray-600 mb-2">Budget: ${campaign.budget}</p>
               )}
-              <p className="text-gray-400 text-sm">
+              <p className="text-gray-500 text-sm">
                 Created: {new Date(campaign.createdAt).toLocaleDateString()}
               </p>
             </Link>

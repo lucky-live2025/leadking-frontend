@@ -119,7 +119,8 @@ export default function AsyncMultiSelect({
     return () => {
       isMounted = false;
     };
-  }, [loadOptions]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Load once on mount
 
   const selectedOptions = useMemo(() => {
     return optionsCache.filter((opt) => value.includes(opt.value));

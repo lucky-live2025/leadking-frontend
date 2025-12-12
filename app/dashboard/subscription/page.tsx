@@ -122,24 +122,24 @@ export default function SubscriptionPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0A1628] p-8">
+    <div className="container mx-auto px-8 py-8">
       <div className="max-w-6xl mx-auto">
-        <h1 className="text-3xl font-bold text-white mb-8">Subscription</h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-8">Subscription</h1>
 
         {error && (
-          <div className="bg-red-500/20 border border-red-500 text-red-200 p-4 rounded-lg mb-6">
+          <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl mb-6 shadow-md">
             {error}
           </div>
         )}
 
         {txHash && (
-          <div className="bg-green-500/20 border border-green-500 text-green-200 p-4 rounded-lg mb-6">
+          <div className="bg-green-50 border border-green-200 text-green-700 p-4 rounded-xl mb-6 shadow-md">
             <p>Transaction submitted!</p>
             <a
               href={`https://etherscan.io/tx/${txHash}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="underline"
+              className="underline text-green-800"
             >
               View on Etherscan
             </a>
@@ -147,15 +147,15 @@ export default function SubscriptionPage() {
         )}
 
         {subscription && subscription.status === "active" && (
-          <div className="bg-[#111827] rounded-lg p-6 mb-8">
-            <h2 className="text-xl font-semibold text-white mb-4">Current Subscription</h2>
+          <div className="bg-white rounded-xl p-6 mb-8 shadow-md border border-gray-200">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">Current Subscription</h2>
             <div className="space-y-2">
-              <p className="text-gray-400">
-                Tier: <span className="text-white font-semibold">{subscription.tier || subscription.planTier}</span>
+              <p className="text-gray-600">
+                Tier: <span className="text-gray-900 font-semibold">{subscription.tier || subscription.planTier}</span>
               </p>
               {subscription.expiryDate && (
-                <p className="text-gray-400">
-                  Expires in: <span className="text-white font-semibold">{getDaysRemaining(subscription.expiryDate)} days</span>
+                <p className="text-gray-600">
+                  Expires in: <span className="text-gray-900 font-semibold">{getDaysRemaining(subscription.expiryDate)} days</span>
                 </p>
               )}
             </div>
@@ -163,11 +163,11 @@ export default function SubscriptionPage() {
         )}
 
         {!wallet && !walletConnected && (
-          <div className="bg-yellow-500/20 border border-yellow-500 text-yellow-200 p-4 rounded-lg mb-6">
+          <div className="bg-yellow-50 border border-yellow-200 text-yellow-700 p-4 rounded-xl mb-6 shadow-md">
             <p>Please connect your wallet to subscribe.</p>
             <button
               onClick={() => setShowConnectModal(true)}
-              className="mt-2 px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700"
+              className="mt-2 px-4 py-2 bg-yellow-600 text-white rounded-xl font-semibold hover:bg-yellow-700 transition-colors shadow-md"
             >
               Connect Wallet
             </button>
@@ -177,22 +177,22 @@ export default function SubscriptionPage() {
         {/* Connect Wallet Modal */}
         {showConnectModal && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-[#111827] rounded-lg p-6 max-w-md w-full mx-4">
-              <h2 className="text-xl font-bold text-white mb-4">Connect Wallet</h2>
-              <p className="text-gray-400 mb-6">
+            <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4 shadow-xl">
+              <h2 className="text-xl font-bold text-gray-900 mb-4">Connect Wallet</h2>
+              <p className="text-gray-600 mb-6">
                 Connect your Ethereum wallet to purchase a subscription with USDT.
               </p>
               <div className="flex gap-4">
                 <button
                   onClick={() => setShowConnectModal(false)}
-                  className="flex-1 px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600"
+                  className="flex-1 px-4 py-2 bg-gray-200 text-gray-900 rounded-xl font-semibold hover:bg-gray-300 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleConnectWallet}
                   disabled={loading}
-                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors shadow-md disabled:opacity-50"
                 >
                   {loading ? "Connecting..." : "Connect"}
                 </button>
@@ -205,14 +205,14 @@ export default function SubscriptionPage() {
           {TIERS.map((tier) => (
             <div
               key={tier.id}
-              className="bg-[#111827] rounded-lg p-6 border border-gray-700"
+              className="bg-white rounded-xl p-6 border border-gray-200 shadow-md hover:shadow-lg transition-all"
             >
-              <h3 className="text-xl font-bold text-white mb-2">{tier.name}</h3>
-              <p className="text-3xl font-bold text-blue-500 mb-4">{tier.usdt} USDT</p>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">{tier.name}</h3>
+              <p className="text-3xl font-bold text-blue-600 mb-4">{tier.usdt} USDT</p>
               <button
                 onClick={() => handleSubscribe(tier.id)}
                 disabled={loading || (!wallet && !walletConnected)}
-                className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full px-4 py-2 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading && selectedTier === tier.id ? "Processing..." : "Subscribe"}
               </button>
