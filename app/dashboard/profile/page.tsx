@@ -44,6 +44,14 @@ export default function DashboardProfilePage() {
       if (err.response?.status === 401 || err.message?.includes("401")) {
         setError("Please log in to view your profile");
         // Don't redirect here - let UserLayout handle it
+      } else if (err.response?.status === 403 || err.message?.includes("403") || err.message?.includes("Forbidden")) {
+        // Handle 403 Forbidden - likely user not approved
+        const errorMsg = err.response?.data?.message || err.message || "Access denied";
+        if (errorMsg.includes("approved") || errorMsg.includes("approval")) {
+          setError("Your account is pending approval. Please wait for admin approval to access your profile.");
+        } else {
+          setError(errorMsg);
+        }
       } else {
         setError(err.message || "Internal server error");
       }

@@ -52,6 +52,14 @@ export default function DashboardCampaignsPage() {
       if (err.response?.status === 401 || err.message?.includes("401")) {
         setError("Please log in to view campaigns");
         // Don't redirect here - let UserLayout handle it
+      } else if (err.response?.status === 403 || err.message?.includes("403") || err.message?.includes("Forbidden")) {
+        // Handle 403 Forbidden - likely user not approved
+        const errorMsg = err.response?.data?.message || err.message || "Access denied";
+        if (errorMsg.includes("approved") || errorMsg.includes("approval")) {
+          setError("Your account is pending approval. Please wait for admin approval to access campaigns.");
+        } else {
+          setError(errorMsg);
+        }
       } else {
         setError(err.message || "Failed to load campaigns");
       }
