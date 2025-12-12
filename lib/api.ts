@@ -124,9 +124,16 @@ function getHeaders(options: any = {}): any {
 
 export async function apiGet(path: string, options: any = {}) {
   try {
+    // Merge headers - interceptor will also add Authorization, but getHeaders ensures it's there
+    const customHeaders = getHeaders(options);
+    const mergedHeaders = {
+      ...customHeaders,
+      ...(options.headers || {}),
+    };
+    
     const response = await apiClient.get(buildUrl(path), {
       ...options,
-      headers: getHeaders(options),
+      headers: mergedHeaders,
     });
     return response.data;
   } catch (error: any) {
