@@ -22,7 +22,7 @@ export default function LoginPage() {
     setLoading(true);
 
     const loginEmail = email.trim().toLowerCase();
-    const loginPassword = password;
+    const loginPassword = password.trim(); // Trim password to remove accidental whitespace
 
     try {
       const response = await apiPost("/auth/login", {
