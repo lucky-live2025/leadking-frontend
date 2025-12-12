@@ -26,42 +26,54 @@ export default function UserLayout({
 
       try {
         const parsedUser = JSON.parse(userStr);
+        // Set user immediately from cache to prevent redirect loops
         setUser(parsedUser);
+        setIsChecking(false);
         
-        // Verify token is valid by calling /auth/me
-        // fetchUser() will return null only on 401, otherwise returns cached user
+        // Verify token in background (non-blocking)
+        // Only redirect if we get a confirmed 401 error
         try {
           const { fetchUser } = await import("@/lib/auth-check");
           const freshUser = await fetchUser();
           
           if (!freshUser) {
-            // fetchUser returned null = 401 error = token invalid
-            console.warn("[UserLayout] Token invalid (401), redirecting to login");
-            router.push("/login");
+            // fetchUser returned null = confirmed 401 error = token invalid
+            // Double-check: only redirect if we still have no valid user
+            const currentToken = localStorage.getItem("token");
+            if (!currentToken) {
+              console.warn("[UserLayout] Token invalid (401), redirecting to login");
+              router.push("/login");
+              return;
+            }
+            // If token still exists but fetchUser returned null, it might be a network issue
+            // Keep using cached user to prevent redirect loops
+            console.warn("[UserLayout] fetchUser returned null but token exists, using cached user");
             return;
           }
           
           // Update with fresh user data
           setUser(freshUser);
         } catch (err: any) {
-          // Only redirect if it's a 401 error
+          // Only redirect if it's a confirmed 401 error AND token was cleared
           const is401 = err?.message?.includes("401") || err?.response?.status === 401;
-          if (is401) {
-            console.warn("[UserLayout] 401 error, redirecting to login");
+          const tokenStillExists = localStorage.getItem("token");
+          
+          if (is401 && !tokenStillExists) {
+            // Confirmed 401 and token was cleared by interceptor
+            console.warn("[UserLayout] 401 error confirmed, redirecting to login");
             router.push("/login");
             return;
           }
           
-          // For other errors, use cached user
-          console.warn("[UserLayout] Network error, using cached user:", err?.message);
+          // For network errors or unconfirmed 401s, keep using cached user
+          // This prevents redirect loops on temporary network issues
+          console.warn("[UserLayout] Network error or unconfirmed 401, using cached user:", err?.message);
         }
       } catch (error) {
         console.error("[UserLayout] Failed to parse user:", error);
         router.push("/login");
         return;
       }
-
-      setIsChecking(false);
     }
     
     checkAuth();

@@ -44,14 +44,15 @@ export default function LoginPage() {
         };
         localStorage.setItem("user", JSON.stringify(user));
 
-        // Small delay to ensure localStorage is written before redirect
-        await new Promise(resolve => setTimeout(resolve, 100));
+        // Ensure localStorage is written and token is available before redirect
+        // Use window.location for a hard redirect to prevent race conditions
+        await new Promise(resolve => setTimeout(resolve, 200));
 
-        // Redirect based on role
+        // Redirect based on role using window.location for reliability
         if (user.role.toUpperCase() === "ADMIN") {
-          router.push("/admin");
+          window.location.href = "/admin";
         } else {
-          router.push("/dashboard");
+          window.location.href = "/dashboard";
         }
       } else {
         setError("Login failed. Please check your credentials.");
