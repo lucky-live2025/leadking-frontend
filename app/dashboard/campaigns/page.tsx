@@ -120,6 +120,7 @@ export default function DashboardCampaignsPage() {
         <h1 className="text-3xl font-bold text-gray-900">My Campaigns</h1>
         <Link
           href="/dashboard/campaigns/create"
+          prefetch={false}
           className="px-6 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors shadow-md"
         >
           Create Campaign
@@ -131,6 +132,7 @@ export default function DashboardCampaignsPage() {
           <p className="text-gray-600 text-lg mb-4">No campaigns found</p>
           <Link
             href="/dashboard/campaigns/create"
+            prefetch={false}
             className="px-6 py-3 bg-blue-600 text-white rounded-xl font-semibold inline-block hover:bg-blue-700 transition-colors shadow-md"
           >
             Create Your First Campaign
@@ -142,6 +144,7 @@ export default function DashboardCampaignsPage() {
             <Link
               key={campaign.id}
               href={`/dashboard/campaigns/${campaign.id}`}
+              prefetch={false}
               className="bg-white rounded-xl p-6 shadow-md border border-gray-200 hover:shadow-lg hover:border-blue-300 transition-all"
             >
               <div className="flex justify-between items-start mb-4">

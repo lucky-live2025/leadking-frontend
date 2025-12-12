@@ -92,6 +92,7 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Link 
           href="/dashboard/leads"
+          prefetch={false}
           className="bg-white rounded-xl p-6 shadow-md border border-gray-200 hover:shadow-lg hover:border-blue-300 transition-all"
         >
           <h3 className="text-xl font-semibold mb-2 text-gray-900">View All Leads</h3>
@@ -99,6 +100,7 @@ export default function DashboardPage() {
         </Link>
         <Link 
           href="/dashboard/campaigns"
+          prefetch={false}
           className="bg-white rounded-xl p-6 shadow-md border border-gray-200 hover:shadow-lg hover:border-blue-300 transition-all"
         >
           <h3 className="text-xl font-semibold mb-2 text-gray-900">Manage Campaigns</h3>
@@ -106,6 +108,7 @@ export default function DashboardPage() {
         </Link>
         <Link 
           href="/ultra"
+          prefetch={false}
           className="bg-white rounded-xl p-6 shadow-md border border-gray-200 hover:shadow-lg hover:border-blue-300 transition-all"
         >
           <h3 className="text-xl font-semibold mb-2 text-gray-900">Ultra Campaign Generator</h3>
@@ -113,6 +116,7 @@ export default function DashboardPage() {
         </Link>
         <Link 
           href="/dashboard/billing"
+          prefetch={false}
           className="bg-white rounded-xl p-6 shadow-md border border-gray-200 hover:shadow-lg hover:border-blue-300 transition-all"
         >
           <h3 className="text-xl font-semibold mb-2 text-gray-900">Billing & Subscription</h3>

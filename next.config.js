@@ -19,8 +19,6 @@ const nextConfig = {
     maxInactiveAge: 25 * 1000,
     pagesBufferLength: 2,
   },
-  // Disable automatic prefetching to prevent RSC payload errors on protected routes
-  reactStrictMode: true,
 }
 
 module.exports = withSentryConfig(
