@@ -34,7 +34,7 @@ export default function Hero() {
             href="/signup" 
             className="btn-premium text-lg px-10 py-4 rounded-xl font-semibold transition-all duration-300 hover:scale-105 hover:shadow-glow"
           >
-            Start Free Demo
+            Create Account
           </Link>
           <Link 
             href="/#pricing"

@@ -2,29 +2,14 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { isPricingUnlocked, getUserFromStorage } from "@/lib/auth-check";
 
 export default function PricingPreview() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userStatus, setUserStatus] = useState<string | null>(null);
+  const [isUnlocked, setIsUnlocked] = useState(false);
 
   useEffect(() => {
-    // Check if user is logged in
-    if (typeof window !== "undefined") {
-      const token = localStorage.getItem("token");
-      const userStr = localStorage.getItem("user");
-      
-      if (token && userStr) {
-        try {
-          const user = JSON.parse(userStr);
-          setIsLoggedIn(true);
-          setUserStatus(user.status || null);
-        } catch (e) {
-          setIsLoggedIn(false);
-        }
-      } else {
-        setIsLoggedIn(false);
-      }
-    }
+    const user = getUserFromStorage();
+    setIsUnlocked(isPricingUnlocked(user));
   }, []);
 
   const pricingTiers = [
@@ -34,7 +19,7 @@ export default function PricingPreview() {
     { name: "Custom", price: 15000, period: "month" }
   ];
 
-  const isLocked = !isLoggedIn || userStatus !== "APPROVED";
+  const isLocked = !isUnlocked;
 
   return (
     <section className="py-24 bg-gradient-to-b from-gray-50 to-white" id="pricing">
@@ -115,7 +100,7 @@ export default function PricingPreview() {
                 </ul>
 
                 <Link
-                  href={isLoggedIn ? "/dashboard/subscription" : "/signup"}
+                  href={isUnlocked ? "/dashboard/subscription" : "/signup"}
                   className={`block w-full text-center py-3 px-6 rounded-xl font-semibold transition-all duration-300 ${
                     index === 1
                       ? "bg-blue-600 text-white hover:bg-blue-700"
@@ -124,7 +109,7 @@ export default function PricingPreview() {
                       : "bg-gray-100 text-gray-900 hover:bg-gray-200"
                   }`}
                 >
-                  {isLoggedIn ? "Upgrade Now" : "Get Started"}
+                  {isUnlocked ? "Upgrade Now" : "Get Started"}
                 </Link>
               </div>
             ))}
