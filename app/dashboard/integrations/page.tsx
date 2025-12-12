@@ -36,9 +36,8 @@ export default function IntegrationsPage() {
         return;
       }
 
-      // Get platform connections
-      const userId = userData.id || userData.userId;
-      const tokens = await apiGet(`/platform-tokens?userId=${userId}`);
+      // Get platform connections (endpoint uses JWT token, no userId needed)
+      const tokens = await apiGet("/auth/platform-tokens");
 
       const platforms = [
         { id: "META", name: "Meta (Facebook & Instagram)", icon: "📘", color: "blue" },
