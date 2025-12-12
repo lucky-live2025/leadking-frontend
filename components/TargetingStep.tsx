@@ -120,14 +120,38 @@ export default function TargetingStep({ platform, formData, onChange }: Targetin
     loadStatesForCountries();
   }, [formData.countries, countries]);
 
-  // Country options
+  // Country options - fetch directly if not loaded yet
   const countryOptions = useCallback(async () => {
-    return countries.map(c => ({ value: c.name, label: c.name }));
+    // If countries are already loaded, use them
+    if (countries.length > 0) {
+      return countries.map(c => ({ value: c.name, label: c.name }));
+    }
+    // Otherwise, fetch them directly
+    try {
+      const data = await getCountries();
+      setCountries(data); // Update state for future use
+      return data.map(c => ({ value: c.name, label: c.name }));
+    } catch (error) {
+      console.error("Failed to load countries in countryOptions:", error);
+      return [];
+    }
   }, [countries]);
 
-  // Language options
+  // Language options - fetch directly if not loaded yet
   const languageOptions = useCallback(async () => {
-    return languages.map(l => ({ value: l.code, label: `${l.name} (${l.nativeName})` }));
+    // If languages are already loaded, use them
+    if (languages.length > 0) {
+      return languages.map(l => ({ value: l.code, label: `${l.name} (${l.nativeName})` }));
+    }
+    // Otherwise, fetch them directly
+    try {
+      const data = await getLanguages();
+      setLanguages(data); // Update state for future use
+      return data.map(l => ({ value: l.code, label: `${l.name} (${l.nativeName})` }));
+    } catch (error) {
+      console.error("Failed to load languages in languageOptions:", error);
+      return [];
+    }
   }, [languages]);
 
   // State options
