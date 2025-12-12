@@ -240,6 +240,14 @@ export default function UltraCampaignPage() {
               >
                 Publish Campaign →
               </button>
+              {campaignId && (
+                <button
+                  onClick={() => router.push(`/ultra-campaign/assets?campaignId=${campaignId}`)}
+                  className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg font-semibold hover:from-purple-700 hover:to-pink-700"
+                >
+                  View AI Assets →
+                </button>
+              )}
             </div>
           </div>
         )}
