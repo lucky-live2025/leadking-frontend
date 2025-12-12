@@ -15,7 +15,7 @@ export default function Workflow() {
     {
       number: "02",
       title: "Select Platform",
-      description: "Choose from Meta, TikTok, Google, YouTube, LinkedIn, Yandex, or Email.",
+      description: "Use our AI generator to create complete campaigns in minutes. AI selects platforms, creates ads, and builds landing pages.",
       icon: (
         <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -36,7 +36,7 @@ export default function Workflow() {
     {
       number: "04",
       title: "Generate AI Creatives",
-      description: "Let AI create high-converting videos, images, and ad copy automatically.",
+      description: "Deploy campaigns and start receiving qualified leads. AI optimizes for lead quality and cost.",
       icon: (
         <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />

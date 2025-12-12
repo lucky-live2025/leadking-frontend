@@ -19,14 +19,14 @@ export default function Hero() {
       <div className="relative container mx-auto px-6 text-center z-10">
         <h1 className="text-6xl md:text-7xl lg:text-8xl font-bold mb-6 text-gray-900 animate-fade-in relative inline-block tracking-tight leading-tight">
           <span className="relative z-10 bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-600 bg-clip-text text-transparent">
-            AI-Powered Global Advertising.
+            Generate Qualified Leads via AI Ad Campaigns.
           </span>
           <br />
           <span className="relative z-10 text-gray-900">Unlimited Scale.</span>
         </h1>
 
         <p className="text-xl md:text-2xl text-gray-700 max-w-3xl mx-auto mb-12 font-normal leading-relaxed animate-fade-in" style={{ animationDelay: "0.15s" }}>
-          One platform to launch, optimize, and automate ads across Meta, TikTok, Google, YouTube, LinkedIn, and Yandex — with real-time intelligence.
+          Create AI-powered ad campaigns that capture leads across Meta, TikTok, Google, YouTube, LinkedIn, and Yandex — with real-time optimization.
         </p>
 
         <div className="flex flex-col sm:flex-row justify-center items-center gap-6 animate-fade-in" style={{ animationDelay: "0.3s" }}>
@@ -34,7 +34,7 @@ export default function Hero() {
             href="/signup" 
             className="btn-premium text-lg px-10 py-4 rounded-xl font-semibold transition-all duration-300 hover:scale-105 hover:shadow-glow"
           >
-            Create Account
+            Start Generating Leads
           </Link>
           <Link 
             href="/#pricing"
