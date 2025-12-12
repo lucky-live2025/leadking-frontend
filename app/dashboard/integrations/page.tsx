@@ -71,10 +71,23 @@ export default function IntegrationsPage() {
     }
   }
 
-  function handleConnect(platform: string) {
-    // Redirect to backend OAuth endpoint (backend will get userId from JWT token)
-    const backendUrl = process.env.NEXT_PUBLIC_API_URL || "https://lead-king-backend-production.up.railway.app";
-    window.location.href = `${backendUrl}/auth/${platform.toLowerCase()}/login`;
+  async function handleConnect(platform: string) {
+    try {
+      setError(null);
+      // Get OAuth URL from backend (authenticated request)
+      const response = await apiGet(`/auth/${platform.toLowerCase()}/login-url`);
+      const authUrl = response.authUrl;
+      
+      if (authUrl) {
+        // Redirect to OAuth provider
+        window.location.href = authUrl;
+      } else {
+        setError(`Failed to get ${platform} OAuth URL. Please try again.`);
+      }
+    } catch (err: any) {
+      console.error(`Failed to connect ${platform}:`, err);
+      setError(err.message || `Failed to connect ${platform}. Please try again.`);
+    }
   }
 
   async function handleDisconnect(platform: string) {
