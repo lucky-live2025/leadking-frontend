@@ -89,10 +89,29 @@ export default function SubscriptionPage() {
         { auth: true }
       );
 
+      // Check if payment creation was disabled or failed
+      if (payment.status === 'disabled' || payment.status === 'error') {
+        setError(payment.message || "Crypto billing temporarily unavailable");
+        setSelectedTier(null);
+        return;
+      }
+
+      // Check if payment has required fields
+      if (!payment.id || !payment.walletAddress) {
+        setError("Crypto billing temporarily unavailable");
+        setSelectedTier(null);
+        return;
+      }
+
       setPaymentData(payment);
       setTimeRemaining(Math.floor((new Date(payment.expiresAt).getTime() - new Date().getTime()) / 1000));
     } catch (err: any) {
-      setError(err.message || "Failed to create payment");
+      // Check if it's a 500 error or network error
+      if (err.response?.status === 500 || err.message?.includes('500') || err.message?.includes('Internal')) {
+        setError("Crypto billing temporarily unavailable");
+      } else {
+        setError(err.message || "Failed to create payment");
+      }
       setSelectedTier(null);
     } finally {
       setLoading(false);
