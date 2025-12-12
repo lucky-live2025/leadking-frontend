@@ -4,6 +4,17 @@ import Link from 'next/link';
 export const metadata: Metadata = {
   title: 'LeadKing vs Marketing Agencies — AI Lead Generation Comparison',
   description: 'Compare LeadKing AI lead generation platform with traditional marketing agencies. See pros, cons, use cases, and which option is right for your business.',
+  openGraph: {
+    title: 'LeadKing vs Marketing Agencies — AI Lead Generation Comparison',
+    description: 'Compare LeadKing AI lead generation platform with traditional marketing agencies. See pros, cons, use cases, and which option is right for your business.',
+    type: 'website',
+    url: 'https://leadkingapp.com/leadking-vs-agencies',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'LeadKing vs Marketing Agencies — AI Lead Generation Comparison',
+    description: 'Compare LeadKing AI lead generation platform with traditional marketing agencies. See pros, cons, use cases, and which option is right for your business.',
+  },
 };
 
 export default function LeadKingVsAgenciesPage() {

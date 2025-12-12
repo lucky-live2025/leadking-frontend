@@ -4,6 +4,17 @@ import Link from 'next/link';
 export const metadata: Metadata = {
   title: 'LeadKing vs HubSpot — Lead Generation Platform Comparison',
   description: 'Compare LeadKing AI lead generation with HubSpot marketing automation. See differences, pros, cons, and which platform fits your needs.',
+  openGraph: {
+    title: 'LeadKing vs HubSpot — Lead Generation Platform Comparison',
+    description: 'Compare LeadKing AI lead generation with HubSpot marketing automation. See differences, pros, cons, and which platform fits your needs.',
+    type: 'website',
+    url: 'https://leadkingapp.com/leadking-vs-hubspot',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'LeadKing vs HubSpot — Lead Generation Platform Comparison',
+    description: 'Compare LeadKing AI lead generation with HubSpot marketing automation. See differences, pros, cons, and which platform fits your needs.',
+  },
 };
 
 export default function LeadKingVsHubSpotPage() {

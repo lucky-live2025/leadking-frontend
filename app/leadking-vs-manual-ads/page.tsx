@@ -4,6 +4,17 @@ import Link from 'next/link';
 export const metadata: Metadata = {
   title: 'LeadKing vs Manual Ad Management — AI Automation Comparison',
   description: 'Compare LeadKing AI-powered ad management with manual ad campaign management. See the benefits of automation versus manual processes.',
+  openGraph: {
+    title: 'LeadKing vs Manual Ad Management — AI Automation Comparison',
+    description: 'Compare LeadKing AI-powered ad management with manual ad campaign management. See the benefits of automation versus manual processes.',
+    type: 'website',
+    url: 'https://leadkingapp.com/leadking-vs-manual-ads',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'LeadKing vs Manual Ad Management — AI Automation Comparison',
+    description: 'Compare LeadKing AI-powered ad management with manual ad campaign management. See the benefits of automation versus manual processes.',
+  },
 };
 
 export default function LeadKingVsManualAdsPage() {

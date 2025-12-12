@@ -4,11 +4,66 @@ import Link from 'next/link';
 export const metadata: Metadata = {
   title: 'AI Lead Generation Platform — How LeadKing Generates Qualified Leads',
   description: 'Learn how AI lead generation works and how LeadKing uses artificial intelligence to create ad campaigns and generate qualified leads automatically.',
+  openGraph: {
+    title: 'AI Lead Generation Platform — How LeadKing Generates Qualified Leads',
+    description: 'Learn how AI lead generation works and how LeadKing uses artificial intelligence to create ad campaigns and generate qualified leads automatically.',
+    type: 'website',
+    url: 'https://leadkingapp.com/ai-lead-generation',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'AI Lead Generation Platform — How LeadKing Generates Qualified Leads',
+    description: 'Learn how AI lead generation works and how LeadKing uses artificial intelligence to create ad campaigns and generate qualified leads automatically.',
+  },
 };
 
 export default function AILeadGenerationPage() {
+  // FAQ Schema for AI Lead Generation
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is AI lead generation?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "AI lead generation is the process of using artificial intelligence to automatically identify, attract, and qualify potential customers. AI systems analyze data, create targeted campaigns, and optimize performance continuously to generate qualified leads."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How does AI lead generation work?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "AI lead generation works by analyzing target audiences, creating ad campaigns automatically, launching them across multiple platforms, and optimizing performance in real-time. AI systems learn from performance data to improve results over time."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What platforms does LeadKing support?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "LeadKing supports Meta (Facebook and Instagram), Google Ads, YouTube, TikTok, LinkedIn, and Yandex. The platform manages campaigns across all these platforms from a single dashboard."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How much does AI lead generation cost?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "AI lead generation platforms typically charge monthly subscriptions ranging from $250 to $15,000, depending on features and usage. This is separate from advertising spend on platforms like Meta and Google."
+        }
+      }
+    ]
+  };
+
   return (
     <div className="bg-white min-h-screen">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
       <div className="container mx-auto px-6 py-16 max-w-4xl">
         <nav className="mb-8">
           <Link href="/" className="text-blue-600 hover:underline">

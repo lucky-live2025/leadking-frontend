@@ -4,6 +4,17 @@ import Link from 'next/link';
 export const metadata: Metadata = {
   title: 'How to Generate Leads with AI (2025 Guide)',
   description: 'Complete guide to AI lead generation in 2025. Learn how artificial intelligence can automate and optimize your lead generation campaigns.',
+  openGraph: {
+    title: 'How to Generate Leads with AI (2025 Guide)',
+    description: 'Complete guide to AI lead generation in 2025. Learn how artificial intelligence can automate and optimize your lead generation campaigns.',
+    type: 'article',
+    url: 'https://leadkingapp.com/guides/how-to-generate-leads-with-ai',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'How to Generate Leads with AI (2025 Guide)',
+    description: 'Complete guide to AI lead generation in 2025. Learn how artificial intelligence can automate and optimize your lead generation campaigns.',
+  },
 };
 
 export default function HowToGenerateLeadsWithAIPage() {

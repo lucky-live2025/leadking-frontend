@@ -4,6 +4,17 @@ import Link from 'next/link';
 export const metadata: Metadata = {
   title: 'Best AI Tools for Lead Generation — 2025 Guide',
   description: 'Discover the best AI-powered tools and platforms for automated lead generation. Compare features, pricing, and use cases for top AI lead generation solutions.',
+  openGraph: {
+    title: 'Best AI Tools for Lead Generation — 2025 Guide',
+    description: 'Discover the best AI-powered tools and platforms for automated lead generation. Compare features, pricing, and use cases for top AI lead generation solutions.',
+    type: 'article',
+    url: 'https://leadkingapp.com/guides/best-ai-tools-for-lead-generation',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Best AI Tools for Lead Generation — 2025 Guide',
+    description: 'Discover the best AI-powered tools and platforms for automated lead generation. Compare features, pricing, and use cases for top AI lead generation solutions.',
+  },
 };
 
 export default function BestAIToolsForLeadGenerationPage() {

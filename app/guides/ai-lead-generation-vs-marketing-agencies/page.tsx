@@ -4,6 +4,17 @@ import Link from 'next/link';
 export const metadata: Metadata = {
   title: 'AI Lead Generation vs Marketing Agencies — Complete Comparison',
   description: 'Compare AI-powered lead generation platforms with traditional marketing agencies. Understand the differences, costs, and which option fits your business needs.',
+  openGraph: {
+    title: 'AI Lead Generation vs Marketing Agencies — Complete Comparison',
+    description: 'Compare AI-powered lead generation platforms with traditional marketing agencies. Understand the differences, costs, and which option fits your business needs.',
+    type: 'article',
+    url: 'https://leadkingapp.com/guides/ai-lead-generation-vs-marketing-agencies',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'AI Lead Generation vs Marketing Agencies — Complete Comparison',
+    description: 'Compare AI-powered lead generation platforms with traditional marketing agencies. Understand the differences, costs, and which option fits your business needs.',
+  },
 };
 
 export default function AILeadGenerationVsMarketingAgenciesPage() {

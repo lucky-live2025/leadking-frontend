@@ -4,6 +4,17 @@ import Link from 'next/link';
 export const metadata: Metadata = {
   title: 'How Much Does AI Lead Generation Cost? — 2025 Pricing Guide',
   description: 'Complete guide to AI lead generation costs in 2025. Understand pricing models, hidden costs, and how to budget for AI-powered lead generation platforms.',
+  openGraph: {
+    title: 'How Much Does AI Lead Generation Cost? — 2025 Pricing Guide',
+    description: 'Complete guide to AI lead generation costs in 2025. Understand pricing models, hidden costs, and how to budget for AI-powered lead generation platforms.',
+    type: 'article',
+    url: 'https://leadkingapp.com/guides/how-much-does-ai-lead-generation-cost',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'How Much Does AI Lead Generation Cost? — 2025 Pricing Guide',
+    description: 'Complete guide to AI lead generation costs in 2025. Understand pricing models, hidden costs, and how to budget for AI-powered lead generation platforms.',
+  },
 };
 
 export default function HowMuchDoesAILeadGenerationCostPage() {
