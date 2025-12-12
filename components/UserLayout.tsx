@@ -16,10 +16,17 @@ export default function UserLayout({
 
   useEffect(() => {
     async function checkAuth() {
-      const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-      const userStr = typeof window !== "undefined" ? localStorage.getItem("user") : null;
+      // Wait for window to be available
+      if (typeof window === "undefined") {
+        return;
+      }
+
+      const token = localStorage.getItem("token");
+      const userStr = localStorage.getItem("user");
       
+      // If no token or user, redirect immediately
       if (!token || !userStr) {
+        setIsChecking(false);
         router.push("/login");
         return;
       }
@@ -28,26 +35,25 @@ export default function UserLayout({
         const parsedUser = JSON.parse(userStr);
         // Set user immediately from cache to prevent redirect loops
         setUser(parsedUser);
-        setIsChecking(false);
+        setIsChecking(false); // Allow page to render with cached user
         
         // Verify token in background (non-blocking)
-        // Only redirect if we get a confirmed 401 error
+        // Only redirect if we get a confirmed 401 error AND token was cleared
         try {
           const { fetchUser } = await import("@/lib/auth-check");
           const freshUser = await fetchUser();
           
           if (!freshUser) {
-            // fetchUser returned null = confirmed 401 error = token invalid
-            // Double-check: only redirect if we still have no valid user
+            // fetchUser returned null - check if token still exists
             const currentToken = localStorage.getItem("token");
             if (!currentToken) {
+              // Token was cleared = confirmed 401, redirect
               console.warn("[UserLayout] Token invalid (401), redirecting to login");
               router.push("/login");
               return;
             }
-            // If token still exists but fetchUser returned null, it might be a network issue
-            // Keep using cached user to prevent redirect loops
-            console.warn("[UserLayout] fetchUser returned null but token exists, using cached user");
+            // Token exists but fetchUser failed - likely network issue, keep cached user
+            console.warn("[UserLayout] fetchUser failed but token exists, using cached user");
             return;
           }
           
@@ -71,6 +77,7 @@ export default function UserLayout({
         }
       } catch (error) {
         console.error("[UserLayout] Failed to parse user:", error);
+        setIsChecking(false);
         router.push("/login");
         return;
       }

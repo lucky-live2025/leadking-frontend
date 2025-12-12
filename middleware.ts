@@ -5,23 +5,21 @@ export function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
   // Public routes that don't require authentication
-  const publicRoutes = ['/login', '/signup', '/pricing', '/forgot-password', '/reset-password', '/about', '/privacy', '/terms', '/support'];
-  const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route));
-
-  // Admin routes - let client-side handle authentication
-  // Middleware can't access localStorage, so we allow these routes through
-  // and let the client-side components check localStorage
-  const isAdminRoute = pathname.startsWith('/admin');
-  
-  // Allow admin routes to pass through - client-side will check localStorage
-  if (isAdminRoute) {
-    return NextResponse.next();
-  }
-
-  // For other protected routes, we can check cookies if available
-  // But since we're using localStorage, we'll let client-side handle it
-  // Only redirect if it's clearly a public route
-  if (isPublicRoute) {
+  // Explicitly allow login, register, auth, and api/auth routes
+  if (
+    pathname.startsWith('/login') ||
+    pathname.startsWith('/register') ||
+    pathname.startsWith('/signup') ||
+    pathname.startsWith('/auth') ||
+    pathname.startsWith('/api/auth') ||
+    pathname.startsWith('/pricing') ||
+    pathname.startsWith('/forgot-password') ||
+    pathname.startsWith('/reset-password') ||
+    pathname.startsWith('/about') ||
+    pathname.startsWith('/privacy') ||
+    pathname.startsWith('/terms') ||
+    pathname.startsWith('/support')
+  ) {
     return NextResponse.next();
   }
 
