@@ -9,7 +9,8 @@ export default function Footer() {
     { name: "Features", href: "/#features" },
     { name: "Pricing", href: "/#pricing" },
     { name: "How It Works", href: "/#how-it-works" },
-    { name: "Platforms", href: "/#platforms" }
+    { name: "Platforms", href: "/#platforms" },
+    { name: "AI Lead Generation", href: "/ai-lead-generation" }
   ];
 
   const companyLinks = [

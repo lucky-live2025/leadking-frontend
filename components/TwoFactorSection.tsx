@@ -68,12 +68,12 @@ export default function TwoFactorSection({ user }: { user: any }) {
   return (
     <div>
       {error && (
-        <div className="mb-4 p-3 bg-red-500/20 border border-red-500/50 rounded-lg text-red-300 text-sm">
+        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
           {error}
         </div>
       )}
       {success && (
-        <div className="mb-4 p-3 bg-green-500/20 border border-green-500/50 rounded-lg text-green-300 text-sm">
+        <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-xl text-green-700 text-sm">
           {success}
         </div>
       )}
@@ -82,20 +82,20 @@ export default function TwoFactorSection({ user }: { user: any }) {
         <div>
           {!qrCode ? (
             <div>
-              <p className="text-gray-300 mb-4">
+              <p className="text-gray-600 mb-4">
                 Enable two-factor authentication to add an extra layer of security to your account.
               </p>
               <button
                 onClick={handleSetup}
                 disabled={loading}
-                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                className="px-6 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors shadow-md disabled:opacity-50"
               >
                 {loading ? "Setting up..." : "Enable 2FA"}
               </button>
             </div>
           ) : (
             <div>
-              <p className="text-gray-300 mb-4">
+              <p className="text-gray-600 mb-4">
                 Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.):
               </p>
               {qrCode && (
@@ -104,7 +104,7 @@ export default function TwoFactorSection({ user }: { user: any }) {
                 </div>
               )}
               <div className="mb-4">
-                <label className="block text-sm font-semibold text-gray-300 mb-2">
+                <label className="block text-sm font-semibold text-gray-900 mb-2">
                   Enter 6-digit verification code
                 </label>
                 <input
@@ -112,14 +112,14 @@ export default function TwoFactorSection({ user }: { user: any }) {
                   value={verificationCode}
                   onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
                   maxLength={6}
-                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 text-center text-2xl tracking-widest"
+                  className="w-full px-4 py-2 bg-white border border-gray-300 rounded-xl text-gray-900 placeholder-gray-500 text-center text-2xl tracking-widest focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="000000"
                 />
               </div>
               <button
                 onClick={handleVerify}
                 disabled={loading || verificationCode.length !== 6}
-                className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
+                className="px-6 py-3 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700 transition-colors shadow-md disabled:opacity-50"
               >
                 {loading ? "Verifying..." : "Verify & Enable"}
               </button>
@@ -128,13 +128,13 @@ export default function TwoFactorSection({ user }: { user: any }) {
         </div>
       ) : (
         <div>
-          <p className="text-gray-300 mb-4">
+          <p className="text-gray-600 mb-4">
             Two-factor authentication is enabled. Your account is protected with an additional security layer.
           </p>
           <button
             onClick={handleDisable}
             disabled={loading}
-            className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
+            className="px-6 py-3 bg-red-600 text-white rounded-xl font-semibold hover:bg-red-700 transition-colors shadow-md disabled:opacity-50"
           >
             {loading ? "Disabling..." : "Disable 2FA"}
           </button>

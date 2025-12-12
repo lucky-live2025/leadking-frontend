@@ -2,6 +2,7 @@
 
 import PublicNav from "@/components/PublicNav";
 import Hero from "@/app/(marketing)/landing/components/Hero";
+import WhatIsLeadKing from "@/app/(marketing)/landing/components/WhatIsLeadKing";
 import Features from "@/app/(marketing)/landing/components/Features";
 import Workflow from "@/app/(marketing)/landing/components/Workflow";
 import PricingPreview from "@/app/(marketing)/landing/components/PricingPreview";
@@ -12,6 +13,7 @@ export default function HomePage() {
     <div className="bg-white min-h-screen">
       <PublicNav />
       <Hero />
+      <WhatIsLeadKing />
       <Features />
       <Workflow />
       <PricingPreview />

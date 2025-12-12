@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { apiGet, apiPost } from "@/lib/api";
+import TwoFactorSection from "@/components/TwoFactorSection";
 
 export default function DashboardProfilePage() {
   const [user, setUser] = useState<any>(null);
@@ -137,6 +138,12 @@ export default function DashboardProfilePage() {
           </button>
         </div>
       </form>
+
+      {/* Two-Factor Authentication Section */}
+      <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200 mt-8">
+        <h2 className="text-2xl font-bold text-gray-900 mb-4">Security</h2>
+        <TwoFactorSection user={user} />
+      </div>
     </div>
   );
 }
