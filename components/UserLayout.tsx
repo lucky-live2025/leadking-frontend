@@ -146,6 +146,15 @@ export default function UserLayout({
               Billing
             </Link>
             <Link 
+              href="/dashboard/integrations" 
+              prefetch={false}
+              className={`text-gray-600 hover:text-gray-900 transition-colors ${
+                pathname === "/dashboard/integrations" ? "text-blue-600 font-semibold" : ""
+              }`}
+            >
+              Integrations
+            </Link>
+            <Link 
               href="/dashboard/profile" 
               prefetch={false}
               className={`text-gray-600 hover:text-gray-900 transition-colors ${
