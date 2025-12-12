@@ -22,6 +22,15 @@ export default function DashboardProfilePage() {
     try {
       setLoading(true);
       setError(null);
+      
+      // Verify user is authenticated first
+      const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+      if (!token) {
+        setError("Please log in to view your profile");
+        setLoading(false);
+        return;
+      }
+      
       const data = await apiGet("/auth/me", { auth: true });
       setUser(data);
       setFormData({
@@ -30,7 +39,14 @@ export default function DashboardProfilePage() {
       });
     } catch (err: any) {
       console.error("Failed to load profile:", err);
-      setError(err.message || "Internal server error");
+      
+      // Handle 401 errors specifically
+      if (err.response?.status === 401 || err.message?.includes("401")) {
+        setError("Please log in to view your profile");
+        // Don't redirect here - let UserLayout handle it
+      } else {
+        setError(err.message || "Internal server error");
+      }
     } finally {
       setLoading(false);
     }
