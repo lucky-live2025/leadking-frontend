@@ -12,6 +12,11 @@ const nextConfig = {
   swcMinify: true,
   experimental: {
     optimizeCss: false,
+    // Disable automatic route prefetching to prevent RSC payload errors
+    staleTimes: {
+      dynamic: 0,
+      static: 0,
+    },
   },
   generateBuildId: async () => String(Date.now()),
   // Disable RSC prefetching for client components to prevent fetch errors

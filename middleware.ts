@@ -25,7 +25,14 @@ export function middleware(request: NextRequest) {
 
   // For all other routes, let them through and let client-side handle auth
   // This allows localStorage-based auth to work properly
-  return NextResponse.next();
+  const response = NextResponse.next();
+  
+  // Disable prefetching for dashboard routes to prevent RSC payload errors
+  if (pathname.startsWith('/dashboard')) {
+    response.headers.set('x-middleware-prefetch', 'false');
+  }
+  
+  return response;
 }
 
 export const config = {
