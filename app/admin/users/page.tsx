@@ -22,10 +22,32 @@ interface User {
   subscriptionStatus?: string;
 }
 
+interface WalletData {
+  internal?: {
+    id: number;
+    balance_usd: number;
+    balance_btc: number;
+    balance_eth: number;
+  };
+  external?: {
+    address: string;
+    network: string;
+    verified: boolean;
+  };
+}
+
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [editingWallet, setEditingWallet] = useState<number | null>(null);
+  const [walletData, setWalletData] = useState<Record<number, WalletData>>({});
+  const [walletForm, setWalletForm] = useState({
+    externalAddress: "",
+    balance_usd: "",
+    balance_btc: "",
+    balance_eth: "",
+  });
 
   useEffect(() => {
     fetchUsers();
@@ -78,6 +100,67 @@ export default function AdminUsersPage() {
         alert(`Failed to update status: ${err.message}`);
       }
     }
+  };
+
+  const loadUserWallet = async (userId: number) => {
+    try {
+      const data = await adminGet(`/wallet/admin/users/${userId}`);
+      setWalletData(prev => ({ ...prev, [userId]: data }));
+    } catch (err: any) {
+      console.error("Failed to load wallet:", err);
+    }
+  };
+
+  const handleEditWallet = async (userId: number) => {
+    // Load wallet data if not already loaded
+    if (!walletData[userId]) {
+      await loadUserWallet(userId);
+    }
+    
+    const wallet = walletData[userId];
+    setWalletForm({
+      externalAddress: wallet?.external?.address || "",
+      balance_usd: wallet?.internal?.balance_usd?.toString() || "0",
+      balance_btc: wallet?.internal?.balance_btc?.toString() || "0",
+      balance_eth: wallet?.internal?.balance_eth?.toString() || "0",
+    });
+    setEditingWallet(userId);
+  };
+
+  const handleSaveWallet = async (userId: number) => {
+    try {
+      // Update external wallet if address provided
+      if (walletForm.externalAddress.trim()) {
+        await adminPatch(`/wallet/admin/users/${userId}/wallet/external`, {
+          walletAddress: walletForm.externalAddress.trim(),
+        });
+      }
+
+      // Update internal wallet balances
+      await adminPatch(`/wallet/admin/users/${userId}/wallet/internal`, {
+        balance_usd: parseFloat(walletForm.balance_usd) || 0,
+        balance_btc: parseFloat(walletForm.balance_btc) || 0,
+        balance_eth: parseFloat(walletForm.balance_eth) || 0,
+      });
+
+      // Reload wallet data
+      await loadUserWallet(userId);
+      setEditingWallet(null);
+      alert("Wallet updated successfully!");
+    } catch (err: any) {
+      console.error("Failed to update wallet:", err);
+      alert(`Failed to update wallet: ${err.message || err.response?.data?.message || "Unknown error"}`);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingWallet(null);
+    setWalletForm({
+      externalAddress: "",
+      balance_usd: "",
+      balance_btc: "",
+      balance_eth: "",
+    });
   };
 
   if (loading) {
@@ -137,6 +220,9 @@ export default function AdminUsersPage() {
                   Status
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                  Wallet
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
@@ -144,7 +230,7 @@ export default function AdminUsersPage() {
             <tbody className="divide-y divide-gray-700">
               {users.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-4 text-center text-gray-400">
+                  <td colSpan={7} className="px-6 py-4 text-center text-gray-400">
                     No users found
                   </td>
                 </tr>
@@ -183,22 +269,118 @@ export default function AdminUsersPage() {
                         {user.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      {user.status === "PENDING" && (
-                        <button
-                          onClick={() => handleUpdateStatus(user.id, "APPROVED")}
-                          className="text-blue-400 hover:text-blue-300 mr-2"
-                        >
-                          Approve
-                        </button>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                      {editingWallet === user.id ? (
+                        <div className="space-y-2">
+                          <div>
+                            <label className="text-xs text-gray-400">External Address</label>
+                            <input
+                              type="text"
+                              value={walletForm.externalAddress}
+                              onChange={(e) => setWalletForm(prev => ({ ...prev, externalAddress: e.target.value }))}
+                              className="w-full px-2 py-1 bg-[#0A1628] border border-gray-600 rounded text-white text-xs"
+                              placeholder="0x..."
+                            />
+                          </div>
+                          <div className="grid grid-cols-3 gap-1">
+                            <div>
+                              <label className="text-xs text-gray-400">USD</label>
+                              <input
+                                type="number"
+                                step="0.01"
+                                value={walletForm.balance_usd}
+                                onChange={(e) => setWalletForm(prev => ({ ...prev, balance_usd: e.target.value }))}
+                                className="w-full px-2 py-1 bg-[#0A1628] border border-gray-600 rounded text-white text-xs"
+                              />
+                            </div>
+                            <div>
+                              <label className="text-xs text-gray-400">BTC</label>
+                              <input
+                                type="number"
+                                step="0.00000001"
+                                value={walletForm.balance_btc}
+                                onChange={(e) => setWalletForm(prev => ({ ...prev, balance_btc: e.target.value }))}
+                                className="w-full px-2 py-1 bg-[#0A1628] border border-gray-600 rounded text-white text-xs"
+                              />
+                            </div>
+                            <div>
+                              <label className="text-xs text-gray-400">ETH</label>
+                              <input
+                                type="number"
+                                step="0.000001"
+                                value={walletForm.balance_eth}
+                                onChange={(e) => setWalletForm(prev => ({ ...prev, balance_eth: e.target.value }))}
+                                className="w-full px-2 py-1 bg-[#0A1628] border border-gray-600 rounded text-white text-xs"
+                              />
+                            </div>
+                          </div>
+                          <div className="flex gap-1">
+                            <button
+                              onClick={() => handleSaveWallet(user.id)}
+                              className="px-2 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700"
+                            >
+                              Save
+                            </button>
+                            <button
+                              onClick={handleCancelEdit}
+                              className="px-2 py-1 bg-gray-600 text-white text-xs rounded hover:bg-gray-700"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div>
+                          {walletData[user.id] ? (
+                            <div className="text-xs space-y-1">
+                              {walletData[user.id].external && (
+                                <div className="text-gray-400">
+                                  Ext: {walletData[user.id].external?.address?.substring(0, 10)}...
+                                </div>
+                              )}
+                              {walletData[user.id].internal && (
+                                <div className="text-gray-400">
+                                  USD: ${walletData[user.id].internal?.balance_usd?.toFixed(2) || "0.00"}
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => handleEditWallet(user.id)}
+                              className="text-blue-400 hover:text-blue-300 text-xs"
+                            >
+                              Edit Wallet
+                            </button>
+                          )}
+                        </div>
                       )}
-                      {user.status !== "SUSPENDED" && (
-                        <button
-                          onClick={() => handleUpdateStatus(user.id, "SUSPENDED")}
-                          className="text-red-400 hover:text-red-300"
-                        >
-                          Suspend
-                        </button>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      {editingWallet !== user.id && (
+                        <>
+                          <button
+                            onClick={() => handleEditWallet(user.id)}
+                            className="text-purple-400 hover:text-purple-300 mr-2 text-xs"
+                          >
+                            Wallet
+                          </button>
+                          {user.status === "PENDING" && (
+                            <button
+                              onClick={() => handleUpdateStatus(user.id, "APPROVED")}
+                              className="text-blue-400 hover:text-blue-300 mr-2 text-xs"
+                            >
+                              Approve
+                            </button>
+                          )}
+                          {user.status !== "SUSPENDED" && (
+                            <button
+                              onClick={() => handleUpdateStatus(user.id, "SUSPENDED")}
+                              className="text-red-400 hover:text-red-300 text-xs"
+                            >
+                              Suspend
+                            </button>
+                          )}
+                        </>
                       )}
                     </td>
                   </tr>
