@@ -294,10 +294,14 @@ export default function TargetingStep({ platform, formData, onChange }: Targetin
           loadOptions={languageOptions}
           isLoading={loadingLanguages}
         />
-        {languages.length > 0 && (
+        {languages.length > 0 ? (
           <p className="text-xs text-gray-500 mt-2">
             {languages.length} languages available • Select languages that match your target audience
           </p>
+        ) : loadingLanguages ? (
+          <p className="text-xs text-gray-500 mt-2">Loading languages...</p>
+        ) : (
+          <p className="text-xs text-red-500 mt-2">⚠️ Failed to load languages. Check console for errors.</p>
         )}
       </div>
 
