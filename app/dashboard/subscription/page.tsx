@@ -57,9 +57,16 @@ export default function SubscriptionPage() {
   async function loadSubscription() {
     try {
       const sub = await apiGet("/subscription/me", { auth: true });
-      setSubscription(sub);
+      // Handle both null and object responses
+      if (sub && (sub.status !== 'inactive' || sub.id)) {
+        setSubscription(sub);
+      } else {
+        setSubscription(null);
+      }
     } catch (err: any) {
       console.error("Failed to load subscription:", err);
+      setSubscription(null);
+      // Don't set error here - it's okay if subscription doesn't exist
     }
   }
 
