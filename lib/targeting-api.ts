@@ -33,20 +33,34 @@ export interface Interest {
 
 export async function getCountries(): Promise<Country[]> {
   try {
+    console.log("[targeting-api] Fetching countries...");
     // Targeting endpoints should be public (no auth required)
-    return await apiGet("/targeting/countries", { auth: false });
-  } catch (error) {
-    console.error("Failed to load countries:", error);
+    const data = await apiGet("/targeting/countries", { auth: false });
+    console.log("[targeting-api] Countries fetched:", data?.length || 0, data);
+    if (!Array.isArray(data)) {
+      console.error("[targeting-api] Countries response is not an array:", typeof data, data);
+      return [];
+    }
+    return data;
+  } catch (error: any) {
+    console.error("[targeting-api] Failed to load countries:", error?.message || error, error);
     return [];
   }
 }
 
 export async function getLanguages(): Promise<Language[]> {
   try {
+    console.log("[targeting-api] Fetching languages...");
     // Targeting endpoints should be public (no auth required)
-    return await apiGet("/targeting/languages", { auth: false });
-  } catch (error) {
-    console.error("Failed to load languages:", error);
+    const data = await apiGet("/targeting/languages", { auth: false });
+    console.log("[targeting-api] Languages fetched:", data?.length || 0, data);
+    if (!Array.isArray(data)) {
+      console.error("[targeting-api] Languages response is not an array:", typeof data, data);
+      return [];
+    }
+    return data;
+  } catch (error: any) {
+    console.error("[targeting-api] Failed to load languages:", error?.message || error, error);
     return [];
   }
 }
