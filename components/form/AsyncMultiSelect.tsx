@@ -100,12 +100,15 @@ export default function AsyncMultiSelect({
     const load = async () => {
       setLoading(true);
       try {
+        console.log("[AsyncMultiSelect] Loading options...");
         const data = await loadOptions();
+        console.log("[AsyncMultiSelect] Loaded options:", data.length);
         if (isMounted) {
           setOptionsCache(data);
+          console.log("[AsyncMultiSelect] Options cached:", data.length);
         }
       } catch (error) {
-        console.error("Failed to load options:", error);
+        console.error("[AsyncMultiSelect] Failed to load options:", error);
         if (isMounted) {
           setOptionsCache([]);
         }

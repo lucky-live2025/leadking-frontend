@@ -34,11 +34,16 @@ export default function TargetingStep({ platform, formData, onChange }: Targetin
   const [loadingInterests, setLoadingInterests] = useState(true);
   const [loadingStates, setLoadingStates] = useState(false);
 
-  // Load initial data
+  // Load initial data - ensure it loads before components mount
   useEffect(() => {
-    loadCountries();
-    loadLanguages();
-    loadInterests();
+    const loadAll = async () => {
+      await Promise.all([
+        loadCountries(),
+        loadLanguages(),
+        loadInterests(),
+      ]);
+    };
+    loadAll();
   }, []);
 
   // Load countries
@@ -120,36 +125,54 @@ export default function TargetingStep({ platform, formData, onChange }: Targetin
     loadStatesForCountries();
   }, [formData.countries, countries]);
 
-  // Country options - fetch directly if not loaded yet
+  // Country options - ALWAYS fetch fresh data
   const countryOptions = useCallback(async () => {
-    // If countries are already loaded, use them
-    if (countries.length > 0) {
-      return countries.map(c => ({ value: c.name, label: c.name }));
-    }
-    // Otherwise, fetch them directly
+    console.log("[TargetingStep] countryOptions called, countries.length:", countries.length);
     try {
+      // Always fetch fresh data to ensure it's available
       const data = await getCountries();
-      setCountries(data); // Update state for future use
-      return data.map(c => ({ value: c.name, label: c.name }));
+      console.log("[TargetingStep] Fetched countries:", data.length);
+      
+      // Update state if it's empty or different
+      if (countries.length === 0 || countries.length !== data.length) {
+        setCountries(data);
+      }
+      
+      const options = data.map(c => ({ value: c.name, label: c.name }));
+      console.log("[TargetingStep] Returning country options:", options.length);
+      return options;
     } catch (error) {
       console.error("Failed to load countries in countryOptions:", error);
+      // Fallback to state if fetch fails
+      if (countries.length > 0) {
+        return countries.map(c => ({ value: c.name, label: c.name }));
+      }
       return [];
     }
   }, [countries]);
 
-  // Language options - fetch directly if not loaded yet
+  // Language options - ALWAYS fetch fresh data
   const languageOptions = useCallback(async () => {
-    // If languages are already loaded, use them
-    if (languages.length > 0) {
-      return languages.map(l => ({ value: l.code, label: `${l.name} (${l.nativeName})` }));
-    }
-    // Otherwise, fetch them directly
+    console.log("[TargetingStep] languageOptions called, languages.length:", languages.length);
     try {
+      // Always fetch fresh data to ensure it's available
       const data = await getLanguages();
-      setLanguages(data); // Update state for future use
-      return data.map(l => ({ value: l.code, label: `${l.name} (${l.nativeName})` }));
+      console.log("[TargetingStep] Fetched languages:", data.length);
+      
+      // Update state if it's empty or different
+      if (languages.length === 0 || languages.length !== data.length) {
+        setLanguages(data);
+      }
+      
+      const options = data.map(l => ({ value: l.code, label: `${l.name} (${l.nativeName})` }));
+      console.log("[TargetingStep] Returning language options:", options.length);
+      return options;
     } catch (error) {
       console.error("Failed to load languages in languageOptions:", error);
+      // Fallback to state if fetch fails
+      if (languages.length > 0) {
+        return languages.map(l => ({ value: l.code, label: `${l.name} (${l.nativeName})` }));
+      }
       return [];
     }
   }, [languages]);
