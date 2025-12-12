@@ -33,6 +33,13 @@ export async function fetchUser(): Promise<User | null> {
 
   fetchUserPromise = (async () => {
     try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        console.warn("[fetchUser] No token found, cannot fetch user");
+        return null;
+      }
+      
+      console.log("[fetchUser] Fetching user profile with token:", token.substring(0, 20) + "...");
       const userData = await apiGet("/auth/me", { auth: true });
       
       // Map backend response to our User interface

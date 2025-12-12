@@ -82,9 +82,22 @@ function getHeaders(options: any = {}): any {
     ...(options.headers ?? {}),
   };
 
+  // Always try to get token if auth is requested or if no explicit auth: false
+  const shouldAuth = options.auth !== false;
   const token = getAuthToken();
-  if (token) {
+  
+  if (shouldAuth && token) {
     headers.Authorization = `Bearer ${token}`;
+    // Log in development only
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[API] Adding Authorization header:', {
+        hasToken: !!token,
+        tokenPrefix: token.substring(0, 20) + '...',
+        path: options.path || 'unknown',
+      });
+    }
+  } else if (shouldAuth && !token) {
+    console.warn('[API] Auth requested but no token found');
   }
 
   return headers;
