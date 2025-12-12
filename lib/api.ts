@@ -24,7 +24,8 @@ apiClient.interceptors.request.use(
       // Check if auth should be skipped (for public endpoints like /targeting)
       const skipAuth = (config as any).skipAuth || 
                        config.url?.includes('/targeting/') ||
-                       config.url?.includes('/health');
+                       config.url?.includes('/health') ||
+                       config.url?.includes('/enterprise/request');
       
       // CRITICAL: ALWAYS remove any existing Authorization header first
       // This prevents browser from adding Basic auth automatically
@@ -187,10 +188,18 @@ export async function apiGet(path: string, options: any = {}) {
 
 export async function apiPost(path: string, data: any = {}, options: any = {}) {
   try {
-    const response = await apiClient.post(buildUrl(path), data, {
+    // Pass skipAuth flag to interceptor for public endpoints
+    const requestConfig: any = {
       ...options,
       headers: getHeaders(options),
-    });
+    };
+    
+    // If auth: false, mark request to skip auth
+    if (options.auth === false || path.includes('/enterprise/request')) {
+      requestConfig.skipAuth = true;
+    }
+    
+    const response = await apiClient.post(buildUrl(path), data, requestConfig);
     return response.data;
   } catch (error: any) {
     // Handle network errors
