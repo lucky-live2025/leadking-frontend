@@ -79,6 +79,14 @@ export default function SubscriptionPage() {
     setPaymentStatus(null);
 
     try {
+      // Verify user is authenticated before creating payment
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setError("Please log in to create a payment");
+        setLoading(false);
+        return;
+      }
+
       // Create payment with QR code
       const payment = await apiPost(
         "/payments/create",
@@ -90,27 +98,38 @@ export default function SubscriptionPage() {
       );
 
       // Check if payment creation was disabled or failed
-      if (payment.status === 'disabled' || payment.status === 'error') {
+      if (payment && (payment.status === 'disabled' || payment.status === 'error')) {
         setError(payment.message || "Crypto billing temporarily unavailable");
         setSelectedTier(null);
+        setLoading(false);
         return;
       }
 
       // Check if payment has required fields
-      if (!payment.id || !payment.walletAddress) {
-        setError("Crypto billing temporarily unavailable");
+      if (!payment || !payment.id || !payment.walletAddress) {
+        console.error('[Subscription] Invalid payment response:', payment);
+        setError("Crypto billing temporarily unavailable. Please try again or contact support.");
         setSelectedTier(null);
+        setLoading(false);
         return;
       }
 
       setPaymentData(payment);
       setTimeRemaining(Math.floor((new Date(payment.expiresAt).getTime() - new Date().getTime()) / 1000));
     } catch (err: any) {
-      // Check if it's a 500 error or network error
-      if (err.response?.status === 500 || err.message?.includes('500') || err.message?.includes('Internal')) {
-        setError("Crypto billing temporarily unavailable");
+      console.error('[Subscription] Error creating payment:', err);
+      
+      // Check if it's an authentication error
+      if (err.response?.status === 401 || err.message?.includes('401') || err.message?.includes('Unauthorized')) {
+        setError("Please log in again to create a payment");
+        // Optionally redirect to login
+        setTimeout(() => {
+          window.location.href = '/login';
+        }, 2000);
+      } else if (err.response?.status === 500 || err.message?.includes('500') || err.message?.includes('Internal')) {
+        setError("Crypto billing temporarily unavailable. Please try again later.");
       } else {
-        setError(err.message || "Failed to create payment");
+        setError(err.message || "Failed to create payment. Please try again.");
       }
       setSelectedTier(null);
     } finally {
