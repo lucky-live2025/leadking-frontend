@@ -109,46 +109,51 @@ export default function UserLayout({
               Lead King
             </Link>
             <nav className="flex gap-6">
-              <Link 
-                href="/dashboard" 
-                className={`text-gray-600 hover:text-gray-900 transition-colors ${
-                  pathname === "/dashboard" ? "text-blue-600 font-semibold" : ""
-                }`}
-              >
-                Dashboard
-              </Link>
-              <Link 
-                href="/dashboard/leads" 
-                className={`text-gray-600 hover:text-gray-900 transition-colors ${
-                  pathname === "/dashboard/leads" ? "text-blue-600 font-semibold" : ""
-                }`}
-              >
-                Leads
-              </Link>
-              <Link 
-                href="/dashboard/campaigns" 
-                className={`text-gray-600 hover:text-gray-900 transition-colors ${
-                  pathname === "/dashboard/campaigns" ? "text-blue-600 font-semibold" : ""
-                }`}
-              >
-                Campaigns
-              </Link>
-              <Link 
-                href="/dashboard/billing" 
-                className={`text-gray-600 hover:text-gray-900 transition-colors ${
-                  pathname === "/dashboard/billing" ? "text-blue-600 font-semibold" : ""
-                }`}
-              >
-                Billing
-              </Link>
-              <Link 
-                href="/dashboard/profile" 
-                className={`text-gray-600 hover:text-gray-900 transition-colors ${
-                  pathname === "/dashboard/profile" ? "text-blue-600 font-semibold" : ""
-                }`}
-              >
-                Profile
-              </Link>
+            <Link 
+              href="/dashboard" 
+              prefetch={false}
+              className={`text-gray-600 hover:text-gray-900 transition-colors ${
+                pathname === "/dashboard" ? "text-blue-600 font-semibold" : ""
+              }`}
+            >
+              Dashboard
+            </Link>
+            <Link 
+              href="/dashboard/leads" 
+              prefetch={false}
+              className={`text-gray-600 hover:text-gray-900 transition-colors ${
+                pathname === "/dashboard/leads" ? "text-blue-600 font-semibold" : ""
+              }`}
+            >
+              Leads
+            </Link>
+            <Link 
+              href="/dashboard/campaigns" 
+              prefetch={false}
+              className={`text-gray-600 hover:text-gray-900 transition-colors ${
+                pathname === "/dashboard/campaigns" ? "text-blue-600 font-semibold" : ""
+              }`}
+            >
+              Campaigns
+            </Link>
+            <Link 
+              href="/dashboard/billing" 
+              prefetch={false}
+              className={`text-gray-600 hover:text-gray-900 transition-colors ${
+                pathname === "/dashboard/billing" ? "text-blue-600 font-semibold" : ""
+              }`}
+            >
+              Billing
+            </Link>
+            <Link 
+              href="/dashboard/profile" 
+              prefetch={false}
+              className={`text-gray-600 hover:text-gray-900 transition-colors ${
+                pathname === "/dashboard/profile" ? "text-blue-600 font-semibold" : ""
+              }`}
+            >
+              Profile
+            </Link>
             </nav>
           </div>
           <div className="flex items-center gap-4">
