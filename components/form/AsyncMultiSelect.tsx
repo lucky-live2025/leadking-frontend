@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import Select, { MultiValue, StylesConfig } from "react-select";
 
 interface Option {
@@ -92,11 +92,10 @@ export default function AsyncMultiSelect({
   isDisabled = false,
 }: AsyncMultiSelectProps) {
   // Load options and cache them
-  const [optionsCache, setOptionsCache] = React.useState<Option[]>([]);
-  const [loading, setLoading] = React.useState(true);
-  const [initialized, setInitialized] = React.useState(false);
+  const [optionsCache, setOptionsCache] = useState<Option[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  React.useEffect(() => {
+  useEffect(() => {
     let isMounted = true;
     const load = async () => {
       setLoading(true);
@@ -104,7 +103,6 @@ export default function AsyncMultiSelect({
         const data = await loadOptions();
         if (isMounted) {
           setOptionsCache(data);
-          setInitialized(true);
         }
       } catch (error) {
         console.error("Failed to load options:", error);
@@ -117,14 +115,11 @@ export default function AsyncMultiSelect({
         }
       }
     };
-    if (!initialized) {
-      load();
-    }
+    load();
     return () => {
       isMounted = false;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [loadOptions]);
 
   const selectedOptions = useMemo(() => {
     return optionsCache.filter((opt) => value.includes(opt.value));
