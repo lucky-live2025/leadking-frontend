@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { apiPost } from "@/lib/api";
+import { apiPost, apiGet } from "@/lib/api";
 import { fetchUser } from "@/lib/auth-check";
 import TargetingStep from "@/components/TargetingStep";
 import CreativeUploader from "@/components/campaign/Create/CreativeUploader";
@@ -125,8 +125,11 @@ export default function CreateCampaignPage() {
   const [uploadedVideoUrls, setUploadedVideoUrls] = useState<string[]>([]);
   const [userStatus, setUserStatus] = useState<string | null>(null);
   const [checkingStatus, setCheckingStatus] = useState(true);
+  const [platformConnections, setPlatformConnections] = useState<any>({});
+  const [checkingConnections, setCheckingConnections] = useState(false);
+  const [aiEngineStatus, setAiEngineStatus] = useState<"checking" | "online" | "offline" | "unknown">("checking");
 
-  // Check user status on mount
+  // Check user status and platform connections on mount
   useEffect(() => {
     async function checkUserStatus() {
       try {
@@ -166,10 +169,78 @@ export default function CreateCampaignPage() {
         setCheckingStatus(false);
       }
     }
+
+    async function checkConnections() {
+      try {
+        setCheckingConnections(true);
+        const tokens = await apiGet("/auth/platform-tokens").catch(() => []);
+        const connections: any = {};
+        if (Array.isArray(tokens)) {
+          tokens.forEach((token: any) => {
+            connections[token.platform] = true;
+          });
+        }
+        setPlatformConnections(connections);
+      } catch (err) {
+        console.warn("Failed to check platform connections:", err);
+      } finally {
+        setCheckingConnections(false);
+      }
+    }
+
+    async function checkAiEngine() {
+      try {
+        const backendUrl = process.env.NEXT_PUBLIC_API_URL || "https://lead-king-backend-production.up.railway.app";
+        const response = await fetch(`${backendUrl}/health/ai`, {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setAiEngineStatus(data.status === "ok" ? "online" : "offline");
+        } else {
+          setAiEngineStatus("offline");
+        }
+      } catch (err) {
+        console.warn("Failed to check AI engine status:", err);
+        setAiEngineStatus("unknown");
+      }
+    }
+
     checkUserStatus();
+    checkConnections();
+    checkAiEngine();
   }, [router]);
 
   const handlePlatformSelect = (platform: any) => {
+    // Map platform ID to backend platform name
+    const platformMap: Record<string, string> = {
+      'meta-facebook': 'META',
+      'meta-instagram': 'META',
+      'tiktok': 'TIKTOK',
+      'google-search': 'GOOGLE',
+      'google-display': 'GOOGLE',
+      'youtube': 'GOOGLE',
+      'linkedin': 'LINKEDIN',
+      'yandex': 'YANDEX',
+    };
+
+    const backendPlatform = platformMap[platform.id] || platform.id.toUpperCase();
+    const isConnected = platformConnections[backendPlatform];
+
+    if (!isConnected) {
+      setError(
+        `Please connect your ${platform.name} account first. Go to Integrations page to connect.`
+      );
+      // Show link to integrations
+      setTimeout(() => {
+        if (window.confirm(`You need to connect ${platform.name} first. Go to Integrations page?`)) {
+          router.push("/dashboard/integrations");
+        }
+      }, 100);
+      return;
+    }
+
     setSelectedPlatform(platform);
     setFormData((prev) => ({ ...prev, platform: platform.id }));
     setStep(2);
@@ -377,19 +448,69 @@ export default function CreateCampaignPage() {
           {step === 1 && (
             <div>
               <h2 className="text-2xl font-bold text-gray-900 mb-6">Select Platform</h2>
+              {checkingConnections && (
+                <div className="mb-4 text-sm text-gray-600">Checking platform connections...</div>
+              )}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {platforms.map((platform) => (
-                  <button
-                    key={platform.id}
-                    onClick={() => handlePlatformSelect(platform)}
-                    className="bg-white border-2 border-gray-300 rounded-xl p-6 text-left hover:border-blue-500 hover:shadow-md transition-all"
-                  >
-                    <div className="text-4xl mb-3">{platform.icon}</div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">{platform.name}</h3>
-                    <p className="text-sm text-gray-600">{platform.description}</p>
-                  </button>
-                ))}
+                {platforms.map((platform) => {
+                  const platformMap: Record<string, string> = {
+                    'meta-facebook': 'META',
+                    'meta-instagram': 'META',
+                    'tiktok': 'TIKTOK',
+                    'google-search': 'GOOGLE',
+                    'google-display': 'GOOGLE',
+                    'youtube': 'GOOGLE',
+                    'linkedin': 'LINKEDIN',
+                    'yandex': 'YANDEX',
+                  };
+                  const backendPlatform = platformMap[platform.id] || platform.id.toUpperCase();
+                  const isConnected = platformConnections[backendPlatform];
+                  
+                  return (
+                    <button
+                      key={platform.id}
+                      onClick={() => handlePlatformSelect(platform)}
+                      className={`bg-white border-2 rounded-xl p-6 text-left transition-all relative ${
+                        isConnected
+                          ? "border-green-300 hover:border-green-500 hover:shadow-md"
+                          : "border-gray-300 hover:border-yellow-500 hover:shadow-md opacity-75"
+                      }`}
+                    >
+                      {isConnected && (
+                        <div className="absolute top-2 right-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full">
+                          ✓ Connected
+                        </div>
+                      )}
+                      {!isConnected && !checkingConnections && (
+                        <div className="absolute top-2 right-2 bg-yellow-500 text-white text-xs px-2 py-1 rounded-full">
+                          ⚠ Not Connected
+                        </div>
+                      )}
+                      <div className="text-4xl mb-3">{platform.icon}</div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">{platform.name}</h3>
+                      <p className="text-sm text-gray-600">{platform.description}</p>
+                      {!isConnected && (
+                        <p className="text-xs text-yellow-600 mt-2 font-medium">
+                          Connect account required
+                        </p>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
+              {!checkingConnections && Object.keys(platformConnections).length === 0 && (
+                <div className="mt-6 bg-yellow-50 border border-yellow-200 rounded-xl p-4">
+                  <p className="text-yellow-800 text-sm mb-2">
+                    ⚠️ No platforms connected. Please connect at least one platform before creating campaigns.
+                  </p>
+                  <Link
+                    href="/dashboard/integrations"
+                    className="text-yellow-900 font-semibold underline hover:text-yellow-700"
+                  >
+                    Go to Integrations →
+                  </Link>
+                </div>
+              )}
             </div>
           )}
 
@@ -538,17 +659,48 @@ export default function CreateCampaignPage() {
               {/* AI Creative Option */}
               {(creativeMode === "ai-only" || creativeMode === "hybrid") && (
                 <div className="mb-6">
-                  <label className="flex items-center gap-3 text-gray-900">
-                    <input
-                      type="checkbox"
-                      checked={formData.generateCreative}
-                      onChange={(e) =>
-                        setFormData((prev) => ({ ...prev, generateCreative: e.target.checked }))
-                      }
-                      className="w-5 h-5"
-                    />
-                    Generate AI Creative (Hooks, Scripts, Headlines)
-                  </label>
+                  <div className="flex items-center justify-between mb-3">
+                    <label className="flex items-center gap-3 text-gray-900">
+                      <input
+                        type="checkbox"
+                        checked={formData.generateCreative}
+                        onChange={(e) =>
+                          setFormData((prev) => ({ ...prev, generateCreative: e.target.checked }))
+                        }
+                        className="w-5 h-5"
+                        disabled={aiEngineStatus === "offline"}
+                      />
+                      Generate AI Creative (Hooks, Scripts, Headlines)
+                    </label>
+                    <div className="flex items-center gap-2">
+                      {aiEngineStatus === "checking" && (
+                        <span className="text-xs text-gray-500">Checking AI Engine...</span>
+                      )}
+                      {aiEngineStatus === "online" && (
+                        <span className="text-xs text-green-600 font-medium flex items-center gap-1">
+                          <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                          AI Engine Online
+                        </span>
+                      )}
+                      {aiEngineStatus === "offline" && (
+                        <span className="text-xs text-red-600 font-medium flex items-center gap-1">
+                          <span className="w-2 h-2 bg-red-500 rounded-full"></span>
+                          AI Engine Offline
+                        </span>
+                      )}
+                      {aiEngineStatus === "unknown" && (
+                        <span className="text-xs text-yellow-600 font-medium flex items-center gap-1">
+                          <span className="w-2 h-2 bg-yellow-500 rounded-full"></span>
+                          AI Engine Status Unknown
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  {aiEngineStatus === "offline" && (
+                    <p className="text-xs text-red-600 ml-8">
+                      AI creative generation is currently unavailable. Please use manual creatives or try again later.
+                    </p>
+                  )}
                 </div>
               )}
 
