@@ -164,14 +164,22 @@ export default function TargetingStep({ platform, formData, onChange }: Targetin
 
       {/* Countries */}
       <div>
-        <label className="block text-gray-900 font-semibold mb-3">Countries *</label>
+        <label className="block text-gray-900 font-semibold mb-3">
+          Countries *
+          <span className="text-gray-500 text-sm font-normal ml-2">(Select one or more countries to target)</span>
+        </label>
         <AsyncMultiSelect
-          placeholder="Select countries..."
+          placeholder="Search and select countries (e.g., United States, United Kingdom, Canada, Germany, France, Japan, Australia...)"
           value={formData.countries || []}
           onChange={(values) => onChange({ countries: values })}
           loadOptions={countryOptions}
           isLoading={loadingCountries}
         />
+        {countries.length > 0 && (
+          <p className="text-xs text-gray-500 mt-2">
+            {countries.length} countries available • Select multiple countries for global campaigns
+          </p>
+        )}
       </div>
 
       {/* States/Regions */}
@@ -190,26 +198,50 @@ export default function TargetingStep({ platform, formData, onChange }: Targetin
 
       {/* Cities */}
       <div>
-        <label className="block text-gray-900 font-semibold mb-3">Cities</label>
-        <AutoComplete
-          placeholder="Search and add cities..."
-          value={formData.cities || []}
-          onChange={(values) => onChange({ cities: values })}
-          loadOptions={citySearchOptions}
-          maxResults={25}
-        />
+        <label className="block text-gray-900 font-semibold mb-3">
+          Cities
+          <span className="text-gray-500 text-sm font-normal ml-2">(Optional: Target specific cities for hyper-local campaigns)</span>
+        </label>
+        {formData.countries.length === 0 ? (
+          <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
+            <p className="text-yellow-800 text-sm">
+              ⚠️ Please select countries first to search for cities
+            </p>
+          </div>
+        ) : (
+          <>
+            <AutoComplete
+              placeholder={`Search cities in ${formData.countries.length === 1 ? formData.countries[0] : `${formData.countries.length} selected countries`} (e.g., New York, London, Tokyo, Paris, Berlin, Sydney...)`}
+              value={formData.cities || []}
+              onChange={(values) => onChange({ cities: values })}
+              loadOptions={citySearchOptions}
+              maxResults={25}
+            />
+            <p className="text-xs text-gray-500 mt-2">
+              Search by city name • Results show population for major cities • Add multiple cities for broader reach
+            </p>
+          </>
+        )}
       </div>
 
       {/* Languages */}
       <div>
-        <label className="block text-gray-900 font-semibold mb-3">Languages *</label>
+        <label className="block text-gray-900 font-semibold mb-3">
+          Languages *
+          <span className="text-gray-500 text-sm font-normal ml-2">(Select languages your audience speaks)</span>
+        </label>
         <AsyncMultiSelect
-          placeholder="Select languages..."
+          placeholder="Search and select languages (e.g., English, Spanish, French, German, Chinese, Japanese, Arabic, Portuguese...)"
           value={formData.languages || []}
           onChange={(values) => onChange({ languages: values })}
           loadOptions={languageOptions}
           isLoading={loadingLanguages}
         />
+        {languages.length > 0 && (
+          <p className="text-xs text-gray-500 mt-2">
+            {languages.length} languages available • Select languages that match your target audience
+          </p>
+        )}
       </div>
 
       {/* Interests */}

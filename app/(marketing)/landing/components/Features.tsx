@@ -133,6 +133,91 @@ export default function Features() {
         </div>
       </section>
 
+      {/* Campaign Objectives Section */}
+      <section className="py-24 bg-gradient-to-b from-white to-gray-50">
+        <div className="container mx-auto px-6">
+          <h2 className="text-4xl md:text-5xl font-bold text-center mb-4 text-gray-900">
+            Campaign <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Objectives</span>
+          </h2>
+          <p className="text-center text-gray-600 mb-16 text-lg max-w-2xl mx-auto">
+            Choose the right objective for your campaign goals. Each objective optimizes for different outcomes.
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+            {[
+              {
+                name: "AWARENESS",
+                icon: "👁️",
+                goal: "Increase brand/product visibility",
+                bestFor: "New products, brand launches, reaching new audiences",
+                focus: "Impressions, reach, brand recognition",
+                example: "Introduce our new product to potential customers"
+              },
+              {
+                name: "TRAFFIC",
+                icon: "🚀",
+                goal: "Drive visitors to your website or landing page",
+                bestFor: "Blog posts, product pages, content marketing",
+                focus: "Clicks, website visits, page views",
+                example: "Get more people to visit our website"
+              },
+              {
+                name: "CONVERSIONS",
+                icon: "💰",
+                goal: "Drive specific actions (purchases, sign-ups, downloads)",
+                bestFor: "E-commerce, lead generation, app installs",
+                focus: "Sales, sign-ups, completed actions",
+                example: "Get people to buy our product or sign up"
+              },
+              {
+                name: "ENGAGEMENT",
+                icon: "❤️",
+                goal: "Increase interactions (likes, comments, shares, video views)",
+                bestFor: "Social media, video content, community building",
+                focus: "Likes, comments, shares, video views, post engagement",
+                example: "Get people to like, comment, and share our posts"
+              },
+              {
+                name: "LEADS",
+                icon: "📋",
+                goal: "Collect contact information from potential customers",
+                bestFor: "B2B, services, email marketing",
+                focus: "Form submissions, email sign-ups, contact info",
+                example: "Collect email addresses from interested customers"
+              }
+            ].map((objective, index) => (
+              <div
+                key={objective.name}
+                className="bg-white rounded-2xl p-6 border border-gray-200 hover:border-blue-300 transition-all duration-300 hover:shadow-xl hover:scale-105"
+                style={{ animationDelay: `${0.1 * index}s` }}
+              >
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="text-4xl">{objective.icon}</div>
+                  <h3 className="text-xl font-bold text-gray-900">{objective.name}</h3>
+                </div>
+                <div className="space-y-3">
+                  <div>
+                    <p className="text-sm font-semibold text-gray-700 mb-1">Goal:</p>
+                    <p className="text-gray-600 text-sm">{objective.goal}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-gray-700 mb-1">Best For:</p>
+                    <p className="text-gray-600 text-sm">{objective.bestFor}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-gray-700 mb-1">Focus:</p>
+                    <p className="text-gray-600 text-sm">{objective.focus}</p>
+                  </div>
+                  <div className="pt-2 border-t border-gray-200">
+                    <p className="text-xs text-gray-500 italic">"{objective.example}"</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Features Section */}
       <section className="py-24 bg-white">
         <div className="container mx-auto px-6">
