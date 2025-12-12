@@ -1,11 +1,11 @@
 "use client";
 
 import PublicNav from "@/components/PublicNav";
-import Hero from "./(marketing)/landing/components/Hero";
-import Features from "./(marketing)/landing/components/Features";
-import Workflow from "./(marketing)/landing/components/Workflow";
-import PricingPreview from "./(marketing)/landing/components/PricingPreview";
-import Footer from "./(marketing)/landing/components/Footer";
+import Hero from "@/app/(marketing)/landing/components/Hero";
+import Features from "@/app/(marketing)/landing/components/Features";
+import Workflow from "@/app/(marketing)/landing/components/Workflow";
+import PricingPreview from "@/app/(marketing)/landing/components/PricingPreview";
+import Footer from "@/app/(marketing)/landing/components/Footer";
 
 export default function HomePage() {
   return (
