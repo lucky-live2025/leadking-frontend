@@ -19,6 +19,14 @@ export default function DashboardBillingPage() {
       setLoading(true);
       setError(null);
       
+      // Verify user is authenticated first
+      const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+      if (!token) {
+        setError("Please log in to view billing information");
+        setLoading(false);
+        return;
+      }
+      
       // Import fetchUser to update localStorage with fresh user data
       const { fetchUser } = await import("@/lib/auth-check");
       const user = await fetchUser();
@@ -44,8 +52,8 @@ export default function DashboardBillingPage() {
       }
 
       const [userData, plansData] = await Promise.all([
-        apiGet("/auth/me").catch(() => null),
-        apiGet("/subscriptions/plans").catch(() => []),
+        apiGet("/auth/me", { auth: true }).catch(() => null),
+        apiGet("/subscriptions/plans", { auth: true }).catch(() => []),
       ]);
 
       if (userData) {
