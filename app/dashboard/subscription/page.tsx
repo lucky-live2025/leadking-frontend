@@ -15,6 +15,8 @@ const TIERS = [
 export default function SubscriptionPage() {
   const [subscription, setSubscription] = useState<any>(null);
   const [wallet, setWallet] = useState<any>(null);
+  const [internalWallet, setInternalWallet] = useState<any>(null);
+  const [externalWallet, setExternalWallet] = useState<any>(null);
   const [walletConnected, setWalletConnected] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -41,8 +43,22 @@ export default function SubscriptionPage() {
     try {
       const walletData = await apiGet("/wallet/me", { auth: true });
       setWallet(walletData);
+      
+      // Extract internal and external wallets
+      if (walletData) {
+        setInternalWallet(walletData.internal || null);
+        setExternalWallet(walletData.external || null);
+        
+        // For backward compatibility, set wallet to external if exists
+        setWallet(walletData.external || walletData.internal || walletData);
+      } else {
+        setInternalWallet(null);
+        setExternalWallet(null);
+      }
     } catch (err: any) {
       console.error("Failed to load wallet:", err);
+      setInternalWallet(null);
+      setExternalWallet(null);
     }
   }
 
@@ -162,14 +178,56 @@ export default function SubscriptionPage() {
           </div>
         )}
 
-        {!wallet && !walletConnected && (
+        {/* Internal Wallet Display */}
+        {internalWallet && (
+          <div className="bg-white rounded-xl p-6 mb-6 shadow-md border border-gray-200">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">Your Wallet</h2>
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <p className="text-sm text-gray-600 mb-1">USD Balance</p>
+                <p className="text-2xl font-bold text-gray-900">${internalWallet.balance_usd?.toFixed(2) || '0.00'}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600 mb-1">BTC Balance</p>
+                <p className="text-2xl font-bold text-gray-900">{internalWallet.balance_btc?.toFixed(8) || '0.00000000'}</p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600 mb-1">ETH Balance</p>
+                <p className="text-2xl font-bold text-gray-900">{internalWallet.balance_eth?.toFixed(6) || '0.000000'}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* External Wallet Display */}
+        {externalWallet && (
+          <div className="bg-white rounded-xl p-6 mb-6 shadow-md border border-gray-200">
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">Connected Wallet</h2>
+            <div className="space-y-2">
+              <p className="text-gray-600">
+                Address: <span className="text-gray-900 font-mono text-sm">{externalWallet.address}</span>
+              </p>
+              <p className="text-gray-600">
+                Network: <span className="text-gray-900 font-semibold">{externalWallet.network || 'Ethereum'}</span>
+              </p>
+              <p className="text-gray-600">
+                Verified: <span className={`font-semibold ${externalWallet.verified ? 'text-green-600' : 'text-yellow-600'}`}>
+                  {externalWallet.verified ? 'Yes' : 'Pending'}
+                </span>
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Connect External Wallet Prompt */}
+        {!externalWallet && !walletConnected && (
           <div className="bg-yellow-50 border border-yellow-200 text-yellow-700 p-4 rounded-xl mb-6 shadow-md">
-            <p>Please connect your wallet to subscribe.</p>
+            <p className="mb-2">Connect your external wallet (MetaMask, etc.) to subscribe with crypto.</p>
             <button
               onClick={() => setShowConnectModal(true)}
-              className="mt-2 px-4 py-2 bg-yellow-600 text-white rounded-xl font-semibold hover:bg-yellow-700 transition-colors shadow-md"
+              className="px-4 py-2 bg-yellow-600 text-white rounded-xl font-semibold hover:bg-yellow-700 transition-colors shadow-md"
             >
-              Connect Wallet
+              Connect External Wallet
             </button>
           </div>
         )}
@@ -211,7 +269,7 @@ export default function SubscriptionPage() {
               <p className="text-3xl font-bold text-blue-600 mb-4">{tier.usdt} USDT</p>
               <button
                 onClick={() => handleSubscribe(tier.id)}
-                disabled={loading || (!wallet && !walletConnected)}
+                disabled={loading || (!externalWallet && !walletConnected)}
                 className="w-full px-4 py-2 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading && selectedTier === tier.id ? "Processing..." : "Subscribe"}

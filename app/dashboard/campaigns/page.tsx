@@ -46,7 +46,10 @@ export default function DashboardCampaignsPage() {
   }
 
   const getStatusColor = (status: string) => {
-    switch (status?.toUpperCase()) {
+    if (!status) return "bg-gray-100 text-gray-700 border border-gray-200";
+    
+    const statusUpper = status.toUpperCase();
+    switch (statusUpper) {
       case "ACTIVE":
       case "LAUNCHED":
         return "bg-green-100 text-green-700 border border-green-200";
@@ -54,9 +57,21 @@ export default function DashboardCampaignsPage() {
         return "bg-yellow-100 text-yellow-700 border border-yellow-200";
       case "COMPLETED":
         return "bg-blue-100 text-blue-700 border border-blue-200";
+      case "PENDING":
+        return "bg-purple-100 text-purple-700 border border-purple-200";
+      case "ERROR":
+      case "INVALID":
+        return "bg-red-100 text-red-700 border border-red-200";
       default:
         return "bg-gray-100 text-gray-700 border border-gray-200";
     }
+  };
+
+  const formatStatus = (status: string) => {
+    if (!status) return "Unknown";
+    const statusUpper = status.toUpperCase();
+    // Capitalize first letter, rest lowercase
+    return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
   };
 
   if (loading) {
@@ -114,9 +129,9 @@ export default function DashboardCampaignsPage() {
               className="bg-white rounded-xl p-6 shadow-md border border-gray-200 hover:shadow-lg hover:border-blue-300 transition-all"
             >
               <div className="flex justify-between items-start mb-4">
-                <h3 className="text-xl font-semibold text-gray-900">{campaign.name}</h3>
+                <h3 className="text-xl font-semibold text-gray-900">{campaign.name || `Campaign #${campaign.id}`}</h3>
                 <span className={`px-3 py-1 rounded-lg text-sm font-medium ${getStatusColor(campaign.status)}`}>
-                  {campaign.status}
+                  {formatStatus(campaign.status || "PENDING")}
                 </span>
               </div>
               {campaign.budget && (
