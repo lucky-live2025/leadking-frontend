@@ -21,6 +21,11 @@ apiClient.interceptors.request.use(
     if (typeof window !== "undefined") {
       const token = localStorage.getItem("token");
       
+      // Check if auth should be skipped (for public endpoints like /targeting)
+      const skipAuth = (config as any).skipAuth || 
+                       config.url?.includes('/targeting/') ||
+                       config.url?.includes('/health');
+      
       // CRITICAL: ALWAYS remove any existing Authorization header first
       // This prevents browser from adding Basic auth automatically
       if (config.headers) {
@@ -37,8 +42,8 @@ apiClient.interceptors.request.use(
       }
       
       // Always set Authorization if token exists (unless explicitly disabled)
-      // Don't check for auth: false here - let the caller control via options
-      if (token && config.headers) {
+      // Skip auth for public endpoints like /targeting
+      if (token && config.headers && !skipAuth) {
         // Ensure we always use "Bearer " prefix (never Basic!)
         const authValue = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
         
@@ -156,13 +161,21 @@ export async function apiGet(path: string, options: any = {}) {
     // Get base headers (interceptor will add Authorization automatically)
     const headers = getHeaders(options);
     
-    const response = await apiClient.get(buildUrl(path), {
+    // Pass skipAuth flag to interceptor for public endpoints
+    const requestConfig: any = {
       ...options,
       headers: {
         ...headers,
         ...(options.headers || {}),
       },
-    });
+    };
+    
+    // If auth: false, mark request to skip auth
+    if (options.auth === false || path.includes('/targeting/') || path.includes('/health')) {
+      requestConfig.skipAuth = true;
+    }
+    
+    const response = await apiClient.get(buildUrl(path), requestConfig);
     return response.data;
   } catch (error: any) {
     if (error.response) {
