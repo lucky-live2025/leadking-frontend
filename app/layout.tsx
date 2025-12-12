@@ -53,6 +53,10 @@ export default function RootLayout({
     "sameAs": [
       "https://leadkingapp.com"
     ],
+    "social": {
+      "@type": "Organization",
+      "url": "https://leadkingapp.com"
+    },
     "contactPoint": {
       "@type": "ContactPoint",
       "contactType": "Customer Service",
