@@ -26,11 +26,18 @@ export default function AdminLeadsPage() {
   async function loadLeads() {
     try {
       setLoading(true);
+      setError(null);
       const data = await adminGet("/admin/leads?limit=100");
-      if (data && data.leads) {
+      
+      // Handle different response formats
+      if (data && data.leads && Array.isArray(data.leads)) {
         setLeads(data.leads);
       } else if (Array.isArray(data)) {
         setLeads(data);
+      } else if (data && typeof data === 'object') {
+        // Try to extract leads from nested structure
+        const leadsArray = data.data?.leads || data.results?.leads || [];
+        setLeads(Array.isArray(leadsArray) ? leadsArray : []);
       } else {
         setLeads([]);
       }

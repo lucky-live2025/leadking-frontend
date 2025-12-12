@@ -32,15 +32,22 @@ export default function LoginPage() {
 
       const token = response.accessToken || response.access_token;
       if (token) {
+        // Store token and user data
         localStorage.setItem("token", token);
         const userData = response.user || {};
         const user = {
           userId: userData.id || response.userId,
+          id: userData.id || response.userId,
           email: userData.email || loginEmail,
           role: userData.role || response.role || "USER",
+          status: userData.status || response.status || "PENDING", // CRITICAL: Store status
         };
         localStorage.setItem("user", JSON.stringify(user));
 
+        // Small delay to ensure localStorage is written before redirect
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        // Redirect based on role
         if (user.role.toUpperCase() === "ADMIN") {
           router.push("/admin");
         } else {
@@ -48,9 +55,19 @@ export default function LoginPage() {
         }
       } else {
         setError("Login failed. Please check your credentials.");
+        setLoading(false);
       }
     } catch (err: any) {
       let errorMessage = "An unexpected error occurred. Please try again.";
+      
+      // Handle network errors
+      if (!err.message || err.message.includes("Network Error") || err.message.includes("Failed to fetch")) {
+        errorMessage = "Network error. Please check your connection and try again.";
+        setError(errorMessage);
+        setLoading(false);
+        return;
+      }
+      
       if (err.message) {
         // Try to parse JSON error response
         try {

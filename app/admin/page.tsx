@@ -22,17 +22,26 @@ export default function AdminPage() {
           return;
         }
 
-        console.log(
-          "[ADMIN PAGE] Fetching stats from:",
-          process.env.NEXT_PUBLIC_API_URL || "API_BASE",
-        );
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "API_BASE";
+        console.log("[ADMIN PAGE] Fetching stats from:", apiUrl);
+        console.log("[ADMIN PAGE] Using token:", token ? "Present" : "Missing");
+        
         const data = await adminGet("/admin/stats");
         console.log("[ADMIN PAGE] ✅ Stats loaded:", data);
         setStats(data);
         setError(null);
       } catch (err: any) {
         console.error("[ADMIN PAGE] ❌ Failed to load admin stats:", err);
-        if (
+        console.error("[ADMIN PAGE] Error details:", {
+          message: err.message,
+          response: err.response?.data,
+          status: err.response?.status,
+        });
+        
+        // Handle network errors
+        if (err.message?.includes("Network Error") || err.message?.includes("Failed to fetch") || !err.response) {
+          setError("Network error. Please check your connection and ensure the backend is running.");
+        } else if (
           err.message?.includes("401") ||
           err.message?.includes("403") ||
           err.message?.includes("Unauthorized") ||

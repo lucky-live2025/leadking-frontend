@@ -132,7 +132,8 @@ export default function LandingPageStep({
         formData.append("files", file);
       });
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "https://api.leadkingapp.com"}/landing/upload`, {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://lead-king-backend-production.up.railway.app";
+      const response = await fetch(`${apiUrl}/landing/upload`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -354,7 +355,7 @@ export default function LandingPageStep({
               <h3 className="text-gray-300 font-semibold mb-3">Preview</h3>
                 <div className="bg-white border border-gray-300 rounded-xl p-4 shadow-md">
                   <iframe
-                    src={`${process.env.NEXT_PUBLIC_API_URL || "https://api.leadkingapp.com"}${generatedUrl}`}
+                    src={`${process.env.NEXT_PUBLIC_API_URL || "https://lead-king-backend-production.up.railway.app"}${generatedUrl}`}
                     className="w-full h-96 border border-gray-300 rounded-lg"
                   title="Generated Landing Page Preview"
                 />
@@ -438,7 +439,7 @@ export default function LandingPageStep({
               <h3 className="text-gray-300 font-semibold mb-3">Landing Page Preview</h3>
               <div className="bg-[#0A1628] border border-gray-700 rounded-lg p-4">
                 <iframe
-                  src={`${process.env.NEXT_PUBLIC_API_URL || "https://api.leadkingapp.com"}${uploadedUrl}`}
+                  src={`${process.env.NEXT_PUBLIC_API_URL || "https://lead-king-backend-production.up.railway.app"}${uploadedUrl}`}
                   className="w-full h-96 border border-gray-700 rounded"
                   title="Uploaded Landing Page Preview"
                 />

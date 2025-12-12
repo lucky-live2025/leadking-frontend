@@ -19,6 +19,23 @@ export default function DashboardBillingPage() {
       setLoading(true);
       setError(null);
       
+      // Import fetchUser to update localStorage with fresh user data
+      const { fetchUser } = await import("@/lib/auth-check");
+      const user = await fetchUser();
+      
+      if (!user) {
+        setError("Please log in to view billing information");
+        setLoading(false);
+        return;
+      }
+
+      // Check if user is approved
+      if (user.status?.toUpperCase() !== "APPROVED") {
+        setError("Your account is pending approval. Please wait for admin approval before accessing billing.");
+        setLoading(false);
+        return;
+      }
+
       const [userData, plansData] = await Promise.all([
         apiGet("/auth/me").catch(() => null),
         apiGet("/subscriptions/plans").catch(() => []),
@@ -26,6 +43,14 @@ export default function DashboardBillingPage() {
 
       if (userData) {
         setSubscription(userData.subscription || null);
+        // Update localStorage with fresh user data
+        localStorage.setItem("user", JSON.stringify({
+          userId: userData.id || userData.userId,
+          id: userData.id || userData.userId,
+          email: userData.email,
+          role: userData.role,
+          status: userData.status,
+        }));
       }
       setPlans(Array.isArray(plansData) ? plansData : []);
     } catch (err: any) {

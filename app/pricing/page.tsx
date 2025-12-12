@@ -3,14 +3,23 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import PublicNav from "@/components/PublicNav";
-import { isPricingUnlocked, getUserFromStorage } from "@/lib/auth-check";
+import { isPricingUnlocked } from "@/lib/auth-check";
 
 export default function PricingPage() {
   const [isUnlocked, setIsUnlocked] = useState(false);
 
   useEffect(() => {
-    const user = getUserFromStorage();
-    setIsUnlocked(isPricingUnlocked(user));
+    async function checkPricing() {
+      try {
+        // Fetch fresh user data to ensure we have latest status
+        const unlocked = await isPricingUnlocked();
+        setIsUnlocked(unlocked);
+      } catch (err) {
+        console.error("Failed to check pricing status:", err);
+        setIsUnlocked(false);
+      }
+    }
+    checkPricing();
   }, []);
 
   const pricingTiers = [

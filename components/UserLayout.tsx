@@ -15,23 +15,41 @@ export default function UserLayout({
   const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
-    const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-    const userStr = typeof window !== "undefined" ? localStorage.getItem("user") : null;
+    async function checkAuth() {
+      const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+      const userStr = typeof window !== "undefined" ? localStorage.getItem("user") : null;
+      
+      if (!token || !userStr) {
+        router.push("/login");
+        return;
+      }
+
+      try {
+        const parsedUser = JSON.parse(userStr);
+        setUser(parsedUser);
+        
+        // Verify token is valid by calling /auth/me (but don't fail on network errors)
+        try {
+          const { fetchUser } = await import("@/lib/auth-check");
+          const freshUser = await fetchUser();
+          if (freshUser) {
+            setUser(freshUser);
+          }
+        } catch (err) {
+          // If fetchUser fails but we have cached user, continue anyway
+          // Only redirect if token is actually invalid (401)
+          console.warn("Could not verify token, using cached user:", err);
+        }
+      } catch (error) {
+        console.error("Failed to parse user:", error);
+        router.push("/login");
+        return;
+      }
+
+      setIsChecking(false);
+    }
     
-    if (!token || !userStr) {
-      router.push("/login");
-      return;
-    }
-
-    try {
-      const parsedUser = JSON.parse(userStr);
-      setUser(parsedUser);
-    } catch (error) {
-      router.push("/login");
-      return;
-    }
-
-    setIsChecking(false);
+    checkAuth();
   }, [router]);
 
   const handleLogout = () => {

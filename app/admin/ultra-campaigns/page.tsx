@@ -17,10 +17,15 @@ export default function AdminUltraCampaignsPage() {
       setLoading(true);
       const data = await adminGet("/admin/ultra-campaigns");
       console.log("[ADMIN ULTRA] Response:", data);
-      if (data && data.campaigns) {
+      
+      // Handle different response formats
+      if (data && data.campaigns && Array.isArray(data.campaigns)) {
         setCampaigns(data.campaigns);
       } else if (Array.isArray(data)) {
         setCampaigns(data);
+      } else if (data && typeof data === 'object') {
+        const campaignsArray = data.data?.campaigns || data.results?.campaigns || [];
+        setCampaigns(Array.isArray(campaignsArray) ? campaignsArray : []);
       } else {
         setCampaigns([]);
       }

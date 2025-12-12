@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { apiPost } from "@/lib/api";
+import { fetchUser } from "@/lib/auth-check";
 import TargetingStep from "@/components/TargetingStep";
 import CreativeUploader from "@/components/campaign/Create/CreativeUploader";
 import CreativeTextInputs from "@/components/campaign/Create/CreativeTextInputs";
@@ -121,6 +123,35 @@ export default function CreateCampaignPage() {
   // Uploaded file URLs (after upload to backend)
   const [uploadedImageUrls, setUploadedImageUrls] = useState<string[]>([]);
   const [uploadedVideoUrls, setUploadedVideoUrls] = useState<string[]>([]);
+  const [userStatus, setUserStatus] = useState<string | null>(null);
+  const [checkingStatus, setCheckingStatus] = useState(true);
+
+  // Check user status on mount
+  useEffect(() => {
+    async function checkUserStatus() {
+      try {
+        const user = await fetchUser();
+        if (user) {
+          setUserStatus(user.status || null);
+          // If user is not approved, redirect to dashboard
+          if (user.status?.toUpperCase() !== "APPROVED") {
+            router.push("/dashboard");
+            return;
+          }
+        } else {
+          // No user, redirect to login
+          router.push("/login");
+          return;
+        }
+      } catch (err) {
+        console.error("Failed to check user status:", err);
+        router.push("/login");
+      } finally {
+        setCheckingStatus(false);
+      }
+    }
+    checkUserStatus();
+  }, [router]);
 
   const handlePlatformSelect = (platform: any) => {
     setSelectedPlatform(platform);
@@ -178,7 +209,8 @@ export default function CreateCampaignPage() {
       });
 
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "https://api.leadkingapp.com"}/uploads/creative`, {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://lead-king-backend-production.up.railway.app";
+        const response = await fetch(`${apiUrl}/uploads/creative`, {
           method: "POST",
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,

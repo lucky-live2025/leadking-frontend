@@ -2,14 +2,26 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { isPricingUnlocked, getUserFromStorage } from "@/lib/auth-check";
+import { isPricingUnlocked, fetchUser } from "@/lib/auth-check";
 
 export default function PricingPreview() {
   const [isUnlocked, setIsUnlocked] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const user = getUserFromStorage();
-    setIsUnlocked(isPricingUnlocked(user));
+    async function checkPricing() {
+      try {
+        // Fetch fresh user data to ensure we have latest status
+        const unlocked = await isPricingUnlocked();
+        setIsUnlocked(unlocked);
+      } catch (err) {
+        console.error("Failed to check pricing status:", err);
+        setIsUnlocked(false);
+      } finally {
+        setLoading(false);
+      }
+    }
+    checkPricing();
   }, []);
 
   const pricingTiers = [
@@ -19,7 +31,7 @@ export default function PricingPreview() {
     { name: "Custom", price: 15000, period: "month" }
   ];
 
-  const isLocked = !isUnlocked;
+  const isLocked = !isUnlocked && !loading;
 
   return (
     <section className="py-24 bg-gradient-to-b from-gray-50 to-white" id="pricing">

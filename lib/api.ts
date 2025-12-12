@@ -2,7 +2,7 @@
 
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from "axios";
 
-export const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://api.leadkingapp.com";
+export const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://lead-king-backend-production.up.railway.app";
 
 // Create global axios instance
 const apiClient: AxiosInstance = axios.create({
@@ -40,14 +40,22 @@ apiClient.interceptors.response.use(
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
-      // Clear invalid token
+      // Only clear and redirect if we're not on the login page
+      // This prevents redirect loops and allows login to complete
       if (typeof window !== "undefined") {
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
+        const currentPath = window.location.pathname;
         
-        // Redirect to login if not already there
-        if (window.location.pathname !== "/login") {
-          window.location.href = "/login";
+        // Don't redirect if we're already on login or signup pages
+        if (currentPath !== "/login" && currentPath !== "/signup") {
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          
+          // Use a small delay to prevent race conditions
+          setTimeout(() => {
+            if (window.location.pathname !== "/login") {
+              window.location.href = "/login";
+            }
+          }, 100);
         }
       }
 
@@ -105,10 +113,17 @@ export async function apiPost(path: string, data: any = {}, options: any = {}) {
     });
     return response.data;
   } catch (error: any) {
-    if (error.response) {
-      throw new Error(error.response.data?.message || error.response.statusText || `HTTP ${error.response.status}`);
+    // Handle network errors
+    if (!error.response) {
+      const errorMessage = error.message || 'Network error. Please check your connection.';
+      throw new Error(errorMessage);
     }
-    throw error;
+    // Handle HTTP errors
+    const errorData = error.response.data;
+    if (errorData?.message) {
+      throw new Error(errorData.message);
+    }
+    throw new Error(error.response.statusText || `HTTP ${error.response.status}`);
   }
 }
 

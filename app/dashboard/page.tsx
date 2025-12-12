@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { apiGet } from "@/lib/api";
 import Link from "next/link";
+import { fetchUser } from "@/lib/auth-check";
 
 export default function DashboardPage() {
   const [stats, setStats] = useState<any>(null);
@@ -15,8 +16,9 @@ export default function DashboardPage() {
 
   async function loadStats() {
     try {
-      const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-      if (!token) {
+      // Fetch fresh user data to ensure we have latest status
+      const user = await fetchUser();
+      if (!user) {
         setError("Please log in to view your dashboard");
         setLoading(false);
         return;
