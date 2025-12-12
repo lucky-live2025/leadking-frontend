@@ -22,7 +22,7 @@ export default function DashboardProfilePage() {
     try {
       setLoading(true);
       setError(null);
-      const data = await apiGet("/auth/me");
+      const data = await apiGet("/auth/me", { auth: true });
       setUser(data);
       setFormData({
         name: data.name || "",
@@ -30,7 +30,7 @@ export default function DashboardProfilePage() {
       });
     } catch (err: any) {
       console.error("Failed to load profile:", err);
-      setError(err.message || "Failed to load profile");
+      setError(err.message || "Internal server error");
     } finally {
       setLoading(false);
     }
