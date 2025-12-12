@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { apiGet } from "@/lib/api";
+import { adminGet } from "@/lib/api-admin";
 
 export default function AdminPaymentsPage() {
   const [payments, setPayments] = useState<any[]>([]);
@@ -14,7 +14,7 @@ export default function AdminPaymentsPage() {
 
   async function loadPayments() {
     try {
-      const data = await apiGet("/admin/payments", { auth: true });
+      const data = await adminGet("/admin/payments");
       if (Array.isArray(data)) {
         setPayments(data);
       } else if (data?.payments) {
@@ -23,7 +23,14 @@ export default function AdminPaymentsPage() {
         setPayments([]);
       }
     } catch (err: any) {
-      setError(err.message || "Failed to load payments");
+      if (err.response?.status === 401 || err.response?.status === 403) {
+        setError("Authentication failed. Redirecting to login...");
+        if (typeof window !== "undefined") {
+          window.location.href = "/login";
+        }
+      } else {
+        setError(err.message || "Failed to load payments");
+      }
       setPayments([]);
     } finally {
       setLoading(false);

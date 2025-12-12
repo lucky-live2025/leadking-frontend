@@ -1,6 +1,6 @@
 "use client";
 
-import { apiGet } from "@/lib/api";
+import { adminGet } from "@/lib/api-admin";
 
 export default function AdminPage() {
   return (

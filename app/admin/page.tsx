@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { apiGet } from "@/lib/api";
+import { adminGet } from "@/lib/api-admin";
 import Link from "next/link";
 
 export default function AdminPage() {
@@ -26,7 +26,7 @@ export default function AdminPage() {
           "[ADMIN PAGE] Fetching stats from:",
           process.env.NEXT_PUBLIC_API_URL || "API_BASE",
         );
-        const data = await apiGet("/admin/stats");
+        const data = await adminGet("/admin/stats");
         console.log("[ADMIN PAGE] ✅ Stats loaded:", data);
         setStats(data);
         setError(null);
@@ -34,7 +34,9 @@ export default function AdminPage() {
         console.error("[ADMIN PAGE] ❌ Failed to load admin stats:", err);
         if (
           err.message?.includes("401") ||
-          err.message?.includes("Unauthorized")
+          err.message?.includes("403") ||
+          err.message?.includes("Unauthorized") ||
+          err.message?.includes("Forbidden")
         ) {
           setError("Authentication failed. Please log in again.");
         } else {

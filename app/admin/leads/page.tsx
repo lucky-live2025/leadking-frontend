@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { apiGet } from "@/lib/api";
+import { adminGet } from "@/lib/api-admin";
 import Link from "next/link";
 
 interface Lead {
@@ -26,7 +26,7 @@ export default function AdminLeadsPage() {
   async function loadLeads() {
     try {
       setLoading(true);
-      const data = await apiGet("/admin/leads?limit=100", { auth: true });
+      const data = await adminGet("/admin/leads?limit=100");
       if (data && data.leads) {
         setLeads(data.leads);
       } else if (Array.isArray(data)) {
@@ -36,7 +36,14 @@ export default function AdminLeadsPage() {
       }
     } catch (err: any) {
       console.error("Failed to load leads:", err);
-      setError(err.message || "Failed to load leads");
+      if (err.response?.status === 401 || err.response?.status === 403) {
+        setError("Authentication failed. Redirecting to login...");
+        if (typeof window !== "undefined") {
+          window.location.href = "/login";
+        }
+      } else {
+        setError(err.message || "Failed to load leads");
+      }
       setLeads([]);
     } finally {
       setLoading(false);

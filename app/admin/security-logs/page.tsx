@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { apiGet } from "@/lib/api";
+import { adminGet } from "@/lib/api-admin";
 import Link from "next/link";
 
 export default function AdminSecurityLogsPage() {
@@ -15,7 +15,7 @@ export default function AdminSecurityLogsPage() {
   async function loadLogs() {
     try {
       setLoading(true);
-      const data = await apiGet("/admin/security-logs");
+      const data = await adminGet("/admin/security-logs");
       console.log("[ADMIN SECURITY] Response:", data);
       if (Array.isArray(data)) {
         setLogs(data);
@@ -24,6 +24,11 @@ export default function AdminSecurityLogsPage() {
       }
     } catch (err: any) {
       console.error("Failed to load security logs:", err);
+      if (err.response?.status === 401 || err.response?.status === 403) {
+        if (typeof window !== "undefined") {
+          window.location.href = "/login";
+        }
+      }
       setLogs([]);
     } finally {
       setLoading(false);

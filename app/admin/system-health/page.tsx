@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { apiGet } from "@/lib/api";
+import { adminGet } from "@/lib/api-admin";
 import Link from "next/link";
 
 export default function AdminSystemHealthPage() {
@@ -16,11 +16,16 @@ export default function AdminSystemHealthPage() {
 
   async function loadHealth() {
     try {
-      const data = await apiGet("/admin/system-health");
+      const data = await adminGet("/admin/system-health");
       console.log("[ADMIN HEALTH] Response:", data);
       setHealth(data);
     } catch (err: any) {
       console.error("Failed to load system health:", err);
+      if (err.response?.status === 401 || err.response?.status === 403) {
+        if (typeof window !== "undefined") {
+          window.location.href = "/login";
+        }
+      }
     } finally {
       setLoading(false);
     }

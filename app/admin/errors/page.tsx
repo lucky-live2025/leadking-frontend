@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { apiGet, apiDelete } from "@/lib/api";
+import { adminGet, adminDelete } from "@/lib/api-admin";
 import Link from "next/link";
 
 export default function AdminErrorsPage() {
@@ -15,7 +15,7 @@ export default function AdminErrorsPage() {
   async function loadErrors() {
     try {
       setLoading(true);
-      const data = await apiGet("/admin/errors?limit=100");
+      const data = await adminGet("/admin/errors?limit=100");
       console.log("[ADMIN ERRORS] Response:", data);
       if (Array.isArray(data)) {
         setErrors(data);
@@ -28,6 +28,11 @@ export default function AdminErrorsPage() {
       }
     } catch (err: any) {
       console.error("Failed to load errors:", err);
+      if (err.response?.status === 401 || err.response?.status === 403) {
+        if (typeof window !== "undefined") {
+          window.location.href = "/login";
+        }
+      }
       setErrors([]);
     } finally {
       setLoading(false);
@@ -37,12 +42,18 @@ export default function AdminErrorsPage() {
   async function clearErrors() {
     if (!confirm("Are you sure you want to clear all error logs?")) return;
     try {
-      await apiDelete("/admin/errors");
+      await adminDelete("/admin/errors");
       setErrors([]);
       alert("Error logs cleared");
     } catch (err: any) {
       console.error("Failed to clear errors:", err);
-      alert("Failed to clear errors: " + err.message);
+      if (err.response?.status === 401 || err.response?.status === 403) {
+        if (typeof window !== "undefined") {
+          window.location.href = "/login";
+        }
+      } else {
+        alert("Failed to clear errors: " + err.message);
+      }
     }
   }
 

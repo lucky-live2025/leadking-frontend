@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { apiGet, apiPost } from "@/lib/api";
+import { adminGet, adminPost } from "@/lib/api-admin";
 import Link from "next/link";
 
 interface User {
@@ -35,7 +35,7 @@ export default function AdminUsersPage() {
     setLoading(true);
     setError(null);
     try {
-      const data = await apiGet("/admin/users", { auth: true });
+      const data = await adminGet("/admin/users");
       if (Array.isArray(data)) {
         setUsers(data);
       } else if (data?.users) {
@@ -46,7 +46,14 @@ export default function AdminUsersPage() {
       }
     } catch (err: any) {
       console.error("Failed to fetch users:", err);
-      setError(err.message || "Failed to fetch users");
+      if (err.response?.status === 401 || err.response?.status === 403) {
+        setError("Authentication failed. Redirecting to login...");
+        if (typeof window !== "undefined") {
+          window.location.href = "/login";
+        }
+      } else {
+        setError(err.message || "Failed to fetch users");
+      }
       setUsers([]);
     } finally {
       setLoading(false);
@@ -56,14 +63,20 @@ export default function AdminUsersPage() {
   const handleUpdateStatus = async (userId: number, newStatus: string) => {
     try {
       if (newStatus === "APPROVED") {
-        await apiPost(`/admin/users/${userId}/approve`, {}, { auth: true });
+        await adminPost(`/admin/users/${userId}/approve`, {});
       } else {
-        await apiPost(`/admin/users/${userId}/status`, { status: newStatus }, { auth: true });
+        await adminPost(`/admin/users/${userId}/status`, { status: newStatus });
       }
       fetchUsers();
     } catch (err: any) {
       console.error("Failed to update user status:", err);
-      alert(`Failed to update status: ${err.message}`);
+      if (err.response?.status === 401 || err.response?.status === 403) {
+        if (typeof window !== "undefined") {
+          window.location.href = "/login";
+        }
+      } else {
+        alert(`Failed to update status: ${err.message}`);
+      }
     }
   };
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { apiGet, apiPatch } from "@/lib/api";
+import { adminGet, adminPatch, adminPost } from "@/lib/api-admin";
 
 export default function AdminTicketsPage() {
   const [tickets, setTickets] = useState<any[]>([]);
@@ -16,7 +16,7 @@ export default function AdminTicketsPage() {
 
   async function loadTickets() {
     try {
-      const data = await apiGet("/support/admin/tickets", { auth: true });
+      const data = await adminGet("/admin/tickets");
       if (Array.isArray(data)) {
         setTickets(data);
       } else if (data?.tickets) {
@@ -25,7 +25,13 @@ export default function AdminTicketsPage() {
         setTickets([]);
       }
     } catch (err: any) {
-      setError(err.message || "Failed to load tickets");
+      if (err.response?.status === 401 || err.response?.status === 403) {
+        if (typeof window !== "undefined") {
+          window.location.href = "/login";
+        }
+      } else {
+        setError(err.message || "Failed to load tickets");
+      }
       setTickets([]);
     } finally {
       setLoading(false);
@@ -39,21 +45,33 @@ export default function AdminTicketsPage() {
     }
 
     try {
-      await apiPatch(`/support/admin/tickets/${selectedTicket.id}/reply`, { adminResponse: response }, { auth: true });
+      await adminPatch(`/admin/tickets/${selectedTicket.id}/reply`, { response });
       setResponse("");
       setSelectedTicket(null);
       await loadTickets();
     } catch (err: any) {
-      setError(err.message || "Failed to reply");
+      if (err.response?.status === 401 || err.response?.status === 403) {
+        if (typeof window !== "undefined") {
+          window.location.href = "/login";
+        }
+      } else {
+        setError(err.message || "Failed to reply");
+      }
     }
   }
 
   async function handleClose(ticketId: number) {
     try {
-      await apiPatch(`/support/admin/tickets/${ticketId}/close`, {}, { auth: true });
+      await adminPost(`/admin/tickets/${ticketId}/close`, {});
       await loadTickets();
     } catch (err: any) {
-      setError(err.message || "Failed to close ticket");
+      if (err.response?.status === 401 || err.response?.status === 403) {
+        if (typeof window !== "undefined") {
+          window.location.href = "/login";
+        }
+      } else {
+        setError(err.message || "Failed to close ticket");
+      }
     }
   }
 
