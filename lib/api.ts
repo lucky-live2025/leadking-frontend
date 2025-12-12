@@ -21,18 +21,38 @@ apiClient.interceptors.request.use(
     if (typeof window !== "undefined") {
       const token = localStorage.getItem("token");
       
+      // CRITICAL: ALWAYS remove any existing Authorization header first
+      // This prevents browser from adding Basic auth automatically
+      if (config.headers) {
+        delete config.headers.Authorization;
+        delete config.headers.authorization;
+        // Also remove from common property names
+        delete (config.headers as any).Authorization;
+        delete (config.headers as any).authorization;
+      }
+      
+      // Remove auth config if present (this can trigger Basic auth)
+      if ((config as any).auth) {
+        delete (config as any).auth;
+      }
+      
       // Always set Authorization if token exists (unless explicitly disabled)
       // Don't check for auth: false here - let the caller control via options
       if (token && config.headers) {
-        // CRITICAL: Remove any existing Authorization header first to prevent conflicts
-        delete config.headers.Authorization;
-        delete config.headers.authorization;
-        
         // Ensure we always use "Bearer " prefix (never Basic!)
         const authValue = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
         
-        // Set Authorization header directly (not via auth config which might trigger Basic)
+        // Set Authorization header directly with explicit Bearer prefix
         config.headers.Authorization = authValue;
+        
+        // Verify it was set correctly
+        const setValue = config.headers.Authorization || (config.headers as any).authorization;
+        if (!setValue || !setValue.startsWith('Bearer ')) {
+          console.error('[API Interceptor] FAILED to set Bearer token correctly!', {
+            setValue: setValue?.substring(0, 20),
+            hasHeaders: !!config.headers,
+          });
+        }
         
         console.log('[API Interceptor] Authorization header set:', {
           hasToken: !!token,
@@ -41,6 +61,7 @@ apiClient.interceptors.request.use(
           headerValue: authValue.substring(0, 40) + '...',
           url: config.url,
           headerType: 'Bearer',
+          verified: setValue?.startsWith('Bearer ') || false,
         });
       } else if (!token) {
         // Only warn for protected routes
