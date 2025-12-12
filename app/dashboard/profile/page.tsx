@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { apiGet, apiPatch } from "@/lib/api";
+import { apiGet, apiPost } from "@/lib/api";
 
 export default function DashboardProfilePage() {
   const [user, setUser] = useState<any>(null);
@@ -43,7 +43,7 @@ export default function DashboardProfilePage() {
     setSuccess(false);
 
     try {
-      await apiPatch("/auth/me", formData);
+      await apiPost("/auth/me", formData, { auth: true });
       setSuccess(true);
       await loadProfile();
     } catch (err: any) {

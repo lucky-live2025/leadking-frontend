@@ -2,132 +2,150 @@
 
 import { useState, useEffect } from "react";
 import { apiGet, apiPost } from "@/lib/api";
-import { connectWallet, getWalletState, startSubscription, waitForTransaction } from "@/lib/web3";
 import Link from "next/link";
 
 const TIERS = [
-  { id: 1, name: "Starter", price: 250, usdt: 250 },
-  { id: 2, name: "Pro", price: 750, usdt: 750 },
-  { id: 3, name: "Ultra", price: 7500, usdt: 7500 },
-  { id: 4, name: "Enterprise", price: 15000, usdt: 15000 },
+  { id: 1, name: "Starter", price: 250, tier: "BASIC" },
+  { id: 2, name: "Pro", price: 750, tier: "PRO" },
+  { id: 3, name: "Ultra", price: 7500, tier: "TITANIUM" },
+  { id: 4, name: "Enterprise", price: 15000, tier: "INFINITY" },
 ];
+
+interface PaymentData {
+  id: number;
+  amount: number;
+  network: string;
+  walletAddress: string;
+  memo: string;
+  expiresAt: string;
+  qrCode: string;
+}
 
 export default function SubscriptionPage() {
   const [subscription, setSubscription] = useState<any>(null);
-  const [wallet, setWallet] = useState<any>(null);
-  const [internalWallet, setInternalWallet] = useState<any>(null);
-  const [externalWallet, setExternalWallet] = useState<any>(null);
-  const [walletConnected, setWalletConnected] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedTier, setSelectedTier] = useState<number | null>(null);
-  const [txHash, setTxHash] = useState<string | null>(null);
-  const [showConnectModal, setShowConnectModal] = useState(false);
+  const [paymentData, setPaymentData] = useState<PaymentData | null>(null);
+  const [txHash, setTxHash] = useState("");
+  const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
+  const [paymentStatus, setPaymentStatus] = useState<string | null>(null);
 
   useEffect(() => {
     loadSubscription();
-    loadWallet();
-    checkWalletConnection();
   }, []);
+
+  useEffect(() => {
+    if (paymentData && paymentData.expiresAt) {
+      const interval = setInterval(() => {
+        const now = new Date().getTime();
+        const expiry = new Date(paymentData.expiresAt).getTime();
+        const remaining = Math.max(0, Math.floor((expiry - now) / 1000));
+        setTimeRemaining(remaining);
+
+        if (remaining === 0) {
+          clearInterval(interval);
+          setPaymentData(null);
+          setError("Payment time expired. Please try again.");
+        }
+      }, 1000);
+
+      return () => clearInterval(interval);
+    }
+  }, [paymentData]);
 
   async function loadSubscription() {
     try {
-      const sub = await apiGet("/subscriptions/me", { auth: true });
+      const sub = await apiGet("/subscription/me", { auth: true });
       setSubscription(sub);
     } catch (err: any) {
       console.error("Failed to load subscription:", err);
     }
   }
 
-  async function loadWallet() {
-    try {
-      const walletData = await apiGet("/wallet/me", { auth: true });
-      setWallet(walletData);
-      
-      // Extract internal and external wallets
-      if (walletData) {
-        setInternalWallet(walletData.internal || null);
-        setExternalWallet(walletData.external || null);
-        
-        // For backward compatibility, set wallet to external if exists
-        setWallet(walletData.external || walletData.internal || walletData);
-      } else {
-        setInternalWallet(null);
-        setExternalWallet(null);
-      }
-    } catch (err: any) {
-      console.error("Failed to load wallet:", err);
-      setInternalWallet(null);
-      setExternalWallet(null);
-    }
-  }
-
-  function checkWalletConnection() {
-    const state = getWalletState();
-    setWalletConnected(state.connected);
-  }
-
-  async function handleConnectWallet() {
+  async function handleSubscribe(tier: typeof TIERS[0]) {
     setLoading(true);
     setError(null);
+    setSelectedTier(tier.id);
+    setPaymentData(null);
+    setTxHash("");
+    setPaymentStatus(null);
+
     try {
-      const state = await connectWallet();
-      setWalletConnected(true);
-      
-      // Save wallet to backend
-      await apiPost("/wallet/connect", { walletAddress: state.address }, { auth: true });
-      await loadWallet();
-      setShowConnectModal(false);
+      // Create payment with QR code
+      const payment = await apiPost(
+        "/payments/create",
+        {
+          tier: tier.tier,
+          network: "USDT_ERC20", // Default to ERC20, can be made configurable
+        },
+        { auth: true }
+      );
+
+      setPaymentData(payment);
+      setTimeRemaining(Math.floor((new Date(payment.expiresAt).getTime() - new Date().getTime()) / 1000));
     } catch (err: any) {
-      setError(err.message || "Failed to connect wallet");
+      setError(err.message || "Failed to create payment");
+      setSelectedTier(null);
     } finally {
       setLoading(false);
     }
   }
 
-  async function handleSubscribe(tier: number) {
-    if (!walletConnected && !wallet) {
-      setShowConnectModal(true);
+  async function handleSubmitTxHash() {
+    if (!paymentData || !txHash.trim()) {
+      setError("Please enter a transaction hash");
       return;
     }
 
     setLoading(true);
     setError(null);
-    setSelectedTier(tier);
+    setPaymentStatus("submitting");
 
     try {
-      // Step 1: Start subscription on backend
-      const startResponse = await apiPost("/subscription/start", { tier }, { auth: true });
-      
-      // Step 2: Connect wallet if not connected
-      if (!walletConnected) {
-        await handleConnectWallet();
-      }
+      await apiPost(
+        `/payments/submit-tx/${paymentData.id}`,
+        { txHash: txHash.trim() },
+        { auth: true }
+      );
 
-      // Step 3: Call smart contract
-      const state = getWalletState();
-      if (!state.connected || !state.signer) {
-        throw new Error("Wallet not connected");
-      }
-
-      const hash = await startSubscription(tier);
-      setTxHash(hash);
-
-      // Step 4: Wait for transaction confirmation
-      await waitForTransaction(hash);
-
-      // Step 5: Confirm subscription on backend
-      await apiPost("/subscription/confirm", { tier, txHash: hash }, { auth: true });
-
-      // Step 6: Refresh subscription status
-      await loadSubscription();
-      
+      setPaymentStatus("submitted");
       setError(null);
+      
+      // Poll for payment status
+      const checkInterval = setInterval(async () => {
+        try {
+          const status = await apiGet(`/payments/status/${paymentData.id}`, { auth: true });
+          if (status.status === "APPROVED") {
+            clearInterval(checkInterval);
+            setPaymentStatus("approved");
+            setPaymentData(null);
+            setTxHash("");
+            await loadSubscription();
+          } else if (status.status === "REJECTED") {
+            clearInterval(checkInterval);
+            setPaymentStatus("rejected");
+            setError("Payment was rejected. Please contact support.");
+          }
+        } catch (err) {
+          console.error("Failed to check payment status:", err);
+        }
+      }, 5000);
+
+      // Stop polling after 5 minutes
+      setTimeout(() => clearInterval(checkInterval), 5 * 60 * 1000);
     } catch (err: any) {
-      setError(err.message || "Failed to process subscription");
+      setError(err.message || "Failed to submit transaction hash");
+      setPaymentStatus(null);
     } finally {
       setLoading(false);
     }
+  }
+
+  function formatTime(seconds: number): string {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
   }
 
   function getDaysRemaining(expiryDate: string) {
@@ -148,20 +166,6 @@ export default function SubscriptionPage() {
           </div>
         )}
 
-        {txHash && (
-          <div className="bg-green-50 border border-green-200 text-green-700 p-4 rounded-xl mb-6 shadow-md">
-            <p>Transaction submitted!</p>
-            <a
-              href={`https://etherscan.io/tx/${txHash}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline text-green-800"
-            >
-              View on Etherscan
-            </a>
-          </div>
-        )}
-
         {subscription && subscription.status === "active" && (
           <div className="bg-white rounded-xl p-6 mb-8 shadow-md border border-gray-200">
             <h2 className="text-xl font-semibold text-gray-900 mb-4">Current Subscription</h2>
@@ -178,83 +182,90 @@ export default function SubscriptionPage() {
           </div>
         )}
 
-        {/* Internal Wallet Display */}
-        {internalWallet && (
-          <div className="bg-white rounded-xl p-6 mb-6 shadow-md border border-gray-200">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Your Wallet</h2>
-            <div className="grid grid-cols-3 gap-4">
-              <div>
-                <p className="text-sm text-gray-600 mb-1">USD Balance</p>
-                <p className="text-2xl font-bold text-gray-900">${internalWallet.balance_usd?.toFixed(2) || '0.00'}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600 mb-1">BTC Balance</p>
-                <p className="text-2xl font-bold text-gray-900">{internalWallet.balance_btc?.toFixed(8) || '0.00000000'}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600 mb-1">ETH Balance</p>
-                <p className="text-2xl font-bold text-gray-900">{internalWallet.balance_eth?.toFixed(6) || '0.000000'}</p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* External Wallet Display */}
-        {externalWallet && (
-          <div className="bg-white rounded-xl p-6 mb-6 shadow-md border border-gray-200">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Connected Wallet</h2>
-            <div className="space-y-2">
-              <p className="text-gray-600">
-                Address: <span className="text-gray-900 font-mono text-sm">{externalWallet.address}</span>
-              </p>
-              <p className="text-gray-600">
-                Network: <span className="text-gray-900 font-semibold">{externalWallet.network || 'Ethereum'}</span>
-              </p>
-              <p className="text-gray-600">
-                Verified: <span className={`font-semibold ${externalWallet.verified ? 'text-green-600' : 'text-yellow-600'}`}>
-                  {externalWallet.verified ? 'Yes' : 'Pending'}
-                </span>
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* Connect External Wallet Prompt */}
-        {!externalWallet && !walletConnected && (
-          <div className="bg-yellow-50 border border-yellow-200 text-yellow-700 p-4 rounded-xl mb-6 shadow-md">
-            <p className="mb-2">Connect your external wallet (MetaMask, etc.) to subscribe with crypto.</p>
-            <button
-              onClick={() => setShowConnectModal(true)}
-              className="px-4 py-2 bg-yellow-600 text-white rounded-xl font-semibold hover:bg-yellow-700 transition-colors shadow-md"
-            >
-              Connect External Wallet
-            </button>
-          </div>
-        )}
-
-        {/* Connect Wallet Modal */}
-        {showConnectModal && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4 shadow-xl">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">Connect Wallet</h2>
-              <p className="text-gray-600 mb-6">
-                Connect your Ethereum wallet to purchase a subscription with USDT.
-              </p>
-              <div className="flex gap-4">
+        {/* Payment QR Code Modal */}
+        {paymentData && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl p-6 max-w-md w-full shadow-xl">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-2xl font-bold text-gray-900">Complete Payment</h2>
                 <button
-                  onClick={() => setShowConnectModal(false)}
-                  className="flex-1 px-4 py-2 bg-gray-200 text-gray-900 rounded-xl font-semibold hover:bg-gray-300 transition-colors"
+                  onClick={() => {
+                    setPaymentData(null);
+                    setTxHash("");
+                    setSelectedTier(null);
+                    setPaymentStatus(null);
+                  }}
+                  className="text-gray-400 hover:text-gray-600 text-2xl"
                 >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleConnectWallet}
-                  disabled={loading}
-                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors shadow-md disabled:opacity-50"
-                >
-                  {loading ? "Connecting..." : "Connect"}
+                  ×
                 </button>
               </div>
+
+              {timeRemaining !== null && timeRemaining > 0 && (
+                <div className="mb-4">
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-center">
+                    <p className="text-sm text-yellow-800 mb-1">Time Remaining</p>
+                    <p className="text-2xl font-bold text-yellow-900">{formatTime(timeRemaining)}</p>
+                  </div>
+                </div>
+              )}
+
+              <div className="text-center mb-4">
+                <p className="text-lg font-semibold text-gray-900 mb-2">
+                  Send {paymentData.amount} USDT to:
+                </p>
+                <div className="bg-gray-50 rounded-lg p-4 mb-4">
+                  <img src={paymentData.qrCode} alt="Payment QR Code" className="mx-auto mb-4 w-48 h-48" />
+                  <p className="text-xs font-mono text-gray-600 break-all">{paymentData.walletAddress}</p>
+                </div>
+                <p className="text-sm text-gray-600 mb-2">Memo:</p>
+                <p className="text-xs font-mono text-gray-700 bg-gray-50 p-2 rounded">{paymentData.memo}</p>
+              </div>
+
+              {paymentStatus === "submitted" && (
+                <div className="bg-blue-50 border border-blue-200 text-blue-700 p-3 rounded-lg mb-4 text-center">
+                  <p>Transaction submitted! Waiting for admin approval...</p>
+                </div>
+              )}
+
+              {paymentStatus === "approved" && (
+                <div className="bg-green-50 border border-green-200 text-green-700 p-3 rounded-lg mb-4 text-center">
+                  <p>Payment approved! Your subscription is now active.</p>
+                </div>
+              )}
+
+              {paymentStatus !== "approved" && (
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Transaction Hash (after payment)
+                    </label>
+                    <input
+                      type="text"
+                      value={txHash}
+                      onChange={(e) => setTxHash(e.target.value)}
+                      placeholder="0x..."
+                      className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      disabled={loading || paymentStatus === "submitted"}
+                    />
+                  </div>
+                  <button
+                    onClick={handleSubmitTxHash}
+                    disabled={loading || !txHash.trim() || paymentStatus === "submitted"}
+                    className="w-full px-4 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {loading
+                      ? "Submitting..."
+                      : paymentStatus === "submitted"
+                      ? "Submitted - Waiting for Approval"
+                      : "Submit Transaction Hash"}
+                  </button>
+                </div>
+              )}
+
+              <p className="text-xs text-gray-500 mt-4 text-center">
+                After sending payment, paste the transaction hash above and click submit.
+              </p>
             </div>
           </div>
         )}
@@ -266,13 +277,17 @@ export default function SubscriptionPage() {
               className="bg-white rounded-xl p-6 border border-gray-200 shadow-md hover:shadow-lg transition-all"
             >
               <h3 className="text-xl font-bold text-gray-900 mb-2">{tier.name}</h3>
-              <p className="text-3xl font-bold text-blue-600 mb-4">{tier.usdt} USDT</p>
+              <p className="text-3xl font-bold text-blue-600 mb-4">{tier.price} USDT</p>
               <button
-                onClick={() => handleSubscribe(tier.id)}
-                disabled={loading || (!externalWallet && !walletConnected)}
+                onClick={() => handleSubscribe(tier)}
+                disabled={loading || (paymentData !== null && selectedTier === tier.id)}
                 className="w-full px-4 py-2 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading && selectedTier === tier.id ? "Processing..." : "Subscribe"}
+                {loading && selectedTier === tier.id
+                  ? "Creating Payment..."
+                  : paymentData && selectedTier === tier.id
+                  ? "Payment in Progress"
+                  : "Subscribe"}
               </button>
             </div>
           ))}

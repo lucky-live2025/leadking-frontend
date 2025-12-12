@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { adminGet, adminPost } from "@/lib/api-admin";
+import { adminGet, adminPost, adminPatch } from "@/lib/api-admin";
 import Link from "next/link";
 
 interface User {
