@@ -79,10 +79,11 @@ export default function AdminLayout({
 
   if (isChecking) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <div className="text-lg mb-2">Checking authentication...</div>
-          <div className="text-sm text-gray-400">Verifying admin access</div>
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
+          <div className="text-lg text-gray-900 mb-2">Checking authentication...</div>
+          <div className="text-sm text-gray-600">Verifying admin access</div>
         </div>
       </div>
     );
@@ -93,39 +94,52 @@ export default function AdminLayout({
   }
 
   return (
-    <div className="min-h-screen bg-gray-900">
+    <div className="min-h-screen bg-gray-50">
       {/* Admin Header */}
-      <header className="bg-gray-800 border-b border-gray-700">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-6">
-            <Link href="/admin" className="text-2xl font-bold text-white">
+      <header className="bg-white border-b border-gray-200">
+        <div className="container mx-auto px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-8">
+            <Link href="/admin" className="text-2xl font-bold text-gray-900">
               LeadKing Admin
             </Link>
-            <nav className="flex gap-4">
-              <Link href="/admin" className="text-gray-300 hover:text-white">
+            <nav className="flex gap-6">
+              <Link 
+                href="/admin" 
+                className={`text-gray-600 hover:text-gray-900 transition-colors ${
+                  pathname === "/admin" ? "text-blue-600 font-semibold" : ""
+                }`}
+              >
                 Dashboard
               </Link>
               <Link
                 href="/admin/users"
-                className="text-gray-300 hover:text-white"
+                className={`text-gray-600 hover:text-gray-900 transition-colors ${
+                  pathname === "/admin/users" ? "text-blue-600 font-semibold" : ""
+                }`}
               >
                 Users
               </Link>
               <Link
                 href="/admin/payments"
-                className="text-gray-300 hover:text-white"
+                className={`text-gray-600 hover:text-gray-900 transition-colors ${
+                  pathname === "/admin/payments" ? "text-blue-600 font-semibold" : ""
+                }`}
               >
                 Payments
               </Link>
               <Link
                 href="/admin/leads"
-                className="text-gray-300 hover:text-white"
+                className={`text-gray-600 hover:text-gray-900 transition-colors ${
+                  pathname === "/admin/leads" ? "text-blue-600 font-semibold" : ""
+                }`}
               >
                 Leads
               </Link>
               <Link
                 href="/admin/ultra-campaigns"
-                className="text-gray-300 hover:text-white"
+                className={`text-gray-600 hover:text-gray-900 transition-colors ${
+                  pathname === "/admin/ultra-campaigns" ? "text-blue-600 font-semibold" : ""
+                }`}
               >
                 Ultra Campaigns
               </Link>
@@ -133,18 +147,18 @@ export default function AdminLayout({
           </div>
           <div className="flex items-center gap-4">
             {user && (
-              <span className="text-gray-300 text-sm">{user.email}</span>
+              <span className="text-gray-600 text-sm">{user.email}</span>
             )}
             <button
               onClick={handleLogout}
-              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+              className="px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors font-semibold"
             >
               Logout
             </button>
           </div>
         </div>
       </header>
-      <main>{children}</main>
+      <main className="py-8">{children}</main>
     </div>
   );
 }
