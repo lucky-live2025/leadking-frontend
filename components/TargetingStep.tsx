@@ -1,7 +1,9 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { getCountries, getLanguages, getStates, getCitiesByCountry, getInterests, Country, Language, State, City, Interest } from "@/lib/targeting-api";
+import AsyncMultiSelect from "./form/AsyncMultiSelect";
+import AutoComplete from "./form/AutoComplete";
 
 interface TargetingStepProps {
   platform: string;
@@ -20,24 +22,17 @@ interface TargetingStepProps {
 }
 
 export default function TargetingStep({ platform, formData, onChange }: TargetingStepProps) {
-  const [countrySearch, setCountrySearch] = useState("");
-  const [citySearch, setCitySearch] = useState("");
-  const [interestSearch, setInterestSearch] = useState("");
-  
   // Data from API
   const [countries, setCountries] = useState<Country[]>([]);
   const [languages, setLanguages] = useState<Language[]>([]);
   const [interests, setInterests] = useState<Interest[]>([]);
   const [availableStates, setAvailableStates] = useState<State[]>([]);
-  const [availableCities, setAvailableCities] = useState<City[]>([]);
-  const [citySuggestions, setCitySuggestions] = useState<City[]>([]);
   
   // Loading states
   const [loadingCountries, setLoadingCountries] = useState(true);
   const [loadingLanguages, setLoadingLanguages] = useState(true);
   const [loadingInterests, setLoadingInterests] = useState(true);
   const [loadingStates, setLoadingStates] = useState(false);
-  const [loadingCities, setLoadingCities] = useState(false);
 
   // Load initial data
   useEffect(() => {
@@ -100,8 +95,8 @@ export default function TargetingStep({ platform, formData, onChange }: Targetin
         for (const countryName of formData.countries) {
           const country = countries.find(c => c.name === countryName);
           if (country) {
-            const countryStates = await getStates(country.code);
-            allStates.push(...countryStates);
+            const states = await getStates(country.code);
+            allStates.push(...states);
           }
         }
         setAvailableStates(allStates);
@@ -112,437 +107,177 @@ export default function TargetingStep({ platform, formData, onChange }: Targetin
       }
     };
 
-    if (countries.length > 0) {
-      loadStatesForCountries();
-    }
+    loadStatesForCountries();
   }, [formData.countries, countries]);
 
-  // Load cities when countries/states change
-  useEffect(() => {
-    if (formData.countries.length === 0) {
-      setAvailableCities([]);
-      return;
-    }
-
-    const loadCities = async () => {
-      setLoadingCities(true);
-      try {
-        const allCities: City[] = [];
-        for (const countryName of formData.countries) {
-          const country = countries.find(c => c.name === countryName);
-          if (country) {
-            const countryCities = await getCitiesByCountry(country.code);
-            allCities.push(...countryCities);
-          }
-        }
-        setAvailableCities(allCities);
-      } catch (error) {
-        console.error("Failed to load cities:", error);
-      } finally {
-        setLoadingCities(false);
-      }
-    };
-
-    if (countries.length > 0) {
-      loadCities();
-    }
-  }, [formData.countries, countries]);
-
-  // City autocomplete
-  useEffect(() => {
-    if (citySearch.length > 2) {
-      const filtered = availableCities
-        .filter(c => c.name.toLowerCase().includes(citySearch.toLowerCase()))
-        .sort((a, b) => (b.population || 0) - (a.population || 0))
-        .slice(0, 20);
-      setCitySuggestions(filtered);
-    } else {
-      setCitySuggestions([]);
-    }
-  }, [citySearch, availableCities]);
-
-  // Group countries by continent
-  const countriesByContinent = useMemo(() => {
-    return countries.reduce((acc, country) => {
-      if (!acc[country.continent]) {
-        acc[country.continent] = [];
-      }
-      acc[country.continent].push(country);
-      return acc;
-    }, {} as Record<string, Country[]>);
+  // Country options
+  const countryOptions = useCallback(async () => {
+    return countries.map(c => ({ value: c.name, label: c.name }));
   }, [countries]);
 
-  // Group interests by category
-  const interestsByCategory = useMemo(() => {
-    return interests.reduce((acc, interest) => {
-      if (!acc[interest.category]) {
-        acc[interest.category] = [];
-      }
-      acc[interest.category].push(interest);
-      return acc;
-    }, {} as Record<string, Interest[]>);
+  // Language options
+  const languageOptions = useCallback(async () => {
+    return languages.map(l => ({ value: l.code, label: `${l.name} (${l.nativeName})` }));
+  }, [languages]);
+
+  // State options
+  const stateOptions = useCallback(async () => {
+    return availableStates.map(s => ({ value: s.code, label: s.name }));
+  }, [availableStates]);
+
+  // Interest options
+  const interestOptions = useCallback(async () => {
+    return interests.map(i => ({ value: i.id, label: i.name }));
   }, [interests]);
 
-  // Filtered data
-  const filteredCountries = useMemo(() => {
-    if (!countrySearch) return countries;
-    const lower = countrySearch.toLowerCase();
-    return countries.filter(c => c.name.toLowerCase().includes(lower));
-  }, [countrySearch, countries]);
-
-  const filteredInterests = useMemo(() => {
-    if (!interestSearch) return interests;
-    const lower = interestSearch.toLowerCase();
-    return interests.filter(i => 
-      i.name.toLowerCase().includes(lower) || 
-      i.category.toLowerCase().includes(lower)
-    );
-  }, [interestSearch, interests]);
-
-  const handleCountryToggle = (countryName: string) => {
-    const current = formData.countries || [];
-    if (current.includes(countryName)) {
-      onChange({ countries: current.filter(c => c !== countryName) });
-    } else {
-      onChange({ countries: [...current, countryName] });
-    }
-  };
-
-  const handleSelectAllCountries = (continent: string) => {
-    const continentCountries = countriesByContinent[continent] || [];
-    const continentNames = continentCountries.map(c => c.name);
-    const current = formData.countries || [];
-    const allSelected = continentNames.every(name => current.includes(name));
+  // City search
+  const citySearchOptions = useCallback(async (query: string) => {
+    if (!query.trim() || formData.countries.length === 0) return [];
     
-    if (allSelected) {
-      onChange({ countries: current.filter(c => !continentNames.includes(c)) });
-    } else {
-      onChange({ countries: Array.from(new Set([...current, ...continentNames])) });
+    const allCities: City[] = [];
+    for (const countryName of formData.countries) {
+      const country = countries.find(c => c.name === countryName);
+      if (country) {
+        try {
+          const cities = await getCitiesByCountry(country.code);
+          const filtered = cities
+            .filter(c => c.name.toLowerCase().includes(query.toLowerCase()))
+            .slice(0, 25);
+          allCities.push(...filtered);
+        } catch (error) {
+          console.error(`Failed to load cities for ${country.code}:`, error);
+        }
+      }
     }
-  };
-
-  const handleStateToggle = (stateCode: string) => {
-    const current = formData.states || [];
-    if (current.includes(stateCode)) {
-      onChange({ states: current.filter(s => s !== stateCode) });
-    } else {
-      onChange({ states: [...current, stateCode] });
-    }
-  };
-
-  const handleCityAdd = (cityName: string) => {
-    const current = formData.cities || [];
-    if (!current.includes(cityName)) {
-      onChange({ cities: [...current, cityName] });
-    }
-    setCitySearch("");
-    setCitySuggestions([]);
-  };
-
-  const handleCityRemove = (cityName: string) => {
-    const current = formData.cities || [];
-    onChange({ cities: current.filter(c => c !== cityName) });
-  };
-
-  const handleLanguageToggle = (langCode: string) => {
-    const current = formData.languages || [];
-    if (current.includes(langCode)) {
-      onChange({ languages: current.filter(l => l !== langCode) });
-    } else {
-      onChange({ languages: [...current, langCode] });
-    }
-  };
-
-  const handleInterestToggle = (interestId: string) => {
-    const current = formData.interests || [];
-    if (current.includes(interestId)) {
-      onChange({ interests: current.filter(i => i !== interestId) });
-    } else {
-      onChange({ interests: [...current, interestId] });
-    }
-  };
+    
+    return allCities
+      .slice(0, 25)
+      .map(c => ({
+        value: c.name,
+        label: `${c.name}${c.stateCode ? `, ${c.stateCode}` : ''}${c.population ? ` (${(c.population / 1000).toFixed(0)}k)` : ''}`
+      }));
+  }, [formData.countries, countries]);
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-white mb-6">Targeting Configuration</h2>
+    <div className="space-y-8 p-8">
+      <h2 className="text-2xl font-bold text-gray-900 mb-6">Targeting Configuration</h2>
 
-      {/* Countries - Grouped by Continent */}
+      {/* Countries */}
       <div>
-        <div className="flex items-center justify-between mb-3">
-          <label className="block text-gray-300 font-semibold">Countries *</label>
-          <input
-            type="text"
-            placeholder="Search countries..."
-            value={countrySearch}
-            onChange={(e) => setCountrySearch(e.target.value)}
-            className="px-3 py-1.5 bg-[#0A1628] border border-gray-700 rounded-lg text-white text-sm w-64"
-          />
-        </div>
-        {loadingCountries ? (
-          <div className="bg-[#0A1628] border border-gray-700 rounded-lg p-8 text-center">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
-            <p className="text-gray-400 mt-2">Loading countries...</p>
-          </div>
-        ) : (
-          <div className="bg-[#0A1628] border border-gray-700 rounded-lg p-4 max-h-64 overflow-y-auto">
-            {Object.entries(countriesByContinent).map(([continent, continentCountries]) => {
-              const continentFiltered = continentCountries.filter(c => 
-                filteredCountries.includes(c)
-              );
-              if (continentFiltered.length === 0) return null;
-
-              const allSelected = continentFiltered.every(c => 
-                formData.countries?.includes(c.name)
-              );
-
-              return (
-                <div key={continent} className="mb-4 last:mb-0">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-sm font-semibold text-gray-400 uppercase">{continent}</h3>
-                    <button
-                      onClick={() => handleSelectAllCountries(continent)}
-                      className="text-xs text-blue-400 hover:text-blue-300"
-                    >
-                      {allSelected ? "Deselect All" : "Select All"}
-                    </button>
-                  </div>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                    {continentFiltered.map((country) => {
-                      const isSelected = formData.countries?.includes(country.name);
-                      return (
-                        <button
-                          key={country.code}
-                          onClick={() => handleCountryToggle(country.name)}
-                          className={`px-3 py-2 rounded-lg text-sm text-left transition ${
-                            isSelected
-                              ? "bg-blue-600 text-white"
-                              : "bg-gray-800 text-gray-300 hover:bg-gray-700"
-                          }`}
-                        >
-                          {country.name}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-        {formData.countries && formData.countries.length > 0 && (
-          <div className="mt-2 flex flex-wrap gap-2">
-            {formData.countries.map((country) => (
-              <span
-                key={country}
-                className="px-2 py-1 bg-blue-600/20 text-blue-300 rounded text-xs"
-              >
-                {country}
-              </span>
-            ))}
-          </div>
-        )}
+        <label className="block text-gray-900 font-semibold mb-3">Countries *</label>
+        <AsyncMultiSelect
+          placeholder="Select countries..."
+          value={formData.countries || []}
+          onChange={(values) => onChange({ countries: values })}
+          loadOptions={countryOptions}
+          isLoading={loadingCountries}
+        />
       </div>
 
       {/* States/Regions */}
       {availableStates.length > 0 && (
         <div>
-          <label className="block text-gray-300 font-semibold mb-3">States/Regions</label>
-          {loadingStates ? (
-            <div className="bg-[#0A1628] border border-gray-700 rounded-lg p-4 text-center">
-              <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
-            </div>
-          ) : (
-            <div className="bg-[#0A1628] border border-gray-700 rounded-lg p-4 max-h-48 overflow-y-auto">
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                {availableStates.map((state) => {
-                  const isSelected = formData.states?.includes(state.code);
-                  return (
-                    <button
-                      key={state.code}
-                      onClick={() => handleStateToggle(state.code)}
-                      className={`px-3 py-2 rounded-lg text-sm text-left transition ${
-                        isSelected
-                          ? "bg-blue-600 text-white"
-                          : "bg-gray-800 text-gray-300 hover:bg-gray-700"
-                      }`}
-                    >
-                      {state.name}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
+          <label className="block text-gray-900 font-semibold mb-3">States/Regions</label>
+          <AsyncMultiSelect
+            placeholder="Select states/regions..."
+            value={formData.states || []}
+            onChange={(values) => onChange({ states: values })}
+            loadOptions={stateOptions}
+            isLoading={loadingStates}
+          />
         </div>
       )}
 
-      {/* Cities - Autocomplete */}
+      {/* Cities */}
       <div>
-        <label className="block text-gray-300 font-semibold mb-3">Cities</label>
-        <div className="relative">
-          <input
-            type="text"
-            placeholder="Search and add cities..."
-            value={citySearch}
-            onChange={(e) => setCitySearch(e.target.value)}
-            className="w-full px-4 py-3 bg-[#0A1628] border border-gray-700 rounded-lg text-white"
-          />
-          {citySuggestions.length > 0 && (
-            <div className="absolute z-10 w-full mt-1 bg-[#111827] border border-gray-700 rounded-lg max-h-48 overflow-y-auto">
-              {citySuggestions.map((city) => (
-                <button
-                  key={`${city.name}-${city.stateCode || ''}`}
-                  onClick={() => handleCityAdd(city.name)}
-                  className="w-full px-4 py-2 text-left text-white hover:bg-gray-700"
-                >
-                  {city.name}
-                  {city.stateCode && `, ${city.stateCode}`}
-                  {city.population && ` (${(city.population / 1000).toFixed(0)}k)`}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-        {formData.cities && formData.cities.length > 0 && (
-          <div className="mt-2 flex flex-wrap gap-2">
-            {formData.cities.map((city) => (
-              <span
-                key={city}
-                className="px-2 py-1 bg-blue-600/20 text-blue-300 rounded text-xs flex items-center gap-1"
-              >
-                {city}
-                <button
-                  onClick={() => handleCityRemove(city)}
-                  className="hover:text-red-400"
-                >
-                  ×
-                </button>
-              </span>
-            ))}
-          </div>
-        )}
+        <label className="block text-gray-900 font-semibold mb-3">Cities</label>
+        <AutoComplete
+          placeholder="Search and add cities..."
+          value={formData.cities || []}
+          onChange={(values) => onChange({ cities: values })}
+          loadOptions={citySearchOptions}
+          maxResults={25}
+        />
       </div>
 
       {/* Languages */}
       <div>
-        <label className="block text-gray-300 font-semibold mb-3">Languages *</label>
-        {loadingLanguages ? (
-          <div className="bg-[#0A1628] border border-gray-700 rounded-lg p-4 text-center">
-            <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
-          </div>
-        ) : (
-          <div className="bg-[#0A1628] border border-gray-700 rounded-lg p-4 max-h-48 overflow-y-auto">
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-              {languages.map((lang) => {
-                const isSelected = formData.languages?.includes(lang.code);
-                return (
-                  <button
-                    key={lang.code}
-                    onClick={() => handleLanguageToggle(lang.code)}
-                    className={`px-3 py-2 rounded-lg text-sm text-left transition ${
-                      isSelected
-                        ? "bg-blue-600 text-white"
-                        : "bg-gray-800 text-gray-300 hover:bg-gray-700"
-                    }`}
-                  >
-                    {lang.name} ({lang.nativeName})
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
+        <label className="block text-gray-900 font-semibold mb-3">Languages *</label>
+        <AsyncMultiSelect
+          placeholder="Select languages..."
+          value={formData.languages || []}
+          onChange={(values) => onChange({ languages: values })}
+          loadOptions={languageOptions}
+          isLoading={loadingLanguages}
+        />
       </div>
 
       {/* Interests */}
-      <div>
-        <div className="flex items-center justify-between mb-3">
-          <label className="block text-gray-300 font-semibold">Interests</label>
-          <input
-            type="text"
-            placeholder="Search interests..."
-            value={interestSearch}
-            onChange={(e) => setInterestSearch(e.target.value)}
-            className="px-3 py-1.5 bg-[#0A1628] border border-gray-700 rounded-lg text-white text-sm w-64"
+      {interests.length > 0 && (
+        <div>
+          <label className="block text-gray-900 font-semibold mb-3">Interests</label>
+          <AsyncMultiSelect
+            placeholder="Select interests..."
+            value={formData.interests || []}
+            onChange={(values) => onChange({ interests: values })}
+            loadOptions={interestOptions}
+            isLoading={loadingInterests}
           />
         </div>
-        {loadingInterests ? (
-          <div className="bg-[#0A1628] border border-gray-700 rounded-lg p-4 text-center">
-            <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
-          </div>
-        ) : (
-          <div className="bg-[#0A1628] border border-gray-700 rounded-lg p-4 max-h-64 overflow-y-auto">
-            {Object.entries(
-              filteredInterests.reduce((acc, interest) => {
-                if (!acc[interest.category]) acc[interest.category] = [];
-                acc[interest.category].push(interest);
-                return acc;
-              }, {} as Record<string, Interest[]>)
-            ).map(([category, categoryInterests]) => (
-              <div key={category} className="mb-4 last:mb-0">
-                <h3 className="text-sm font-semibold text-gray-400 uppercase mb-2">{category}</h3>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                  {categoryInterests.map((interest) => {
-                    const isSelected = formData.interests?.includes(interest.id);
-                    return (
-                      <button
-                        key={interest.id}
-                        onClick={() => handleInterestToggle(interest.id)}
-                        className={`px-3 py-2 rounded-lg text-sm text-left transition ${
-                          isSelected
-                            ? "bg-blue-600 text-white"
-                            : "bg-gray-800 text-gray-300 hover:bg-gray-700"
-                        }`}
-                      >
-                        {interest.name}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+      )}
 
       {/* Age Range */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-6">
         <div>
-          <label className="block text-gray-300 font-semibold mb-2">Age Min</label>
+          <label className="block text-gray-900 font-semibold mb-3">Age Min</label>
           <input
             type="number"
             min="13"
             max="100"
             value={formData.ageMin}
             onChange={(e) => onChange({ ageMin: parseInt(e.target.value) || 18 })}
-            className="w-full px-4 py-3 bg-[#0A1628] border border-gray-700 rounded-lg text-white"
+            className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
         <div>
-          <label className="block text-gray-300 font-semibold mb-2">Age Max</label>
+          <label className="block text-gray-900 font-semibold mb-3">Age Max</label>
           <input
             type="number"
             min="13"
             max="100"
             value={formData.ageMax}
             onChange={(e) => onChange({ ageMax: parseInt(e.target.value) || 65 })}
-            className="w-full px-4 py-3 bg-[#0A1628] border border-gray-700 rounded-lg text-white"
+            className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
       </div>
 
       {/* Gender */}
       <div>
-        <label className="block text-gray-300 font-semibold mb-2">Gender</label>
+        <label className="block text-gray-900 font-semibold mb-3">Gender</label>
         <select
           value={formData.gender}
           onChange={(e) => onChange({ gender: e.target.value })}
-          className="w-full px-4 py-3 bg-[#0A1628] border border-gray-700 rounded-lg text-white"
+          className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         >
           <option value="all">All</option>
           <option value="male">Male</option>
           <option value="female">Female</option>
         </select>
+      </div>
+
+      {/* Budget */}
+      <div>
+        <label className="block text-gray-900 font-semibold mb-3">Daily Budget ($)</label>
+        <input
+          type="number"
+          min="0"
+          step="0.01"
+          value={formData.dailyBudget}
+          onChange={(e) => onChange({ dailyBudget: e.target.value })}
+          placeholder="0.00"
+          className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        />
       </div>
     </div>
   );

@@ -42,11 +42,11 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-8 py-8">
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-white mb-4"></div>
-            <div className="text-lg text-white">Loading dashboard...</div>
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
+            <div className="text-lg text-gray-900">Loading dashboard...</div>
           </div>
         </div>
       </div>
@@ -55,73 +55,68 @@ export default function DashboardPage() {
 
   if (error) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="bg-red-500/20 border border-red-500 rounded-lg p-6">
-          <h2 className="text-xl font-bold text-red-400 mb-2">Error</h2>
-          <p className="text-red-300">{error}</p>
+      <div className="container mx-auto px-8 py-8">
+        <div className="bg-red-50 border border-red-200 rounded-xl p-6 shadow-md">
+          <h2 className="text-xl font-bold text-red-900 mb-2">Error</h2>
+          <p className="text-red-700">{error}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6 text-white">Dashboard</h1>
+    <div className="container mx-auto px-8 py-8">
+      <h1 className="text-3xl font-bold mb-8 text-gray-900">Dashboard</h1>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <div className="rounded-lg p-6" style={{ backgroundColor: "#111827" }}>
-          <h3 className="text-lg font-semibold mb-2 text-gray-300">Total Leads</h3>
-          <p className="text-3xl font-bold text-white">{stats?.leads || 0}</p>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200">
+          <h3 className="text-lg font-semibold mb-2 text-gray-600">Total Leads</h3>
+          <p className="text-3xl font-bold text-gray-900">{stats?.leads || 0}</p>
         </div>
-        <div className="rounded-lg p-6" style={{ backgroundColor: "#111827" }}>
-          <h3 className="text-lg font-semibold mb-2 text-gray-300">Active Campaigns</h3>
-          <p className="text-3xl font-bold text-white">{stats?.campaigns || 0}</p>
+        <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200">
+          <h3 className="text-lg font-semibold mb-2 text-gray-600">Active Campaigns</h3>
+          <p className="text-3xl font-bold text-gray-900">{stats?.campaigns || 0}</p>
         </div>
-        <div className="rounded-lg p-6" style={{ backgroundColor: "#111827" }}>
-          <h3 className="text-lg font-semibold mb-2 text-gray-300">Conversion Rate</h3>
-          <p className="text-3xl font-bold text-white">--</p>
+        <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200">
+          <h3 className="text-lg font-semibold mb-2 text-gray-600">Conversion Rate</h3>
+          <p className="text-3xl font-bold text-gray-900">--</p>
         </div>
-        <div className="rounded-lg p-6" style={{ backgroundColor: "#111827" }}>
-          <h3 className="text-lg font-semibold mb-2 text-gray-300">Revenue</h3>
-          <p className="text-3xl font-bold text-white">--</p>
+        <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200">
+          <h3 className="text-lg font-semibold mb-2 text-gray-600">Revenue</h3>
+          <p className="text-3xl font-bold text-gray-900">--</p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Link 
           href="/dashboard/leads"
-          className="rounded-lg p-6 hover:opacity-90 transition"
-          style={{ backgroundColor: "#111827" }}
+          className="bg-white rounded-xl p-6 shadow-md border border-gray-200 hover:shadow-lg hover:border-blue-300 transition-all"
         >
-          <h3 className="text-xl font-semibold mb-2 text-white">View All Leads</h3>
-          <p className="text-gray-400">Manage and track your leads</p>
+          <h3 className="text-xl font-semibold mb-2 text-gray-900">View All Leads</h3>
+          <p className="text-gray-600">Manage and track your leads</p>
         </Link>
         <Link 
           href="/dashboard/campaigns"
-          className="rounded-lg p-6 hover:opacity-90 transition"
-          style={{ backgroundColor: "#111827" }}
+          className="bg-white rounded-xl p-6 shadow-md border border-gray-200 hover:shadow-lg hover:border-blue-300 transition-all"
         >
-          <h3 className="text-xl font-semibold mb-2 text-white">Manage Campaigns</h3>
-          <p className="text-gray-400">Create and monitor campaigns</p>
+          <h3 className="text-xl font-semibold mb-2 text-gray-900">Manage Campaigns</h3>
+          <p className="text-gray-600">Create and monitor campaigns</p>
         </Link>
         <Link 
           href="/ultra"
-          className="rounded-lg p-6 hover:opacity-90 transition"
-          style={{ backgroundColor: "#111827" }}
+          className="bg-white rounded-xl p-6 shadow-md border border-gray-200 hover:shadow-lg hover:border-blue-300 transition-all"
         >
-          <h3 className="text-xl font-semibold mb-2 text-white">Ultra Campaign Generator</h3>
-          <p className="text-gray-400">Create AI-powered campaigns</p>
+          <h3 className="text-xl font-semibold mb-2 text-gray-900">Ultra Campaign Generator</h3>
+          <p className="text-gray-600">Create AI-powered campaigns</p>
         </Link>
         <Link 
           href="/dashboard/billing"
-          className="rounded-lg p-6 hover:opacity-90 transition"
-          style={{ backgroundColor: "#111827" }}
+          className="bg-white rounded-xl p-6 shadow-md border border-gray-200 hover:shadow-lg hover:border-blue-300 transition-all"
         >
-          <h3 className="text-xl font-semibold mb-2 text-white">Billing & Subscription</h3>
-          <p className="text-gray-400">Manage your subscription</p>
+          <h3 className="text-xl font-semibold mb-2 text-gray-900">Billing & Subscription</h3>
+          <p className="text-gray-600">Manage your subscription</p>
         </Link>
       </div>
     </div>
   );
 }
-

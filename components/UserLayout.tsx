@@ -42,48 +42,58 @@ export default function UserLayout({
 
   if (isChecking) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "#0A1628" }}>
-        <div className="text-center text-white">Loading...</div>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center text-gray-900">Loading...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "#0A1628" }}>
-      <header style={{ backgroundColor: "#111827", borderBottom: "1px solid #1f2937" }}>
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-6">
-            <Link href="/dashboard" className="text-2xl font-bold text-white">
+    <div className="min-h-screen bg-gray-50">
+      <header className="bg-white border-b border-gray-200">
+        <div className="container mx-auto px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-8">
+            <Link href="/dashboard" className="text-2xl font-bold text-gray-900">
               Lead King
             </Link>
-            <nav className="flex gap-4">
+            <nav className="flex gap-6">
               <Link 
                 href="/dashboard" 
-                className={`text-gray-300 hover:text-white ${pathname === "/dashboard" ? "text-white font-semibold" : ""}`}
+                className={`text-gray-600 hover:text-gray-900 transition-colors ${
+                  pathname === "/dashboard" ? "text-blue-600 font-semibold" : ""
+                }`}
               >
                 Dashboard
               </Link>
               <Link 
                 href="/dashboard/leads" 
-                className={`text-gray-300 hover:text-white ${pathname === "/dashboard/leads" ? "text-white font-semibold" : ""}`}
+                className={`text-gray-600 hover:text-gray-900 transition-colors ${
+                  pathname === "/dashboard/leads" ? "text-blue-600 font-semibold" : ""
+                }`}
               >
                 Leads
               </Link>
               <Link 
                 href="/dashboard/campaigns" 
-                className={`text-gray-300 hover:text-white ${pathname === "/dashboard/campaigns" ? "text-white font-semibold" : ""}`}
+                className={`text-gray-600 hover:text-gray-900 transition-colors ${
+                  pathname === "/dashboard/campaigns" ? "text-blue-600 font-semibold" : ""
+                }`}
               >
                 Campaigns
               </Link>
               <Link 
                 href="/dashboard/billing" 
-                className={`text-gray-300 hover:text-white ${pathname === "/dashboard/billing" ? "text-white font-semibold" : ""}`}
+                className={`text-gray-600 hover:text-gray-900 transition-colors ${
+                  pathname === "/dashboard/billing" ? "text-blue-600 font-semibold" : ""
+                }`}
               >
                 Billing
               </Link>
               <Link 
                 href="/dashboard/profile" 
-                className={`text-gray-300 hover:text-white ${pathname === "/dashboard/profile" ? "text-white font-semibold" : ""}`}
+                className={`text-gray-600 hover:text-gray-900 transition-colors ${
+                  pathname === "/dashboard/profile" ? "text-blue-600 font-semibold" : ""
+                }`}
               >
                 Profile
               </Link>
@@ -91,20 +101,18 @@ export default function UserLayout({
           </div>
           <div className="flex items-center gap-4">
             {user && (
-              <span className="text-gray-300 text-sm">{user.email}</span>
+              <span className="text-gray-600 text-sm">{user.email}</span>
             )}
             <button
               onClick={handleLogout}
-              className="px-4 py-2 text-white rounded-lg hover:opacity-90 transition"
-              style={{ backgroundColor: "#ef4444" }}
+              className="px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors font-semibold"
             >
               Logout
             </button>
           </div>
         </div>
       </header>
-      <main>{children}</main>
+      <main className="py-8">{children}</main>
     </div>
   );
 }
-

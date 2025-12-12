@@ -188,17 +188,17 @@ export default function LandingPageStep({
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-white mb-6">Landing Page</h2>
+      <h2 className="text-2xl font-bold text-gray-900 mb-6">Landing Page</h2>
 
       {/* Tab Selection */}
-      <div className="flex gap-4 border-b border-gray-700">
+      <div className="flex gap-4 border-b border-gray-300">
         <button
           onClick={() => handleTabChange("ai")}
-          className={`px-4 py-2 font-semibold transition ${
-            activeTab === "ai"
-              ? "text-blue-400 border-b-2 border-blue-400"
-              : "text-gray-400 hover:text-gray-300"
-          }`}
+                className={`px-4 py-2 font-semibold transition ${
+                  activeTab === "ai"
+                    ? "text-blue-600 border-b-2 border-blue-600"
+                    : "text-gray-600 hover:text-gray-900"
+                }`}
         >
           AI Generated
         </button>
@@ -228,12 +228,12 @@ export default function LandingPageStep({
       {activeTab === "ai" && (
         <div className="space-y-6">
           <div>
-            <label className="block text-gray-300 font-semibold mb-2">Business Name *</label>
-            <input
-              type="text"
-              value={aiForm.businessName}
-              onChange={(e) => handleAiFormChange("businessName", e.target.value)}
-              className="w-full px-4 py-3 bg-[#0A1628] border border-gray-700 rounded-lg text-white"
+                  <label className="block text-gray-900 font-semibold mb-2">Business Name *</label>
+                  <input
+                    type="text"
+                    value={aiForm.businessName}
+                    onChange={(e) => handleAiFormChange("businessName", e.target.value)}
+                    className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Your Company Name"
             />
           </div>
@@ -244,7 +244,7 @@ export default function LandingPageStep({
               type="text"
               value={aiForm.productName}
               onChange={(e) => handleAiFormChange("productName", e.target.value)}
-              className="w-full px-4 py-3 bg-[#0A1628] border border-gray-700 rounded-lg text-white"
+                    className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Your Product/Service"
             />
           </div>
@@ -254,7 +254,7 @@ export default function LandingPageStep({
             <textarea
               value={aiForm.offer}
               onChange={(e) => handleAiFormChange("offer", e.target.value)}
-              className="w-full px-4 py-3 bg-[#0A1628] border border-gray-700 rounded-lg text-white"
+                    className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
               rows={3}
               placeholder="Describe your offer..."
             />
@@ -264,8 +264,8 @@ export default function LandingPageStep({
             <label className="block text-gray-300 font-semibold mb-2">Benefits</label>
             <div className="space-y-2 mb-2">
               {aiForm.benefits.map((benefit, index) => (
-                <div key={index} className="flex items-center justify-between bg-gray-800 p-2 rounded">
-                  <span className="text-white text-sm">{benefit}</span>
+                      <div key={index} className="flex items-center justify-between bg-gray-100 p-2 rounded-lg">
+                        <span className="text-gray-900 text-sm">{benefit}</span>
                   <button
                     onClick={() => handleRemoveBenefit(index)}
                     className="text-red-400 hover:text-red-300 ml-2"
@@ -277,7 +277,7 @@ export default function LandingPageStep({
             </div>
             <button
               onClick={handleAddBenefit}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                    className="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-semibold shadow-md"
             >
               + Add Benefit
             </button>
@@ -289,7 +289,7 @@ export default function LandingPageStep({
               type="text"
               value={aiForm.ctaText}
               onChange={(e) => handleAiFormChange("ctaText", e.target.value)}
-              className="w-full px-4 py-3 bg-[#0A1628] border border-gray-700 rounded-lg text-white"
+                    className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Get Started"
             />
           </div>
@@ -299,7 +299,7 @@ export default function LandingPageStep({
             <select
               value={aiForm.theme}
               onChange={(e) => handleAiFormChange("theme", e.target.value)}
-              className="w-full px-4 py-3 bg-[#0A1628] border border-gray-700 rounded-lg text-white"
+                    className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="modern">Modern</option>
               <option value="clean">Clean</option>
@@ -322,7 +322,7 @@ export default function LandingPageStep({
                     handleAiFormChange("mainImage", "");
                   }
                 }}
-                className="w-full px-4 py-3 bg-[#0A1628] border border-gray-700 rounded-lg text-white"
+                    className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">None</option>
                 {availableImages.map((url, index) => (
@@ -352,10 +352,10 @@ export default function LandingPageStep({
           {generatedUrl && (
             <div className="mt-6">
               <h3 className="text-gray-300 font-semibold mb-3">Preview</h3>
-              <div className="bg-[#0A1628] border border-gray-700 rounded-lg p-4">
-                <iframe
-                  src={`${process.env.NEXT_PUBLIC_API_URL || "https://api.leadkingapp.com"}${generatedUrl}`}
-                  className="w-full h-96 border border-gray-700 rounded"
+                <div className="bg-white border border-gray-300 rounded-xl p-4 shadow-md">
+                  <iframe
+                    src={`${process.env.NEXT_PUBLIC_API_URL || "https://api.leadkingapp.com"}${generatedUrl}`}
+                    className="w-full h-96 border border-gray-300 rounded-lg"
                   title="Generated Landing Page Preview"
                 />
               </div>
@@ -387,7 +387,7 @@ export default function LandingPageStep({
                 <p className="text-gray-400 text-sm mb-4">or</p>
                 <button
                   type="button"
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                    className="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-semibold shadow-md"
                 >
                   Browse Files
                 </button>
@@ -400,15 +400,15 @@ export default function LandingPageStep({
 
           {uploadFiles.length > 0 && (
             <div>
-              <h3 className="text-gray-300 font-semibold mb-3">Uploaded Files ({uploadFiles.length})</h3>
-              <div className="space-y-2">
-                {uploadFiles.map((file, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between bg-gray-800 p-3 rounded"
-                  >
-                    <span className="text-white text-sm">{file.name}</span>
-                    <span className="text-gray-400 text-xs">
+                    <h3 className="text-gray-900 font-semibold mb-3">Uploaded Files ({uploadFiles.length})</h3>
+                    <div className="space-y-2">
+                      {uploadFiles.map((file, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center justify-between bg-gray-100 p-3 rounded-lg"
+                        >
+                          <span className="text-gray-900 text-sm">{file.name}</span>
+                          <span className="text-gray-600 text-xs">
                       {(file.size / 1024).toFixed(1)} KB
                     </span>
                   </div>
@@ -457,7 +457,7 @@ export default function LandingPageStep({
               type="url"
               value={externalUrl}
               onChange={(e) => handleExternalUrlChange(e.target.value)}
-              className="w-full px-4 py-3 bg-[#0A1628] border border-gray-700 rounded-lg text-white"
+                    className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="https://example.com/landing"
             />
             {externalUrl && !validateUrl(externalUrl) && (

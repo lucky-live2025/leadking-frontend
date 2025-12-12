@@ -281,11 +281,11 @@ export default function CreateCampaignPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0A1628] p-8">
+    <div className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-6xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">Create Campaign</h1>
-          <p className="text-gray-400">Build and launch your marketing campaign</p>
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">Create Campaign</h1>
+          <p className="text-gray-600">Build and launch your marketing campaign</p>
         </div>
 
         {/* Progress Steps */}
@@ -294,39 +294,39 @@ export default function CreateCampaignPage() {
             <div key={s} className="flex items-center flex-1">
               <div
                 className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold ${
-                  step >= s ? "bg-blue-600 text-white" : "bg-gray-700 text-gray-400"
+                  step >= s ? "bg-blue-600 text-white" : "bg-gray-300 text-gray-600"
                 }`}
               >
                 {s}
               </div>
               {s < 6 && (
-                <div className={`flex-1 h-1 mx-2 ${step > s ? "bg-blue-600" : "bg-gray-700"}`} />
+                <div className={`flex-1 h-1 mx-2 ${step > s ? "bg-blue-600" : "bg-gray-300"}`} />
               )}
             </div>
           ))}
         </div>
 
         {error && (
-          <div className="bg-red-500/20 border border-red-500 text-red-200 p-4 rounded-lg mb-6">
+          <div className="bg-red-50 border border-red-200 text-red-900 p-4 rounded-xl mb-6 shadow-md">
             {error}
           </div>
         )}
 
-        <div className="bg-[#111827] rounded-lg p-8">
+        <div className="bg-white rounded-xl p-8 shadow-md border border-gray-200">
           {/* Step 1: Platform Selection */}
           {step === 1 && (
             <div>
-              <h2 className="text-2xl font-bold text-white mb-6">Select Platform</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">Select Platform</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {platforms.map((platform) => (
                   <button
                     key={platform.id}
                     onClick={() => handlePlatformSelect(platform)}
-                    className="bg-[#0A1628] border-2 border-gray-700 rounded-lg p-6 text-left hover:border-blue-500 transition"
+                    className="bg-white border-2 border-gray-300 rounded-xl p-6 text-left hover:border-blue-500 hover:shadow-md transition-all"
                   >
                     <div className="text-4xl mb-3">{platform.icon}</div>
-                    <h3 className="text-lg font-semibold text-white mb-2">{platform.name}</h3>
-                    <p className="text-sm text-gray-400">{platform.description}</p>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">{platform.name}</h3>
+                    <p className="text-sm text-gray-600">{platform.description}</p>
                   </button>
                 ))}
               </div>
@@ -336,16 +336,16 @@ export default function CreateCampaignPage() {
           {/* Step 2: Objective */}
           {step === 2 && selectedPlatform && (
             <div>
-              <h2 className="text-2xl font-bold text-white mb-6">Campaign Objective</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">Campaign Objective</h2>
               <div className="space-y-3">
                 {selectedPlatform.objectives.map((obj: string) => (
                   <button
                     key={obj}
                     onClick={() => setFormData((prev) => ({ ...prev, objective: obj }))}
-                    className={`w-full p-4 rounded-lg text-left ${
+                    className={`w-full p-4 rounded-xl text-left transition-all ${
                       formData.objective === obj
-                        ? "bg-blue-600 text-white"
-                        : "bg-[#0A1628] text-gray-300 hover:bg-gray-700"
+                        ? "bg-blue-600 text-white shadow-md"
+                        : "bg-gray-50 text-gray-900 hover:bg-gray-100 border border-gray-200"
                     }`}
                   >
                     {obj.replace(/_/g, " ")}
@@ -355,13 +355,13 @@ export default function CreateCampaignPage() {
               <div className="mt-6 flex gap-4">
                 <button
                   onClick={handleBack}
-                  className="px-6 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600"
+                  className="px-6 py-2 bg-gray-200 text-gray-900 rounded-xl hover:bg-gray-300 font-semibold transition-colors"
                 >
                   Back
                 </button>
                 <button
                   onClick={handleNext}
-                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  className="px-6 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-semibold transition-colors shadow-md"
                 >
                   Next
                 </button>
@@ -380,13 +380,13 @@ export default function CreateCampaignPage() {
               <div className="mt-6 flex gap-4">
                 <button
                   onClick={handleBack}
-                  className="px-6 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600"
+                  className="px-6 py-2 bg-gray-200 text-gray-900 rounded-xl hover:bg-gray-300 font-semibold transition-colors"
                 >
                   Back
                 </button>
                 <button
                   onClick={handleNext}
-                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  className="px-6 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-semibold transition-colors shadow-md"
                 >
                   Next
                 </button>
@@ -416,13 +416,13 @@ export default function CreateCampaignPage() {
               <div className="mt-6 flex gap-4">
                 <button
                   onClick={handleBack}
-                  className="px-6 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600"
+                  className="px-6 py-2 bg-gray-200 text-gray-900 rounded-xl hover:bg-gray-300 font-semibold transition-colors"
                 >
                   Back
                 </button>
                 <button
                   onClick={handleNext}
-                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  className="px-6 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-semibold transition-colors shadow-md"
                 >
                   Next
                 </button>
@@ -433,44 +433,44 @@ export default function CreateCampaignPage() {
           {/* Step 5: Creative */}
           {step === 5 && (
             <div>
-              <h2 className="text-2xl font-bold text-white mb-6">Creative Assets</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">Creative Assets</h2>
               
               {/* Creative Mode Selection */}
               <div className="mb-6">
-                <label className="block text-gray-300 font-semibold mb-3">Creative Mode</label>
+                <label className="block text-gray-900 font-semibold mb-3">Creative Mode</label>
                 <div className="grid grid-cols-3 gap-4">
                   <button
                     onClick={() => setCreativeMode("ai-only")}
-                    className={`p-4 rounded-lg border-2 ${
+                    className={`p-4 rounded-xl border-2 transition-all ${
                       creativeMode === "ai-only"
-                        ? "border-blue-500 bg-blue-500/20"
-                        : "border-gray-700 bg-[#0A1628]"
+                        ? "border-blue-500 bg-blue-50 shadow-md"
+                        : "border-gray-300 bg-white hover:border-gray-400"
                     }`}
                   >
-                    <div className="text-white font-semibold">AI Only</div>
-                    <div className="text-gray-400 text-sm">Generate with AI</div>
+                    <div className="text-gray-900 font-semibold">AI Only</div>
+                    <div className="text-gray-600 text-sm">Generate with AI</div>
                   </button>
                   <button
                     onClick={() => setCreativeMode("manual-only")}
-                    className={`p-4 rounded-lg border-2 ${
+                    className={`p-4 rounded-xl border-2 transition-all ${
                       creativeMode === "manual-only"
-                        ? "border-blue-500 bg-blue-500/20"
-                        : "border-gray-700 bg-[#0A1628]"
+                        ? "border-blue-500 bg-blue-50 shadow-md"
+                        : "border-gray-300 bg-white hover:border-gray-400"
                     }`}
                   >
-                    <div className="text-white font-semibold">Manual Only</div>
-                    <div className="text-gray-400 text-sm">Upload your own</div>
+                    <div className="text-gray-900 font-semibold">Manual Only</div>
+                    <div className="text-gray-600 text-sm">Upload your own</div>
                   </button>
                   <button
                     onClick={() => setCreativeMode("hybrid")}
-                    className={`p-4 rounded-lg border-2 ${
+                    className={`p-4 rounded-xl border-2 transition-all ${
                       creativeMode === "hybrid"
-                        ? "border-blue-500 bg-blue-500/20"
-                        : "border-gray-700 bg-[#0A1628]"
+                        ? "border-blue-500 bg-blue-50 shadow-md"
+                        : "border-gray-300 bg-white hover:border-gray-400"
                     }`}
                   >
-                    <div className="text-white font-semibold">Hybrid</div>
-                    <div className="text-gray-400 text-sm">AI + Manual</div>
+                    <div className="text-gray-900 font-semibold">Hybrid</div>
+                    <div className="text-gray-600 text-sm">AI + Manual</div>
                   </button>
                 </div>
               </div>
@@ -478,7 +478,7 @@ export default function CreateCampaignPage() {
               {/* AI Creative Option */}
               {(creativeMode === "ai-only" || creativeMode === "hybrid") && (
                 <div className="mb-6">
-                  <label className="flex items-center gap-3 text-gray-300">
+                  <label className="flex items-center gap-3 text-gray-900">
                     <input
                       type="checkbox"
                       checked={formData.generateCreative}
@@ -515,13 +515,13 @@ export default function CreateCampaignPage() {
               <div className="mt-6 flex gap-4">
                 <button
                   onClick={handleBack}
-                  className="px-6 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600"
+                  className="px-6 py-2 bg-gray-200 text-gray-900 rounded-xl hover:bg-gray-300 font-semibold transition-colors"
                 >
                   Back
                 </button>
                 <button
                   onClick={handleNext}
-                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  className="px-6 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-semibold transition-colors shadow-md"
                 >
                   Next
                 </button>
@@ -532,72 +532,72 @@ export default function CreateCampaignPage() {
           {/* Step 6: Review & Generate */}
           {step === 6 && (
             <div>
-              <h2 className="text-2xl font-bold text-white mb-6">Review & Generate</h2>
-              <div className="bg-[#0A1628] rounded-lg p-6 space-y-4 mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">Review & Generate</h2>
+              <div className="bg-gray-50 rounded-xl p-6 space-y-4 mb-6 border border-gray-200">
                 <div>
-                  <span className="text-gray-400">Platform:</span>
-                  <span className="text-white ml-2">{selectedPlatform?.name}</span>
+                  <span className="text-gray-600">Platform:</span>
+                  <span className="text-gray-900 ml-2 font-semibold">{selectedPlatform?.name}</span>
                 </div>
                 <div>
-                  <span className="text-gray-400">Objective:</span>
-                  <span className="text-white ml-2">{formData.objective}</span>
+                  <span className="text-gray-600">Objective:</span>
+                  <span className="text-gray-900 ml-2 font-semibold">{formData.objective}</span>
                 </div>
                 <div>
-                  <span className="text-gray-400">Countries:</span>
-                  <span className="text-white ml-2">{formData.countries.join(", ")}</span>
+                  <span className="text-gray-600">Countries:</span>
+                  <span className="text-gray-900 ml-2 font-semibold">{formData.countries.join(", ")}</span>
                 </div>
                 {formData.states && formData.states.length > 0 && (
                   <div>
-                    <span className="text-gray-400">States:</span>
-                    <span className="text-white ml-2">{formData.states.join(", ")}</span>
+                    <span className="text-gray-600">States:</span>
+                    <span className="text-gray-900 ml-2 font-semibold">{formData.states.join(", ")}</span>
                   </div>
                 )}
                 {formData.cities && formData.cities.length > 0 && (
                   <div>
-                    <span className="text-gray-400">Cities:</span>
-                    <span className="text-white ml-2">{formData.cities.slice(0, 5).join(", ")}{formData.cities.length > 5 ? ` +${formData.cities.length - 5} more` : ""}</span>
+                    <span className="text-gray-600">Cities:</span>
+                    <span className="text-gray-900 ml-2 font-semibold">{formData.cities.slice(0, 5).join(", ")}{formData.cities.length > 5 ? ` +${formData.cities.length - 5} more` : ""}</span>
                   </div>
                 )}
                 <div>
-                  <span className="text-gray-400">Languages:</span>
-                  <span className="text-white ml-2">{formData.languages.join(", ")}</span>
+                  <span className="text-gray-600">Languages:</span>
+                  <span className="text-gray-900 ml-2 font-semibold">{formData.languages.join(", ")}</span>
                 </div>
                 {formData.interests && formData.interests.length > 0 && (
                   <div>
-                    <span className="text-gray-400">Interests:</span>
-                    <span className="text-white ml-2">{formData.interests.length} selected</span>
+                    <span className="text-gray-600">Interests:</span>
+                    <span className="text-gray-900 ml-2 font-semibold">{formData.interests.length} selected</span>
                   </div>
                 )}
                 <div>
-                  <span className="text-gray-400">Age Range:</span>
-                  <span className="text-white ml-2">{formData.ageMin} - {formData.ageMax}</span>
+                  <span className="text-gray-600">Age Range:</span>
+                  <span className="text-gray-900 ml-2 font-semibold">{formData.ageMin} - {formData.ageMax}</span>
                 </div>
                 <div>
-                  <span className="text-gray-400">Gender:</span>
-                  <span className="text-white ml-2">{formData.gender}</span>
+                  <span className="text-gray-600">Gender:</span>
+                  <span className="text-gray-900 ml-2 font-semibold">{formData.gender}</span>
                 </div>
                 <div>
-                  <span className="text-gray-400">Daily Budget:</span>
-                  <span className="text-white ml-2">${formData.dailyBudget}</span>
+                  <span className="text-gray-600">Daily Budget:</span>
+                  <span className="text-gray-900 ml-2 font-semibold">${formData.dailyBudget}</span>
                 </div>
                 <div>
-                  <span className="text-gray-400">Creative Mode:</span>
-                  <span className="text-white ml-2">{creativeMode}</span>
+                  <span className="text-gray-600">Creative Mode:</span>
+                  <span className="text-gray-900 ml-2 font-semibold">{creativeMode}</span>
                 </div>
                 <div>
-                  <span className="text-gray-400">Images:</span>
-                  <span className="text-white ml-2">{uploadedImageUrls.length}</span>
+                  <span className="text-gray-600">Images:</span>
+                  <span className="text-gray-900 ml-2 font-semibold">{uploadedImageUrls.length}</span>
                 </div>
                 <div>
-                  <span className="text-gray-400">Videos:</span>
-                  <span className="text-white ml-2">{uploadedVideoUrls.length}</span>
+                  <span className="text-gray-600">Videos:</span>
+                  <span className="text-gray-900 ml-2 font-semibold">{uploadedVideoUrls.length}</span>
                 </div>
               </div>
 
               {/* JSON Preview for Debugging */}
               <details className="mb-6">
-                <summary className="text-gray-400 cursor-pointer mb-2">View JSON Payload (Debug)</summary>
-                <pre className="bg-[#0A1628] p-4 rounded-lg text-xs text-gray-300 overflow-auto max-h-64">
+                <summary className="text-gray-600 cursor-pointer mb-2 font-semibold">View JSON Payload (Debug)</summary>
+                <pre className="bg-gray-50 p-4 rounded-xl text-xs text-gray-700 overflow-auto max-h-64 border border-gray-200">
                   {JSON.stringify({
                     platform: formData.platform,
                     objective: formData.objective,
@@ -624,7 +624,7 @@ export default function CreateCampaignPage() {
               <div className="flex gap-4">
                 <button
                   onClick={handleBack}
-                  className="px-6 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600"
+                  className="px-6 py-2 bg-gray-200 text-gray-900 rounded-xl hover:bg-gray-300 font-semibold transition-colors disabled:opacity-50"
                   disabled={loading}
                 >
                   Back
@@ -632,7 +632,7 @@ export default function CreateCampaignPage() {
                 <button
                   onClick={handleSubmit}
                   disabled={loading}
-                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                  className="px-6 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-semibold transition-colors shadow-md disabled:opacity-50"
                 >
                   {loading ? "Generating..." : "Generate Campaign"}
                 </button>
