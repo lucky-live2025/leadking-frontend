@@ -11,7 +11,8 @@ const apiClient: AxiosInstance = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
-  withCredentials: true,
+  // REMOVED withCredentials: true - this was causing Basic auth to be sent instead of Bearer
+  // withCredentials: true,
 });
 
 // Request interceptor - Add auth token (SINGLE SOURCE OF TRUTH)
@@ -23,16 +24,23 @@ apiClient.interceptors.request.use(
       // Always set Authorization if token exists (unless explicitly disabled)
       // Don't check for auth: false here - let the caller control via options
       if (token && config.headers) {
-        // Ensure we always use "Bearer " prefix
+        // CRITICAL: Remove any existing Authorization header first to prevent conflicts
+        delete config.headers.Authorization;
+        delete config.headers.authorization;
+        
+        // Ensure we always use "Bearer " prefix (never Basic!)
         const authValue = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+        
+        // Set Authorization header directly (not via auth config which might trigger Basic)
         config.headers.Authorization = authValue;
         
         console.log('[API Interceptor] Authorization header set:', {
           hasToken: !!token,
           tokenLength: token.length,
           tokenPrefix: token.substring(0, 30) + '...',
-          headerValue: authValue.substring(0, 30) + '...',
+          headerValue: authValue.substring(0, 40) + '...',
           url: config.url,
+          headerType: 'Bearer',
         });
       } else if (!token) {
         // Only warn for protected routes
