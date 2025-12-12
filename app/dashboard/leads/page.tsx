@@ -29,7 +29,16 @@ export default function DashboardLeadsPage() {
     try {
       setLoading(true);
       setError(null);
-      const data = await apiGet("/leads");
+      
+      // Verify user is authenticated first
+      const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+      if (!token) {
+        setError("Please log in to view leads");
+        setLoading(false);
+        return;
+      }
+      
+      const data = await apiGet("/leads", { auth: true });
       
       let leadsData: Lead[] = [];
       if (data && data.leads) {
@@ -41,7 +50,14 @@ export default function DashboardLeadsPage() {
       setLeads(leadsData.map(lead => ({ ...lead, status: lead.status || 'NEW' })));
     } catch (err: any) {
       console.error("Failed to load leads:", err);
-      setError(err.message || "Failed to load leads");
+      
+      // Handle 401 errors specifically
+      if (err.response?.status === 401 || err.message?.includes("401")) {
+        setError("Please log in to view leads");
+        // Don't redirect here - let UserLayout handle it
+      } else {
+        setError(err.message || "Failed to load leads");
+      }
       setLeads([]);
     } finally {
       setLoading(false);

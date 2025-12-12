@@ -27,6 +27,15 @@ export default function DashboardCampaignsPage() {
     try {
       setLoading(true);
       setError(null);
+      
+      // Verify user is authenticated first
+      const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+      if (!token) {
+        setError("Please log in to view campaigns");
+        setLoading(false);
+        return;
+      }
+      
       const data = await apiGet("/campaigns", { auth: true });
       
       if (data && data.campaigns) {
@@ -38,7 +47,14 @@ export default function DashboardCampaignsPage() {
       }
     } catch (err: any) {
       console.error("Failed to load campaigns:", err);
-      setError(err.message || "Failed to load campaigns");
+      
+      // Handle 401 errors specifically
+      if (err.response?.status === 401 || err.message?.includes("401")) {
+        setError("Please log in to view campaigns");
+        // Don't redirect here - let UserLayout handle it
+      } else {
+        setError(err.message || "Failed to load campaigns");
+      }
       setCampaigns([]);
     } finally {
       setLoading(false);

@@ -14,6 +14,11 @@ const nextConfig = {
     optimizeCss: false,
   },
   generateBuildId: async () => String(Date.now()),
+  // Disable RSC prefetching for client components to prevent fetch errors
+  onDemandEntries: {
+    maxInactiveAge: 25 * 1000,
+    pagesBufferLength: 2,
+  },
 }
 
 module.exports = withSentryConfig(
