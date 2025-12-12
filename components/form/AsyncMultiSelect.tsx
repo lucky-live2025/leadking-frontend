@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import React, { useMemo } from "react";
 import Select, { MultiValue, StylesConfig } from "react-select";
 
 interface Option {
@@ -76,6 +76,10 @@ const customStyles: StylesConfig<Option, true> = {
     ...provided,
     color: "#94A3B8",
   }),
+  noOptionsMessage: (provided) => ({
+    ...provided,
+    color: "#94A3B8",
+  }),
 };
 
 export default function AsyncMultiSelect({
@@ -87,46 +91,76 @@ export default function AsyncMultiSelect({
   isSearchable = true,
   isDisabled = false,
 }: AsyncMultiSelectProps) {
-  const [options, setOptions] = useState<Option[]>([]);
-  const [loading, setLoading] = useState(true);
+  // Load options and cache them
+  const [optionsCache, setOptionsCache] = React.useState<Option[]>([]);
+  const [loading, setLoading] = React.useState(true);
+  const [initialized, setInitialized] = React.useState(false);
 
-  useEffect(() => {
+  React.useEffect(() => {
+    let isMounted = true;
     const load = async () => {
       setLoading(true);
       try {
         const data = await loadOptions();
-        setOptions(data);
+        if (isMounted) {
+          setOptionsCache(data);
+          setInitialized(true);
+        }
       } catch (error) {
         console.error("Failed to load options:", error);
-        setOptions([]);
+        if (isMounted) {
+          setOptionsCache([]);
+        }
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
-    load();
-  }, [loadOptions]);
+    if (!initialized) {
+      load();
+    }
+    return () => {
+      isMounted = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const selectedOptions = useMemo(() => {
-    return options.filter((opt) => value.includes(opt.value));
-  }, [options, value]);
+    return optionsCache.filter((opt) => value.includes(opt.value));
+  }, [optionsCache, value]);
 
   const handleChange = (newValue: MultiValue<Option>) => {
     onChange(newValue.map((opt) => opt.value));
   };
 
+  // Custom filter function for client-side search
+  const filterOption = (option: Option, inputValue: string) => {
+    if (!inputValue) return true;
+    const searchTerm = inputValue.toLowerCase();
+    return (
+      option.label.toLowerCase().includes(searchTerm) ||
+      option.value.toLowerCase().includes(searchTerm)
+    );
+  };
+
   return (
     <Select
       isMulti
-      options={options}
+      options={optionsCache}
       value={selectedOptions}
       onChange={handleChange}
       placeholder={placeholder}
       isLoading={loading || isLoading}
       isSearchable={isSearchable}
       isDisabled={isDisabled}
+      filterOption={filterOption}
       styles={customStyles}
       className="react-select-container"
       classNamePrefix="react-select"
+      noOptionsMessage={({ inputValue }) => 
+        inputValue ? `No options found for "${inputValue}"` : "No options available"
+      }
     />
   );
 }
