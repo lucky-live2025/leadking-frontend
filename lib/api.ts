@@ -141,12 +141,27 @@ export async function apiPost(path: string, data: any = {}, options: any = {}) {
       const errorMessage = error.message || 'Network error. Please check your connection.';
       throw new Error(errorMessage);
     }
-    // Handle HTTP errors
+    // Handle HTTP errors - preserve full error object for better error handling
     const errorData = error.response.data;
-    if (errorData?.message) {
-      throw new Error(errorData.message);
+    
+    // If error data is a string (JSON stringified), try to parse it
+    if (typeof errorData === 'string') {
+      try {
+        const parsed = JSON.parse(errorData);
+        // Re-throw with full error object including response
+        const enhancedError: any = new Error(parsed.message || errorData);
+        enhancedError.response = error.response;
+        enhancedError.response.data = parsed;
+        throw enhancedError;
+      } catch {
+        // Not JSON, continue with string
+      }
     }
-    throw new Error(error.response.statusText || `HTTP ${error.response.status}`);
+    
+    // Re-throw with full error object for better error handling
+    const enhancedError: any = new Error(errorData?.message || error.response.statusText || `HTTP ${error.response.status}`);
+    enhancedError.response = error.response;
+    throw enhancedError;
   }
 }
 

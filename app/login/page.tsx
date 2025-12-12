@@ -68,32 +68,64 @@ export default function LoginPage() {
         return;
       }
       
-      if (err.message) {
-        // Try to parse JSON error response
+      // Check if error has response data (axios error)
+      let errorResponse = null;
+      if (err.response?.data) {
+        errorResponse = err.response.data;
+      } else if (err.message) {
+        // Try to parse error message as JSON (backend sends JSON stringified errors)
         try {
-          const errorData = JSON.parse(err.message);
-          if (errorData.error === 'ACCOUNT_PENDING' || errorData.error === 'ACCOUNT_NOT_APPROVED') {
-            errorMessage = "Your account is pending admin approval. You will be notified when approved.";
-          } else if (errorData.error === 'ACCOUNT_SUSPENDED') {
-            errorMessage = "Your account has been suspended. Please contact support.";
-          } else if (errorData.error === 'ACCOUNT_REJECTED') {
-            errorMessage = "Your account registration was rejected. Please contact support.";
-          } else if (errorData.message) {
-            errorMessage = errorData.message;
-          }
+          errorResponse = JSON.parse(err.message);
         } catch {
-          // Not JSON, check for string patterns
-          if (err.message.includes("401") || err.message.includes("Invalid credentials")) {
-            errorMessage = "Invalid credentials. Please try again.";
-          } else if (err.message.includes("403") || err.message.includes("Access denied")) {
-            errorMessage = "Access denied. Your account may not be approved.";
-          } else if (err.message.includes("pending") || err.message.includes("approval")) {
-            errorMessage = "Your account is pending admin approval. You will be notified when approved.";
-          } else {
-            errorMessage = err.message;
+          // Not JSON, try to extract from error message string
+          if (err.message.includes('ACCOUNT_PENDING') || err.message.includes('ACCOUNT_NOT_APPROVED')) {
+            errorResponse = { error: 'ACCOUNT_PENDING', message: 'Your account is pending admin approval.' };
+          } else if (err.message.includes('ACCOUNT_SUSPENDED')) {
+            errorResponse = { error: 'ACCOUNT_SUSPENDED', message: 'Your account has been suspended.' };
+          } else if (err.message.includes('ACCOUNT_REJECTED')) {
+            errorResponse = { error: 'ACCOUNT_REJECTED', message: 'Your account registration was rejected.' };
           }
         }
       }
+      
+      // Handle structured error response
+      if (errorResponse) {
+        if (typeof errorResponse === 'string') {
+          // If it's a JSON string, try parsing again
+          try {
+            errorResponse = JSON.parse(errorResponse);
+          } catch {
+            // If still not JSON, use as message
+            errorMessage = errorResponse;
+          }
+        }
+        
+        if (typeof errorResponse === 'object') {
+          if (errorResponse.error === 'ACCOUNT_PENDING' || errorResponse.error === 'ACCOUNT_NOT_APPROVED') {
+            errorMessage = errorResponse.message || "Your account is pending admin approval. You will be notified when approved.";
+          } else if (errorResponse.error === 'ACCOUNT_SUSPENDED') {
+            errorMessage = errorResponse.message || "Your account has been suspended. Please contact support.";
+          } else if (errorResponse.error === 'ACCOUNT_REJECTED') {
+            errorMessage = errorResponse.message || "Your account registration was rejected. Please contact support.";
+          } else if (errorResponse.message) {
+            errorMessage = errorResponse.message;
+          } else if (errorResponse.error) {
+            errorMessage = errorResponse.error;
+          }
+        }
+      } else if (err.message) {
+        // Fallback to message parsing
+        if (err.message.includes("401") || err.message.includes("Invalid credentials")) {
+          errorMessage = "Invalid credentials. Please try again.";
+        } else if (err.message.includes("403") || err.message.includes("Access denied")) {
+          errorMessage = "Access denied. Your account may not be approved.";
+        } else if (err.message.includes("pending") || err.message.includes("approval")) {
+          errorMessage = "Your account is pending admin approval. You will be notified when approved.";
+        } else {
+          errorMessage = err.message;
+        }
+      }
+      
       setError(errorMessage);
       setLoading(false);
     }
