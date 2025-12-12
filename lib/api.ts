@@ -21,6 +21,15 @@ apiClient.interceptors.request.use(
       const token = localStorage.getItem("token");
       if (token && config.headers) {
         config.headers.Authorization = `Bearer ${token}`;
+        // Log in production to debug auth issues
+        console.log('[API Interceptor] Added Authorization header:', {
+          hasToken: !!token,
+          tokenLength: token.length,
+          tokenPrefix: token.substring(0, 20) + '...',
+          url: config.url,
+        });
+      } else if (!token && config.url && !config.url.includes('/login') && !config.url.includes('/register')) {
+        console.warn('[API Interceptor] No token found for request:', config.url);
       }
     }
     return config;
