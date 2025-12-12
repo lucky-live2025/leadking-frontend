@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-// import { getWalletState, subscribeToTier } from "@/lib/wallet";
 import { apiGet, apiPost } from "@/lib/api";
+import { connectWallet, getWalletState, startSubscription, waitForTransaction } from "@/lib/web3";
 import Link from "next/link";
 
 const TIERS = [
@@ -15,14 +15,17 @@ const TIERS = [
 export default function SubscriptionPage() {
   const [subscription, setSubscription] = useState<any>(null);
   const [wallet, setWallet] = useState<any>(null);
+  const [walletConnected, setWalletConnected] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedTier, setSelectedTier] = useState<number | null>(null);
   const [txHash, setTxHash] = useState<string | null>(null);
+  const [showConnectModal, setShowConnectModal] = useState(false);
 
   useEffect(() => {
     loadSubscription();
     loadWallet();
+    checkWalletConnection();
   }, []);
 
   async function loadSubscription() {
@@ -43,9 +46,32 @@ export default function SubscriptionPage() {
     }
   }
 
+  function checkWalletConnection() {
+    const state = getWalletState();
+    setWalletConnected(state.connected);
+  }
+
+  async function handleConnectWallet() {
+    setLoading(true);
+    setError(null);
+    try {
+      const state = await connectWallet();
+      setWalletConnected(true);
+      
+      // Save wallet to backend
+      await apiPost("/wallet/connect", { walletAddress: state.address }, { auth: true });
+      await loadWallet();
+      setShowConnectModal(false);
+    } catch (err: any) {
+      setError(err.message || "Failed to connect wallet");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   async function handleSubscribe(tier: number) {
-    if (!wallet) {
-      setError("Please connect your wallet first");
+    if (!walletConnected && !wallet) {
+      setShowConnectModal(true);
       return;
     }
 
@@ -54,19 +80,33 @@ export default function SubscriptionPage() {
     setSelectedTier(tier);
 
     try {
-      // Wallet integration will be enabled after contract deployment
-      // const walletState = getWalletState();
-      // if (!walletState.connected) {
-      //   throw new Error("Wallet not connected");
-      // }
-      // const hash = await subscribeToTier(tier);
-      const hash = "pending_contract_deployment";
+      // Step 1: Start subscription on backend
+      const startResponse = await apiPost("/subscription/start", { tier }, { auth: true });
+      
+      // Step 2: Connect wallet if not connected
+      if (!walletConnected) {
+        await handleConnectWallet();
+      }
+
+      // Step 3: Call smart contract
+      const state = getWalletState();
+      if (!state.connected || !state.signer) {
+        throw new Error("Wallet not connected");
+      }
+
+      const hash = await startSubscription(tier);
       setTxHash(hash);
 
-      // Wait a moment for blockchain confirmation
-      setTimeout(() => {
-        loadSubscription();
-      }, 5000);
+      // Step 4: Wait for transaction confirmation
+      await waitForTransaction(hash);
+
+      // Step 5: Confirm subscription on backend
+      await apiPost("/subscription/confirm", { tier, txHash: hash }, { auth: true });
+
+      // Step 6: Refresh subscription status
+      await loadSubscription();
+      
+      setError(null);
     } catch (err: any) {
       setError(err.message || "Failed to process subscription");
     } finally {
@@ -122,12 +162,42 @@ export default function SubscriptionPage() {
           </div>
         )}
 
-        {!wallet && (
+        {!wallet && !walletConnected && (
           <div className="bg-yellow-500/20 border border-yellow-500 text-yellow-200 p-4 rounded-lg mb-6">
             <p>Please connect your wallet to subscribe.</p>
-            <Link href="/dashboard/wallet" className="underline">
+            <button
+              onClick={() => setShowConnectModal(true)}
+              className="mt-2 px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700"
+            >
               Connect Wallet
-            </Link>
+            </button>
+          </div>
+        )}
+
+        {/* Connect Wallet Modal */}
+        {showConnectModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div className="bg-[#111827] rounded-lg p-6 max-w-md w-full mx-4">
+              <h2 className="text-xl font-bold text-white mb-4">Connect Wallet</h2>
+              <p className="text-gray-400 mb-6">
+                Connect your Ethereum wallet to purchase a subscription with USDT.
+              </p>
+              <div className="flex gap-4">
+                <button
+                  onClick={() => setShowConnectModal(false)}
+                  className="flex-1 px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleConnectWallet}
+                  disabled={loading}
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                >
+                  {loading ? "Connecting..." : "Connect"}
+                </button>
+              </div>
+            </div>
           </div>
         )}
 
@@ -141,7 +211,7 @@ export default function SubscriptionPage() {
               <p className="text-3xl font-bold text-blue-500 mb-4">{tier.usdt} USDT</p>
               <button
                 onClick={() => handleSubscribe(tier.id)}
-                disabled={loading || !wallet}
+                disabled={loading || (!wallet && !walletConnected)}
                 className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading && selectedTier === tier.id ? "Processing..." : "Subscribe"}
@@ -153,4 +223,3 @@ export default function SubscriptionPage() {
     </div>
   );
 }
-
