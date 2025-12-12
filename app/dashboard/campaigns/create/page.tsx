@@ -130,22 +130,35 @@ export default function CreateCampaignPage() {
   useEffect(() => {
     async function checkUserStatus() {
       try {
+        setCheckingStatus(true);
+        // Always fetch fresh user data to get latest status
         const user = await fetchUser();
-        if (user) {
-          setUserStatus(user.status || null);
-          // If user is not approved, redirect to dashboard
-          if (user.status?.toUpperCase() !== "APPROVED") {
-            router.push("/dashboard");
-            return;
-          }
-        } else {
-          // No user, redirect to login
+        
+        if (!user) {
+          console.warn("[CreateCampaign] No user found, redirecting to login");
           router.push("/login");
           return;
         }
-      } catch (err) {
-        console.error("Failed to check user status:", err);
-        router.push("/login");
+
+        const userStatus = user.status?.toUpperCase() || 'PENDING';
+        setUserStatus(userStatus);
+        
+        console.log("[CreateCampaign] User status check:", {
+          email: user.email,
+          status: userStatus,
+          approved: userStatus === "APPROVED"
+        });
+
+        // Only block if status is explicitly not APPROVED
+        if (userStatus !== "APPROVED") {
+          console.warn("[CreateCampaign] User not approved, redirecting to dashboard");
+          router.push("/dashboard");
+          return;
+        }
+      } catch (err: any) {
+        console.error("[CreateCampaign] Failed to check user status:", err);
+        // Don't redirect on error - let user try to access
+        setUserStatus(null);
       } finally {
         setCheckingStatus(false);
       }

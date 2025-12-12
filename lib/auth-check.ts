@@ -28,49 +28,62 @@ export async function fetchUser(): Promise<User | null> {
 
   const token = localStorage.getItem("token");
   if (!token) {
+    console.log("[fetchUser] No token found");
     return null;
   }
 
   fetchUserPromise = (async () => {
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        console.warn("[fetchUser] No token found, cannot fetch user");
+      console.log("[fetchUser] Fetching fresh user profile from backend...");
+      const userData = await apiGet("/auth/me", { auth: true });
+      
+      // Validate response has required fields
+      if (!userData || (!userData.id && !userData.userId)) {
+        console.warn("[fetchUser] Invalid response from /auth/me:", userData);
+        // Return cached user if available
+        const cachedUser = getUserFromStorage();
+        if (cachedUser) {
+          console.warn("[fetchUser] Using cached user due to invalid response");
+          return cachedUser;
+        }
         return null;
       }
-      
-      console.log("[fetchUser] Fetching user profile with token:", token.substring(0, 20) + "...");
-      const userData = await apiGet("/auth/me", { auth: true });
       
       // Map backend response to our User interface
       const user: User = {
         userId: userData.id || userData.userId,
         id: userData.id || userData.userId,
-        email: userData.email,
-        role: userData.role,
-        status: userData.status,
+        email: userData.email || '',
+        role: userData.role || 'USER',
+        status: userData.status || 'PENDING', // Use actual status from backend
       };
+
+      console.log("[fetchUser] Successfully fetched user:", {
+        id: user.id,
+        email: user.email,
+        status: user.status,
+        role: user.role
+      });
 
       // Update localStorage with fresh user data
       localStorage.setItem("user", JSON.stringify(user));
       
       return user;
     } catch (error: any) {
-      console.error("Failed to fetch user:", error);
+      console.error("[fetchUser] Failed to fetch user:", error);
       
       // Only clear localStorage if it's a 401 (unauthorized) error
-      // Don't clear on network errors or other issues
       if (error.message?.includes("401") || error.message?.includes("Unauthorized")) {
+        console.log("[fetchUser] 401 Unauthorized - clearing token and user");
         localStorage.removeItem("token");
         localStorage.removeItem("user");
         return null;
       }
       
-      // For other errors (network, etc.), return cached user from localStorage
-      // This prevents immediate redirect on temporary network issues
+      // For other errors, return cached user from localStorage
       const cachedUser = getUserFromStorage();
       if (cachedUser) {
-        console.warn("Using cached user data due to fetch error");
+        console.warn("[fetchUser] Using cached user data due to fetch error:", error.message);
         return cachedUser;
       }
       

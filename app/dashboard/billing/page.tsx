@@ -30,7 +30,14 @@ export default function DashboardBillingPage() {
       }
 
       // Check if user is approved
-      if (user.status?.toUpperCase() !== "APPROVED") {
+      const userStatus = user.status?.toUpperCase() || 'PENDING';
+      console.log("[Billing] User status check:", {
+        email: user.email,
+        status: userStatus,
+        approved: userStatus === "APPROVED"
+      });
+
+      if (userStatus !== "APPROVED") {
         setError("Your account is pending approval. Please wait for admin approval before accessing billing.");
         setLoading(false);
         return;
