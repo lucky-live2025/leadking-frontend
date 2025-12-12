@@ -32,8 +32,24 @@ export default function LoginPage() {
 
       const token = response.accessToken || response.access_token;
       if (token) {
-        // Store token and user data
+        // CRITICAL: Store token FIRST and verify it's stored
         localStorage.setItem("token", token);
+        
+        // Verify token was stored
+        const storedToken = localStorage.getItem("token");
+        if (!storedToken || storedToken !== token) {
+          console.error('[Login] Failed to store token in localStorage');
+          setError("Failed to save authentication token. Please try again.");
+          setLoading(false);
+          return;
+        }
+        
+        console.log('[Login] Token stored successfully:', {
+          tokenLength: token.length,
+          tokenPrefix: token.substring(0, 30) + '...',
+          stored: !!storedToken,
+        });
+        
         const userData = response.user || {};
         const user = {
           userId: userData.id || response.userId,
@@ -46,7 +62,16 @@ export default function LoginPage() {
 
         // Ensure localStorage is written and token is available before redirect
         // Use window.location for a hard redirect to prevent race conditions
-        await new Promise(resolve => setTimeout(resolve, 200));
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        // Double-check token is still there before redirect
+        const finalTokenCheck = localStorage.getItem("token");
+        if (!finalTokenCheck) {
+          console.error('[Login] Token disappeared before redirect!');
+          setError("Authentication error. Please try again.");
+          setLoading(false);
+          return;
+        }
 
         // Redirect based on role using window.location for reliability
         if (user.role.toUpperCase() === "ADMIN") {

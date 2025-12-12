@@ -14,22 +14,36 @@ const apiClient: AxiosInstance = axios.create({
   withCredentials: true,
 });
 
-// Request interceptor - Add auth token
+// Request interceptor - Add auth token (SINGLE SOURCE OF TRUTH)
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     if (typeof window !== "undefined") {
       const token = localStorage.getItem("token");
+      
+      // Always set Authorization if token exists (unless explicitly disabled)
+      // Don't check for auth: false here - let the caller control via options
       if (token && config.headers) {
-        config.headers.Authorization = `Bearer ${token}`;
-        // Log in production to debug auth issues
-        console.log('[API Interceptor] Added Authorization header:', {
+        // Ensure we always use "Bearer " prefix
+        const authValue = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+        config.headers.Authorization = authValue;
+        
+        console.log('[API Interceptor] Authorization header set:', {
           hasToken: !!token,
           tokenLength: token.length,
-          tokenPrefix: token.substring(0, 20) + '...',
+          tokenPrefix: token.substring(0, 30) + '...',
+          headerValue: authValue.substring(0, 30) + '...',
           url: config.url,
         });
-      } else if (!token && config.url && !config.url.includes('/login') && !config.url.includes('/register')) {
-        console.warn('[API Interceptor] No token found for request:', config.url);
+      } else if (!token) {
+        // Only warn for protected routes
+        const isProtectedRoute = config.url && 
+          !config.url.includes('/login') && 
+          !config.url.includes('/register') &&
+          !config.url.includes('/health');
+        
+        if (isProtectedRoute) {
+          console.warn('[API Interceptor] No token found for protected route:', config.url);
+        }
       }
     }
     return config;
@@ -101,39 +115,24 @@ function getHeaders(options: any = {}): any {
     ...(options.headers ?? {}),
   };
 
-  // Always try to get token if auth is requested or if no explicit auth: false
-  const shouldAuth = options.auth !== false;
-  const token = getAuthToken();
-  
-  if (shouldAuth && token) {
-    headers.Authorization = `Bearer ${token}`;
-    // Log in development only
-    if (process.env.NODE_ENV === 'development') {
-      console.log('[API] Adding Authorization header:', {
-        hasToken: !!token,
-        tokenPrefix: token.substring(0, 20) + '...',
-        path: options.path || 'unknown',
-      });
-    }
-  } else if (shouldAuth && !token) {
-    console.warn('[API] Auth requested but no token found');
-  }
+  // DON'T set Authorization here - let the interceptor handle it
+  // This prevents conflicts and ensures consistent "Bearer " prefix
+  // The interceptor will add Authorization header automatically for all requests
 
   return headers;
 }
 
 export async function apiGet(path: string, options: any = {}) {
   try {
-    // Merge headers - interceptor will also add Authorization, but getHeaders ensures it's there
-    const customHeaders = getHeaders(options);
-    const mergedHeaders = {
-      ...customHeaders,
-      ...(options.headers || {}),
-    };
+    // Get base headers (interceptor will add Authorization automatically)
+    const headers = getHeaders(options);
     
     const response = await apiClient.get(buildUrl(path), {
       ...options,
-      headers: mergedHeaders,
+      headers: {
+        ...headers,
+        ...(options.headers || {}),
+      },
     });
     return response.data;
   } catch (error: any) {
