@@ -96,8 +96,8 @@ export default function CreateCampaignPage() {
     cities: [] as string[],
     languages: [] as string[],
     interests: [] as string[],
-    ageMin: 18,
-    ageMax: 65,
+    ageMin: 22,
+    ageMax: 88,
     gender: "all",
     dailyBudget: "",
     generateCreative: false,
@@ -150,9 +150,12 @@ export default function CreateCampaignPage() {
         });
 
         // Only block if status is explicitly not APPROVED
+        // But show error message instead of redirecting immediately
         if (userStatus !== "APPROVED") {
-          console.warn("[CreateCampaign] User not approved, redirecting to dashboard");
-          router.push("/dashboard");
+          console.warn("[CreateCampaign] User not approved, status:", userStatus);
+          setError("Your account is pending approval. Please wait for admin approval before creating campaigns.");
+          // Don't redirect - let user see the error message
+          setCheckingStatus(false);
           return;
         }
       } catch (err: any) {
@@ -324,6 +327,18 @@ export default function CreateCampaignPage() {
       setLoading(false);
     }
   };
+
+  // Show loading state while checking user status
+  if (checkingStatus) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-8 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Checking access...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">

@@ -46,9 +46,14 @@ export default function TargetingStep({ platform, formData, onChange }: Targetin
     setLoadingCountries(true);
     try {
       const data = await getCountries();
+      console.log("[TargetingStep] Loaded countries:", data.length);
       setCountries(data);
+      if (data.length === 0) {
+        console.warn("[TargetingStep] No countries loaded - check API endpoint");
+      }
     } catch (error) {
       console.error("Failed to load countries:", error);
+      setCountries([]);
     } finally {
       setLoadingCountries(false);
     }
@@ -59,9 +64,14 @@ export default function TargetingStep({ platform, formData, onChange }: Targetin
     setLoadingLanguages(true);
     try {
       const data = await getLanguages();
+      console.log("[TargetingStep] Loaded languages:", data.length);
       setLanguages(data);
+      if (data.length === 0) {
+        console.warn("[TargetingStep] No languages loaded - check API endpoint");
+      }
     } catch (error) {
       console.error("Failed to load languages:", error);
+      setLanguages([]);
     } finally {
       setLoadingLanguages(false);
     }
@@ -267,7 +277,7 @@ export default function TargetingStep({ platform, formData, onChange }: Targetin
             min="13"
             max="100"
             value={formData.ageMin}
-            onChange={(e) => onChange({ ageMin: parseInt(e.target.value) || 18 })}
+            onChange={(e) => onChange({ ageMin: parseInt(e.target.value) || 22 })}
             className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
@@ -278,7 +288,7 @@ export default function TargetingStep({ platform, formData, onChange }: Targetin
             min="13"
             max="100"
             value={formData.ageMax}
-            onChange={(e) => onChange({ ageMax: parseInt(e.target.value) || 65 })}
+            onChange={(e) => onChange({ ageMax: parseInt(e.target.value) || 88 })}
             className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>

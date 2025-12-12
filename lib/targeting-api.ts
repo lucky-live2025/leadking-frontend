@@ -33,7 +33,8 @@ export interface Interest {
 
 export async function getCountries(): Promise<Country[]> {
   try {
-    return await apiGet("/targeting/countries");
+    // Targeting endpoints should be public (no auth required)
+    return await apiGet("/targeting/countries", { auth: false });
   } catch (error) {
     console.error("Failed to load countries:", error);
     return [];
@@ -42,7 +43,8 @@ export async function getCountries(): Promise<Country[]> {
 
 export async function getLanguages(): Promise<Language[]> {
   try {
-    return await apiGet("/targeting/languages");
+    // Targeting endpoints should be public (no auth required)
+    return await apiGet("/targeting/languages", { auth: false });
   } catch (error) {
     console.error("Failed to load languages:", error);
     return [];
@@ -51,7 +53,7 @@ export async function getLanguages(): Promise<Language[]> {
 
 export async function getStates(countryCode: string): Promise<State[]> {
   try {
-    return await apiGet(`/targeting/states/${countryCode}`);
+    return await apiGet(`/targeting/states/${countryCode}`, { auth: false });
   } catch (error) {
     console.error("Failed to load states:", error);
     return [];
@@ -60,7 +62,7 @@ export async function getStates(countryCode: string): Promise<State[]> {
 
 export async function getCities(stateCode: string): Promise<City[]> {
   try {
-    return await apiGet(`/targeting/cities/${stateCode}`);
+    return await apiGet(`/targeting/cities/${stateCode}`, { auth: false });
   } catch (error) {
     console.error("Failed to load cities:", error);
     return [];
@@ -69,7 +71,7 @@ export async function getCities(stateCode: string): Promise<City[]> {
 
 export async function getCitiesByCountry(countryCode: string): Promise<City[]> {
   try {
-    return await apiGet(`/targeting/cities/country/${countryCode}`);
+    return await apiGet(`/targeting/cities/country/${countryCode}`, { auth: false });
   } catch (error) {
     console.error("Failed to load cities:", error);
     return [];
