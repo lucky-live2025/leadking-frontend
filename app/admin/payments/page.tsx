@@ -89,7 +89,7 @@ export default function AdminPaymentsPage() {
                           rel="noopener noreferrer"
                           className="text-blue-400 hover:underline font-mono text-sm"
                         >
-                          {payment.txHash.slice(0, 10)}...
+                          {payment.txHash.substring(0, 10)}...
                         </a>
                       ) : (
                         <span className="text-gray-400">-</span>
@@ -97,7 +97,7 @@ export default function AdminPaymentsPage() {
                     </td>
                     <td className="px-6 py-4">
                       <span className={`px-2 py-1 rounded text-xs ${
-                        payment.status === "confirmed"
+                        payment.status === "confirmed" || payment.status === "APPROVED"
                           ? "bg-green-500/20 text-green-200"
                           : "bg-yellow-500/20 text-yellow-200"
                       }`}>
@@ -105,7 +105,7 @@ export default function AdminPaymentsPage() {
                       </span>
                     </td>
                     <td className="px-6 py-4 text-gray-400 text-sm">
-                      {new Date(payment.timestamp).toLocaleDateString()}
+                      {payment.timestamp ? new Date(payment.timestamp).toLocaleDateString() : payment.createdAt ? new Date(payment.createdAt).toLocaleDateString() : "N/A"}
                     </td>
                   </tr>
                 ))

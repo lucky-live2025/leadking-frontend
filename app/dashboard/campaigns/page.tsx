@@ -27,7 +27,7 @@ export default function DashboardCampaignsPage() {
     try {
       setLoading(true);
       setError(null);
-      const data = await apiGet("/campaigns");
+      const data = await apiGet("/campaigns", { auth: true });
       
       if (data && data.campaigns) {
         setCampaigns(data.campaigns);
@@ -112,7 +112,7 @@ export default function DashboardCampaignsPage() {
           {campaigns.map((campaign) => (
             <Link
               key={campaign.id}
-              href={`/campaigns/${campaign.id}`}
+              href={`/dashboard/campaigns/${campaign.id}`}
               className="rounded-lg p-6 hover:opacity-90 transition"
               style={{ backgroundColor: "#111827" }}
             >
@@ -135,4 +135,3 @@ export default function DashboardCampaignsPage() {
     </div>
   );
 }
-

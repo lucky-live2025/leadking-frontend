@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { apiGet, apiPost } from "@/lib/api";
+import { apiGet, apiPatch } from "@/lib/api";
 
 export default function AdminTicketsPage() {
   const [tickets, setTickets] = useState<any[]>([]);
@@ -39,7 +39,7 @@ export default function AdminTicketsPage() {
     }
 
     try {
-      await apiPost(`/support/admin/tickets/${selectedTicket.id}/reply`, { adminResponse: response }, { auth: true });
+      await apiPatch(`/support/admin/tickets/${selectedTicket.id}/reply`, { adminResponse: response }, { auth: true });
       setResponse("");
       setSelectedTicket(null);
       await loadTickets();
@@ -50,7 +50,7 @@ export default function AdminTicketsPage() {
 
   async function handleClose(ticketId: number) {
     try {
-      await apiPost(`/support/admin/tickets/${ticketId}/close`, {}, { auth: true });
+      await apiPatch(`/support/admin/tickets/${ticketId}/close`, {}, { auth: true });
       await loadTickets();
     } catch (err: any) {
       setError(err.message || "Failed to close ticket");
@@ -98,25 +98,31 @@ export default function AdminTicketsPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="space-y-4">
-            {tickets.map((ticket) => (
-              <div
-                key={ticket.id}
-                className="bg-[#111827] rounded-lg p-6 cursor-pointer hover:bg-[#0A1628]"
-                onClick={() => setSelectedTicket(ticket)}
-              >
-                <div className="flex justify-between items-start mb-2">
-                  <h3 className="text-lg font-semibold text-white">{ticket.subject}</h3>
-                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(ticket.status)}`}>
-                    {ticket.status}
-                  </span>
-                </div>
-                <p className="text-sm text-gray-400 mb-2">{ticket.user.email}</p>
-                <p className="text-gray-300 text-sm line-clamp-2">{ticket.message}</p>
-                {ticket.adminResponse && (
-                  <p className="text-blue-300 text-sm mt-2">✓ Replied</p>
-                )}
+            {tickets.length === 0 ? (
+              <div className="bg-[#111827] rounded-lg p-6 text-center text-gray-400">
+                No tickets found
               </div>
-            ))}
+            ) : (
+              tickets.map((ticket) => (
+                <div
+                  key={ticket.id}
+                  className="bg-[#111827] rounded-lg p-6 cursor-pointer hover:bg-[#0A1628]"
+                  onClick={() => setSelectedTicket(ticket)}
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="text-lg font-semibold text-white">{ticket.subject}</h3>
+                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(ticket.status)}`}>
+                      {ticket.status}
+                    </span>
+                  </div>
+                  <p className="text-sm text-gray-400 mb-2">{ticket.user?.email || "N/A"}</p>
+                  <p className="text-gray-300 text-sm line-clamp-2">{ticket.message}</p>
+                  {ticket.adminResponse && (
+                    <p className="text-blue-300 text-sm mt-2">✓ Replied</p>
+                  )}
+                </div>
+              ))
+            )}
           </div>
 
           {selectedTicket && (
@@ -124,7 +130,7 @@ export default function AdminTicketsPage() {
               <h2 className="text-xl font-semibold text-white mb-4">{selectedTicket.subject}</h2>
               <div className="space-y-4">
                 <div>
-                  <p className="text-sm text-gray-400 mb-2">From: {selectedTicket.user.email}</p>
+                  <p className="text-sm text-gray-400 mb-2">From: {selectedTicket.user?.email || "N/A"}</p>
                   <p className="text-gray-300">{selectedTicket.message}</p>
                 </div>
 
@@ -168,4 +174,3 @@ export default function AdminTicketsPage() {
     </div>
   );
 }
-

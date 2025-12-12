@@ -1,3 +1,5 @@
+"use client";
+
 import { apiGet } from "./api";
 
 export async function getEngines() {

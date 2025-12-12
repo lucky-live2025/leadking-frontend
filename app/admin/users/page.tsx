@@ -35,20 +35,17 @@ export default function AdminUsersPage() {
     setLoading(true);
     setError(null);
     try {
-      console.log(
-        "[ADMIN USERS] Fetching users from:",
-        process.env.NEXT_PUBLIC_API_URL || "API_BASE",
-      );
-      const data = await apiGet("/admin/users");
-      console.log("[ADMIN USERS] Received data:", data);
+      const data = await apiGet("/admin/users", { auth: true });
       if (Array.isArray(data)) {
         setUsers(data);
+      } else if (data?.users) {
+        setUsers(data.users);
       } else {
         setUsers([]);
         setError("Invalid response format");
       }
     } catch (err: any) {
-      console.error("[ADMIN USERS] Failed to fetch users:", err);
+      console.error("Failed to fetch users:", err);
       setError(err.message || "Failed to fetch users");
       setUsers([]);
     } finally {
@@ -63,7 +60,7 @@ export default function AdminUsersPage() {
       } else {
         await apiPost(`/admin/users/${userId}/status`, { status: newStatus }, { auth: true });
       }
-      fetchUsers(); // Refresh the list
+      fetchUsers();
     } catch (err: any) {
       console.error("Failed to update user status:", err);
       alert(`Failed to update status: ${err.message}`);
@@ -108,86 +105,95 @@ export default function AdminUsersPage() {
           <p className="text-gray-300">View and manage all users</p>
         </div>
         <div className="bg-[#111827] rounded-lg shadow overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-700">
-          <thead className="bg-[#0A1628]">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                Email
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                Name
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                Role
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                Subscription
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                Status
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-700">
-            {users.map((user) => (
-              <tr key={user.id}>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
-                  {user.email}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                  {user.name || "N/A"}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                  {user.role}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                  {user.subscription?.planTier ||
-                    user.subscriptionStatus ||
-                    "N/A"}
-                  {user.subscription?.plan && (
-                    <span className="ml-2 text-xs text-gray-400">
-                      (${user.subscription.plan.price}/mo)
-                    </span>
-                  )}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm">
-                  <span
-                    className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      user.status === "APPROVED"
-                        ? "bg-green-100 text-green-800"
-                        : user.status === "PENDING"
-                          ? "bg-yellow-100 text-yellow-800"
-                          : "bg-red-100 text-red-800"
-                    }`}
-                  >
-                    {user.status}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  {user.status === "PENDING" && (
-                    <button
-                      onClick={() => handleUpdateStatus(user.id, "APPROVED")}
-                      className="text-indigo-400 hover:text-indigo-300 mr-2"
-                    >
-                      Approve
-                    </button>
-                  )}
-                  {user.status !== "SUSPENDED" && (
-                    <button
-                      onClick={() => handleUpdateStatus(user.id, "SUSPENDED")}
-                      className="text-red-400 hover:text-red-300"
-                    >
-                      Suspend
-                    </button>
-                  )}
-                </td>
+          <table className="min-w-full divide-y divide-gray-700">
+            <thead className="bg-[#0A1628]">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                  Email
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                  Name
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                  Role
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                  Subscription
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                  Status
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                  Actions
+                </th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-gray-700">
+              {users.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="px-6 py-4 text-center text-gray-400">
+                    No users found
+                  </td>
+                </tr>
+              ) : (
+                users.map((user) => (
+                  <tr key={user.id} className="hover:bg-[#0A1628]">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
+                      {user.email}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                      {user.name || "N/A"}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                      {user.role}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                      {user.subscription?.planTier ||
+                        user.subscriptionStatus ||
+                        "N/A"}
+                      {user.subscription?.plan && (
+                        <span className="ml-2 text-xs text-gray-400">
+                          (${user.subscription.plan.price}/mo)
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                      <span
+                        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          user.status === "APPROVED"
+                            ? "bg-green-500/20 text-green-400"
+                            : user.status === "PENDING"
+                              ? "bg-yellow-500/20 text-yellow-400"
+                              : "bg-red-500/20 text-red-400"
+                        }`}
+                      >
+                        {user.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      {user.status === "PENDING" && (
+                        <button
+                          onClick={() => handleUpdateStatus(user.id, "APPROVED")}
+                          className="text-blue-400 hover:text-blue-300 mr-2"
+                        >
+                          Approve
+                        </button>
+                      )}
+                      {user.status !== "SUSPENDED" && (
+                        <button
+                          onClick={() => handleUpdateStatus(user.id, "SUSPENDED")}
+                          className="text-red-400 hover:text-red-300"
+                        >
+                          Suspend
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
