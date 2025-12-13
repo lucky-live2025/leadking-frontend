@@ -10,23 +10,21 @@ export default function Hero() {
       <div className="absolute inset-0 hero-noise opacity-30"></div>
       
       {/* Floating Light Orb */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 hero-orb"></div>
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 hero-orb max-w-[90vw] max-h-[90vh]"></div>
       
       {/* Cinematic Glow Effects */}
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse"></div>
-      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "1s" }}></div>
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse max-w-[90vw]"></div>
+      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse max-w-[90vw]" style={{ animationDelay: "1s" }}></div>
       
       <div className="relative container mx-auto px-6 text-center z-10">
         <h1 className="text-6xl md:text-7xl lg:text-8xl font-bold mb-6 text-gray-900 animate-fade-in relative inline-block tracking-tight leading-tight">
           <span className="relative z-10 bg-gradient-to-r from-blue-600 via-purple-600 to-cyan-600 bg-clip-text text-transparent">
-            Generate Qualified Leads via AI Ad Campaigns.
+            Create and launch high-converting ad campaigns in minutes.
           </span>
-          <br />
-          <span className="relative z-10 text-gray-900">Unlimited Scale.</span>
         </h1>
 
         <p className="text-xl md:text-2xl text-gray-700 max-w-3xl mx-auto mb-12 font-normal leading-relaxed animate-fade-in" style={{ animationDelay: "0.15s" }}>
-          Create AI-powered ad campaigns that capture leads across Meta, TikTok, Google, YouTube, LinkedIn, and Yandex — with real-time optimization.
+          Without a media buyer, copywriter, or designer. LeadKing uses AI to generate complete ad campaigns — ready for Meta, Google, and TikTok.
         </p>
 
         <div className="flex flex-col sm:flex-row justify-center items-center gap-6 animate-fade-in" style={{ animationDelay: "0.3s" }}>

@@ -10,7 +10,7 @@ import Footer from "@/app/(marketing)/landing/components/Footer";
 
 export default function HomePage() {
   return (
-    <div className="bg-white min-h-screen">
+    <div className="bg-white min-h-screen overflow-x-hidden w-full max-w-full">
       <PublicNav />
       <Hero />
       <WhatIsLeadKing />

@@ -40,6 +40,12 @@
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
+html {
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100vw;
+}
+
 body {
   color: rgb(var(--foreground-rgb));
   background: linear-gradient(
@@ -50,6 +56,9 @@ body {
   font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100vw;
 }
 
 /* Premium Typography Scale */
@@ -395,6 +404,13 @@ textarea::placeholder {
 
 /* Mobile Responsive */
 @media (max-width: 768px) {
+  html, body {
+    overflow-x: hidden;
+    width: 100%;
+    max-width: 100vw;
+    position: relative;
+  }
+
   .text-display {
     font-size: 3rem;
   }
@@ -414,8 +430,15 @@ textarea::placeholder {
   }
 
   .hero-orb {
-    width: 400px;
-    height: 400px;
+    width: min(400px, 90vw);
+    height: min(400px, 90vh);
     filter: blur(40px);
+  }
+
+  /* Constrain decorative elements on mobile */
+  section {
+    overflow-x: hidden;
+    width: 100%;
+    max-width: 100vw;
   }
 }
