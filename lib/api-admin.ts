@@ -70,6 +70,13 @@ export function handleAdminError(error: any): never {
     
     throw new Error(message);
   }
+  
+  // Handle network errors (no response)
+  if (error.request) {
+    const message = error.message || "Network error. Please check your connection and ensure the backend is running.";
+    throw new Error(message);
+  }
+  
   throw error;
 }
 
