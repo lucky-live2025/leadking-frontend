@@ -79,7 +79,7 @@ export default function CampaignDetailPage() {
     try {
       // Prepare launch payload
       const platforms = Array.isArray(campaign.platforms) ? campaign.platforms : [];
-      const platformMap: Record<string, string> = {};
+      const platformMap: Record<string, boolean> = {};
       
       platforms.forEach((p: string) => {
         if (p === 'META') platformMap.meta = true;
