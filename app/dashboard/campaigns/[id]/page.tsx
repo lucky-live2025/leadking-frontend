@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { apiGet } from "@/lib/api";
+import { apiGet, apiPut, apiDelete } from "@/lib/api";
 import Link from "next/link";
 
 interface Campaign {
@@ -62,6 +62,8 @@ export default function CampaignDetailPage() {
   const [campaign, setCampaign] = useState<Campaign | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   useEffect(() => {
     if (campaignId) {
@@ -152,6 +154,35 @@ export default function CampaignDetailPage() {
       'EMAIL': 'Email',
     };
     return platformMap[platform] || platform;
+  }
+
+  async function handleDelete() {
+    if (!campaign) return;
+    
+    if (!showDeleteConfirm) {
+      setShowDeleteConfirm(true);
+      return;
+    }
+
+    setDeleting(true);
+    setError(null);
+
+    try {
+      await apiDelete(`/campaigns/${campaign.id}`, { auth: true });
+      // Redirect to campaigns list
+      router.push('/dashboard/campaigns');
+    } catch (err: any) {
+      console.error("Failed to delete campaign:", err);
+      setError(err.message || "Failed to delete campaign");
+      setDeleting(false);
+      setShowDeleteConfirm(false);
+    }
+  }
+
+  function handleEdit() {
+    if (!campaign) return;
+    // For now, just show a message - edit page can be added later
+    alert('Edit functionality coming soon! For now, you can delete and recreate the campaign.');
   }
 
   // Extract creatives from targeting.creativeAssets or from creatives array

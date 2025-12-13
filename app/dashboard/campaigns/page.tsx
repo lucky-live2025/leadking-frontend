@@ -151,23 +151,31 @@ export default function DashboardCampaignsPage() {
           {campaigns.map((campaign) => (
             <div
               key={campaign.id}
-              onClick={() => {
-                router.push(`/dashboard/campaigns/${campaign.id}`);
-              }}
-              className="bg-white rounded-xl p-6 shadow-md border border-gray-200 hover:shadow-lg hover:border-blue-300 transition-all cursor-pointer"
+              className="bg-white rounded-xl p-6 shadow-md border border-gray-200 hover:shadow-lg hover:border-blue-300 transition-all"
             >
-              <div className="flex justify-between items-start mb-4">
-                <h3 className="text-xl font-semibold text-gray-900">{campaign.name || `Campaign #${campaign.id}`}</h3>
-                <span className={`px-3 py-1 rounded-lg text-sm font-medium ${getStatusColor(campaign.status)}`}>
-                  {formatStatus(campaign.status || "PENDING")}
-                </span>
+              <div 
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  const url = `/dashboard/campaigns/${campaign.id}`;
+                  console.log('[CampaignsPage] Navigating to:', url);
+                  window.location.href = url;
+                }}
+                className="cursor-pointer"
+              >
+                <div className="flex justify-between items-start mb-4">
+                  <h3 className="text-xl font-semibold text-gray-900">{campaign.name || `Campaign #${campaign.id}`}</h3>
+                  <span className={`px-3 py-1 rounded-lg text-sm font-medium ${getStatusColor(campaign.status)}`}>
+                    {formatStatus(campaign.status || "PENDING")}
+                  </span>
+                </div>
+                {campaign.budget && (
+                  <p className="text-gray-600 mb-2">Budget: ${campaign.budget}</p>
+                )}
+                <p className="text-gray-500 text-sm">
+                  Created: {new Date(campaign.createdAt).toLocaleDateString()}
+                </p>
               </div>
-              {campaign.budget && (
-                <p className="text-gray-600 mb-2">Budget: ${campaign.budget}</p>
-              )}
-              <p className="text-gray-500 text-sm">
-                Created: {new Date(campaign.createdAt).toLocaleDateString()}
-              </p>
             </div>
           ))}
         </div>
