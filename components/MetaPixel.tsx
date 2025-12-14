@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import Script from "next/script";
+import Script from 'next/script';
+
+const META_PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID;
 
 export default function MetaPixel() {
-  const pixelId = process.env.NEXT_PUBLIC_META_PIXEL_ID;
-
-  if (!pixelId) return null;
+  if (!META_PIXEL_ID) return null;
 
   return (
     <>
@@ -22,7 +22,7 @@ export default function MetaPixel() {
             t.src=v;s=b.getElementsByTagName(e)[0];
             s.parentNode.insertBefore(t,s)}(window, document,'script',
             'https://connect.facebook.net/en_US/fbevents.js');
-            fbq('init', '${pixelId}');
+            fbq('init', '${META_PIXEL_ID}');
             fbq('track', 'PageView');
           `,
         }}
