@@ -5,8 +5,6 @@ import Script from "next/script";
 export default function MetaPixel() {
   const pixelId = process.env.NEXT_PUBLIC_META_PIXEL_ID;
 
-  console.log("PIXEL_ID", pixelId);
-
   if (!pixelId) {
     return null;
   }
@@ -30,6 +28,9 @@ export default function MetaPixel() {
             fbq('track', 'PageView');
           `,
         }}
+        onLoad={() => {
+          console.log("Meta Pixel loaded, fbq type:", typeof window.fbq);
+        }}
       />
       <noscript>
         <img
@@ -48,7 +49,7 @@ export default function MetaPixel() {
  * Helper function to track custom events
  */
 export function trackMetaEvent(eventName: string, data?: any) {
-  if (typeof window !== "undefined" && (window as any).fbq) {
+  if (typeof window !== "undefined" && typeof (window as any).fbq === "function") {
     (window as any).fbq("track", eventName, data);
   }
 }
@@ -66,4 +67,3 @@ export function trackLeadSubmission(data?: any) {
 export function trackConversion(data?: any) {
   trackMetaEvent("CompleteRegistration", data);
 }
-
