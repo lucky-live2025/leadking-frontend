@@ -153,9 +153,7 @@ export default function LandingPageView() {
   const colors = themes[theme] || themes.modern;
 
   return (
-    <>
-      <MetaPixel />
-      <div className={`min-h-screen ${colors.bg} ${colors.text}`}>
+    <div className={`min-h-screen ${colors.bg} ${colors.text}`}>
         {/* Header */}
       <header className={`${colors.card} border-b border-gray-700 py-4`}>
         <div className="container mx-auto px-4 max-w-6xl">
