@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { apiPost } from "@/lib/api";
 import PublicNav from "@/components/PublicNav";
+import { trackLeadSubmission } from "@/components/MetaPixel";
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -38,6 +39,14 @@ export default function SignUpPage() {
         email: formData.email,
         password: formData.password,
         referralCode: formData.referralCode || undefined,
+      });
+
+      // Track Meta Pixel Lead event after successful signup
+      trackLeadSubmission({
+        content_name: "User Signup",
+        content_category: "Account Creation",
+        value: 0,
+        currency: "USD",
       });
 
       setSuccess(true);
