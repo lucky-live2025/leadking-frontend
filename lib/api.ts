@@ -200,7 +200,11 @@ export async function apiPost(path: string, data: any = {}, options: any = {}) {
     };
     
     // If auth: false, mark request to skip auth
-    if (options.auth === false || path.includes('/enterprise/request')) {
+    // Also skip auth for public auth endpoints (register, login)
+    if (options.auth === false || 
+        path.includes('/enterprise/request') ||
+        path.includes('/auth/register') ||
+        path.includes('/auth/login')) {
       requestConfig.skipAuth = true;
     }
     
