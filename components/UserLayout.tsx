@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
+import Logo from "./Logo";
 
 export default function UserLayout({
   children,
@@ -105,9 +106,7 @@ export default function UserLayout({
       <header className="bg-white border-b border-gray-200">
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-8">
-            <Link href="/dashboard" className="text-2xl font-bold text-gray-900">
-              Lead King
-            </Link>
+            <Logo href="/dashboard" size="md" />
             <nav className="flex gap-6">
             <Link 
               href="/dashboard" 

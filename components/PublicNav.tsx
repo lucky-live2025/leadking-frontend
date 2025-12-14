@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Logo from "./Logo";
 
 export default function PublicNav() {
   const router = useRouter();
@@ -56,9 +57,7 @@ export default function PublicNav() {
   return (
     <header className={`navbar-premium ${scrolled ? "scrolled" : ""}`}>
       <div className="container mx-auto px-6 py-4 flex items-center justify-between">
-        <Link href="/" className="text-2xl font-bold text-gray-900 tracking-tight">
-          Lead King
-        </Link>
+        <Logo href="/" size="md" />
         <nav className="flex gap-8 items-center">
           <Link href="/features" className="link-premium text-gray-700 hover:text-gray-900 font-medium">
             Features

@@ -1,0 +1,20 @@
+<svg width="200" height="60" viewBox="0 0 200 60" xmlns="http://www.w3.org/2000/svg">
+  <!-- Crown Icon -->
+  <g id="crown">
+    <!-- Base band -->
+    <rect x="8" y="38" width="24" height="6" rx="2" fill="#2563eb"/>
+    <!-- Left point -->
+    <path d="M 8 38 L 12 20 L 16 38 Z" fill="#2563eb"/>
+    <circle cx="12" cy="20" r="2.5" fill="#2563eb"/>
+    <!-- Center point -->
+    <path d="M 16 38 L 18 12 L 22 38 Z" fill="#2563eb"/>
+    <circle cx="18" cy="12" r="2.5" fill="#2563eb"/>
+    <!-- Right point -->
+    <path d="M 22 38 L 26 20 L 30 38 Z" fill="#2563eb"/>
+    <circle cx="26" cy="20" r="2.5" fill="#2563eb"/>
+  </g>
+  
+  <!-- LeadKing Text -->
+  <text x="42" y="38" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#000000">LeadKing</text>
+</svg>
+

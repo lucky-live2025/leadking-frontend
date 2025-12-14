@@ -5,17 +5,37 @@ import { ErrorBoundaryWrapper } from '@/components/ErrorBoundaryWrapper';
 export const metadata: Metadata = {
   title: 'LeadKing — AI Lead Generation Platform',
   description: 'AI-powered lead generation platform that automatically creates, launches, and optimizes advertising campaigns to generate qualified leads across Meta, Google, TikTok, LinkedIn, and Yandex.',
+  icons: {
+    icon: [
+      { url: '/logo-icon.svg', type: 'image/svg+xml' },
+      { url: '/favicon.ico', sizes: 'any' },
+    ],
+    apple: [
+      { url: '/logo-icon.svg', type: 'image/svg+xml' },
+    ],
+  },
   openGraph: {
     title: 'LeadKing — AI Lead Generation Platform',
     description: 'AI-powered lead generation platform that automatically creates, launches, and optimizes advertising campaigns to generate qualified leads.',
     type: 'website',
     url: 'https://leadkingapp.com',
+    images: [
+      {
+        url: 'https://leadkingapp.com/logo.svg',
+        width: 200,
+        height: 60,
+        alt: 'LeadKing Logo',
+      },
+    ],
+    siteName: 'LeadKing',
   },
   twitter: {
     card: 'summary_large_image',
     title: 'LeadKing — AI Lead Generation Platform',
     description: 'AI-powered lead generation platform that automatically creates, launches, and optimizes advertising campaigns to generate qualified leads.',
+    images: ['https://leadkingapp.com/logo.svg'],
   },
+  metadataBase: new URL('https://leadkingapp.com'),
 };
 
 export default function RootLayout({
@@ -48,7 +68,13 @@ export default function RootLayout({
     "@type": "Organization",
     "name": "LeadKing",
     "url": "https://leadkingapp.com",
-    "logo": "https://leadkingapp.com/favicon.ico",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://leadkingapp.com/logo.svg",
+      "width": 200,
+      "height": 60
+    },
+    "image": "https://leadkingapp.com/logo.svg",
     "description": "AI-powered lead generation platform that automatically creates, launches, and optimizes advertising campaigns to generate qualified leads.",
     "sameAs": [
       "https://leadkingapp.com"
@@ -88,6 +114,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        <link rel="manifest" href="/manifest.json" />
+        <link rel="icon" href="/logo-icon.svg" type="image/svg+xml" />
+        <link rel="apple-touch-icon" href="/logo-icon.svg" />
+        <meta name="theme-color" content="#2563eb" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareApplicationSchema) }}
