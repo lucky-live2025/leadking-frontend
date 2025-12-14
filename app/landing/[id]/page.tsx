@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { apiGet, apiPost } from "@/lib/api";
+import { trackLeadSubmission } from "@/components/MetaPixel";
 
 interface LandingPage {
   id: string;
@@ -64,6 +65,14 @@ export default function LandingPageView() {
         source: "LANDING_PAGE",
         landingPageId: landingPageId,
       }, { auth: false });
+
+      // Track Meta Pixel events
+      trackLeadSubmission({
+        content_name: landingPage?.businessName || landingPage?.productName,
+        content_category: "Lead Form",
+        value: 0,
+        currency: "USD",
+      });
 
       setSubmitted(true);
       setFormData({ name: "", email: "", phone: "" });
@@ -144,8 +153,10 @@ export default function LandingPageView() {
   const colors = themes[theme] || themes.modern;
 
   return (
-    <div className={`min-h-screen ${colors.bg} ${colors.text}`}>
-      {/* Header */}
+    <>
+      <MetaPixel />
+      <div className={`min-h-screen ${colors.bg} ${colors.text}`}>
+        {/* Header */}
       <header className={`${colors.card} border-b border-gray-700 py-4`}>
         <div className="container mx-auto px-4 max-w-6xl">
           <h1 className={`text-2xl font-bold ${colors.text}`}>{businessName}</h1>

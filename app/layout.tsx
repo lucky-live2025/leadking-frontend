@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { ErrorBoundaryWrapper } from '@/components/ErrorBoundaryWrapper';
+import MetaPixel from '@/components/MetaPixel';
 
 export const metadata: Metadata = {
   title: 'LeadKing — AI Lead Generation Platform',
@@ -137,6 +138,7 @@ export default function RootLayout({
         />
       </head>
       <body>
+        <MetaPixel />
         <ErrorBoundaryWrapper>
           {children}
         </ErrorBoundaryWrapper>
