@@ -51,7 +51,24 @@ export default function SignUpPage() {
 
       setSuccess(true);
     } catch (err: any) {
-      setError(err.message || "Registration failed");
+      console.error("Signup error:", err);
+      
+      // Provide more specific error messages
+      let errorMessage = "Registration failed";
+      
+      if (err.message) {
+        errorMessage = err.message;
+      } else if (err.response?.data?.message) {
+        errorMessage = err.response.data.message;
+      } else if (err.code === 'ERR_NETWORK' || err.message?.includes('Network')) {
+        errorMessage = "Network error. Please check your connection and try again.";
+      } else if (err.response?.status === 400) {
+        errorMessage = err.response.data?.message || "Invalid registration data";
+      } else if (err.response?.status === 409) {
+        errorMessage = "Email already exists";
+      }
+      
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
