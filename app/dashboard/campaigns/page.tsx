@@ -149,16 +149,14 @@ export default function DashboardCampaignsPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {campaigns.map((campaign) => (
-            <Link
+            <div
               key={campaign.id}
-              href={`/dashboard/campaigns/${campaign.id}`}
-              prefetch={false}
-              className="bg-white rounded-xl p-6 shadow-md border border-gray-200 hover:shadow-lg hover:border-blue-300 transition-all block cursor-pointer"
-              onClick={(e) => {
-                // Ensure navigation happens regardless of campaign status
-                e.preventDefault();
+              onClick={() => {
+                // CRITICAL: Navigate to campaign detail page regardless of status
+                console.log('[CampaignCard] Navigating to campaign:', campaign.id, 'Status:', campaign.status);
                 router.push(`/dashboard/campaigns/${campaign.id}`);
               }}
+              className="bg-white rounded-xl p-6 shadow-md border border-gray-200 hover:shadow-lg hover:border-blue-300 transition-all cursor-pointer"
             >
               <div className="flex justify-between items-start mb-4">
                 <h3 className="text-xl font-semibold text-gray-900">{campaign.name || `Campaign #${campaign.id}`}</h3>
@@ -172,7 +170,7 @@ export default function DashboardCampaignsPage() {
               <p className="text-gray-500 text-sm">
                 Created: {new Date(campaign.createdAt).toLocaleDateString()}
               </p>
-            </Link>
+            </div>
           ))}
         </div>
       )}

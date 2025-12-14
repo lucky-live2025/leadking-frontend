@@ -105,9 +105,11 @@ apiClient.interceptors.response.use(
         
         // Don't redirect if we're already on login or signup pages
         // Also don't redirect if this is a /auth/me call (let UserLayout handle it)
+        // CRITICAL: Don't redirect from campaign detail pages - let them show errors
         const isAuthMe = originalRequest.url?.includes('/auth/me');
+        const isCampaignDetail = currentPath.startsWith('/dashboard/campaigns/') && currentPath !== '/dashboard/campaigns';
         
-        if (currentPath !== "/login" && currentPath !== "/signup" && !isAuthMe) {
+        if (currentPath !== "/login" && currentPath !== "/signup" && !isAuthMe && !isCampaignDetail) {
           console.warn("[API Interceptor] 401 error, clearing token and redirecting");
           localStorage.removeItem("token");
           localStorage.removeItem("user");
@@ -124,6 +126,9 @@ apiClient.interceptors.response.use(
           console.warn("[API Interceptor] 401 on /auth/me, clearing token (UserLayout will handle redirect)");
           localStorage.removeItem("token");
           localStorage.removeItem("user");
+        } else if (isCampaignDetail) {
+          // For campaign detail pages, don't redirect - let the page show the error
+          console.warn("[API Interceptor] 401 on campaign detail page, not redirecting (page will show error)");
         }
       }
 
