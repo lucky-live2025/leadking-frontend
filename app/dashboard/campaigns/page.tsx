@@ -152,7 +152,13 @@ export default function DashboardCampaignsPage() {
             <Link
               key={campaign.id}
               href={`/dashboard/campaigns/${campaign.id}`}
+              prefetch={false}
               className="bg-white rounded-xl p-6 shadow-md border border-gray-200 hover:shadow-lg hover:border-blue-300 transition-all block cursor-pointer"
+              onClick={(e) => {
+                // Ensure navigation happens regardless of campaign status
+                e.preventDefault();
+                router.push(`/dashboard/campaigns/${campaign.id}`);
+              }}
             >
               <div className="flex justify-between items-start mb-4">
                 <h3 className="text-xl font-semibold text-gray-900">{campaign.name || `Campaign #${campaign.id}`}</h3>

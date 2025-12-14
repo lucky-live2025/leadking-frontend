@@ -92,9 +92,14 @@ export default function CampaignDetailPage() {
       console.log('[CampaignDetail] Loading campaign:', campaignId);
       const data = await apiGet(`/campaigns/${campaignId}`, { auth: true });
       console.log('[CampaignDetail] Campaign loaded:', data);
+      
+      // IMPORTANT: Campaign status must NEVER block page rendering
+      // Status is only used for UI display (badges, buttons)
       setCampaign(data);
     } catch (err: any) {
       console.error("Failed to load campaign:", err);
+      // IMPORTANT: Never redirect from this page based on status or errors
+      // Always show error message instead of redirecting
       if (err.response?.status === 401) {
         setError("Please log in to view campaign");
         // Don't redirect - let user see the error
