@@ -7,11 +7,14 @@ export const metadata: Metadata = {
   description: 'AI-powered lead generation platform that automatically creates, launches, and optimizes advertising campaigns to generate qualified leads across Meta, Google, TikTok, LinkedIn, and Yandex.',
   icons: {
     icon: [
-      { url: '/logo-icon.svg', type: 'image/svg+xml' },
+      { url: '/favicon.svg', type: 'image/svg+xml' },
       { url: '/favicon.ico', sizes: 'any' },
     ],
     apple: [
       { url: '/logo-icon.svg', type: 'image/svg+xml' },
+    ],
+    shortcut: [
+      { url: '/favicon.ico' },
     ],
   },
   openGraph: {
