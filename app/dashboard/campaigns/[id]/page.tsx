@@ -26,6 +26,18 @@ interface Campaign {
   landingPageId?: string;
 }
 
+interface AnalyticsMetrics {
+  impressions?: number;
+  clicks?: number;
+  spend?: number;
+  conversions?: number;
+  cpc?: number;
+  cpm?: number;
+  ctr?: number;
+  cpl?: number;
+  roas?: number;
+}
+
 interface Creative {
   id: number;
   type: string;
@@ -64,10 +76,18 @@ export default function CampaignDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [metrics, setMetrics] = useState<AnalyticsMetrics | null>(null);
+  const [metricsLoading, setMetricsLoading] = useState(false);
 
   useEffect(() => {
     if (campaignId) {
       loadCampaign();
+      loadMetrics();
+      // Poll for metrics updates every 30 seconds
+      const interval = setInterval(() => {
+        loadMetrics();
+      }, 30000);
+      return () => clearInterval(interval);
     }
   }, [campaignId]);
 
@@ -112,6 +132,21 @@ export default function CampaignDetailPage() {
       }
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function loadMetrics() {
+    if (!campaignId) return;
+    
+    try {
+      setMetricsLoading(true);
+      const data = await apiGet(`/analytics/${campaignId}`, { auth: true });
+      setMetrics(data);
+    } catch (err: any) {
+      // Silently fail - metrics are optional
+      console.log("Metrics not available:", err.message);
+    } finally {
+      setMetricsLoading(false);
     }
   }
 
@@ -718,6 +753,101 @@ export default function CampaignDetailPage() {
                     </div>
                   )}
                 </div>
+              </div>
+            )}
+
+            {/* Performance Metrics */}
+            {metrics && (metrics.impressions || metrics.clicks || metrics.spend) && (
+              <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-200">
+                <h2 className="text-xl font-bold text-gray-900 mb-4">Performance Metrics</h2>
+                <div className="space-y-4">
+                  {metrics.impressions !== undefined && (
+                    <div>
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="text-gray-600 text-sm">Impressions</span>
+                        <span className="text-gray-900 font-semibold">
+                          {metrics.impressions.toLocaleString()}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                  {metrics.clicks !== undefined && (
+                    <div>
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="text-gray-600 text-sm">Clicks</span>
+                        <span className="text-gray-900 font-semibold">
+                          {metrics.clicks.toLocaleString()}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                  {metrics.spend !== undefined && (
+                    <div>
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="text-gray-600 text-sm">Spend</span>
+                        <span className="text-gray-900 font-semibold">
+                          ${metrics.spend.toFixed(2)}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                  {metrics.conversions !== undefined && metrics.conversions > 0 && (
+                    <div>
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="text-gray-600 text-sm">Conversions</span>
+                        <span className="text-gray-900 font-semibold">
+                          {metrics.conversions.toLocaleString()}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                  {metrics.ctr !== undefined && metrics.ctr !== null && (
+                    <div className="pt-2 border-t border-gray-200">
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="text-gray-600 text-sm">CTR</span>
+                        <span className="text-gray-900 font-semibold">
+                          {metrics.ctr.toFixed(2)}%
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                  {metrics.cpc !== undefined && metrics.cpc !== null && (
+                    <div>
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="text-gray-600 text-sm">CPC</span>
+                        <span className="text-gray-900 font-semibold">
+                          ${metrics.cpc.toFixed(2)}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                  {metrics.cpl !== undefined && metrics.cpl !== null && (
+                    <div>
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="text-gray-600 text-sm">CPL</span>
+                        <span className="text-gray-900 font-semibold">
+                          ${metrics.cpl.toFixed(2)}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                  {metrics.cpm !== undefined && metrics.cpm !== null && (
+                    <div>
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="text-gray-600 text-sm">CPM</span>
+                        <span className="text-gray-900 font-semibold">
+                          ${metrics.cpm.toFixed(2)}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                {metricsLoading && (
+                  <div className="mt-4 text-center">
+                    <div className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                    <span className="ml-2 text-xs text-gray-500">Updating...</span>
+                  </div>
+                )}
               </div>
             )}
 
