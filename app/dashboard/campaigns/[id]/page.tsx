@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { apiGet, apiPut, apiDelete } from "@/lib/api";
+import { apiGet, apiPut, apiDelete, apiPost } from "@/lib/api";
 import Link from "next/link";
 
 interface Campaign {
@@ -78,6 +78,9 @@ export default function CampaignDetailPage() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [metrics, setMetrics] = useState<AnalyticsMetrics | null>(null);
   const [metricsLoading, setMetricsLoading] = useState(false);
+  const [publishing, setPublishing] = useState<Record<string, boolean>>({});
+  const [publishError, setPublishError] = useState<string | null>(null);
+  const [publishSuccess, setPublishSuccess] = useState<string | null>(null);
 
   useEffect(() => {
     if (campaignId) {
@@ -223,6 +226,96 @@ export default function CampaignDetailPage() {
     if (!campaign) return;
     // For now, just show a message - edit page can be added later
     alert('Edit functionality coming soon! For now, you can delete and recreate the campaign.');
+  }
+
+  async function handlePublish(platform: string) {
+    if (!campaign) return;
+    
+    setPublishing({ ...publishing, [platform]: true });
+    setPublishError(null);
+    setPublishSuccess(null);
+
+    try {
+      // Get platform token to check if connected
+      // Try multiple endpoint variations
+      let platformToken = null;
+      try {
+        const tokenResponse = await apiGet('/integrations/status', { auth: true });
+        const platformTokens = tokenResponse.tokens || tokenResponse || [];
+        platformToken = Array.isArray(platformTokens) 
+          ? platformTokens.find((t: any) => t.platform === platform.toUpperCase())
+          : null;
+      } catch (err) {
+        // If status endpoint doesn't exist, try to get token directly
+        console.log('Status endpoint not available, checking token directly');
+      }
+      
+      // If still no token, check if we can proceed anyway (backend will handle)
+      if (!platformToken) {
+        console.warn(`No token found for ${platform}, proceeding anyway - backend will handle auth`);
+      }
+
+      if (!platformToken) {
+        setPublishError(`Please connect your ${platform} account first in Settings → Integrations`);
+        setPublishing({ ...publishing, [platform]: false });
+        return;
+      }
+
+      // Prepare publish payload
+      const platforms = Array.isArray(campaign.platforms) ? campaign.platforms : [];
+      const targeting = campaign.targeting || {};
+      const creatives = getCreatives();
+      const headlines = creatives.filter(c => c.type === 'headline').map(c => c.content);
+      const primaryTexts = creatives.filter(c => c.type === 'primaryText').map(c => c.content);
+      const ctas = creatives.filter(c => c.type === 'cta').map(c => c.content);
+
+      const publishPayload: any = {
+        campaignId: campaign.id,
+        campaignName: campaign.name || `Campaign #${campaign.id}`,
+        objective: 'CONVERSIONS',
+        budget: campaign.budget || 0,
+        adSetName: `${campaign.name} - Ad Set`,
+        targeting: {
+          ageMin: targeting.ageMin || 18,
+          ageMax: targeting.ageMax || 65,
+          gender: targeting.gender || 'all',
+          countries: targeting.selectedCountries || targeting.countries || ['US'],
+          languages: targeting.selectedLanguages || targeting.languages || ['en'],
+        },
+        creative: {
+          name: `${campaign.name} - Ad`,
+          primaryText: primaryTexts[0] || campaign.primaryText || '',
+          headline: headlines[0] || campaign.headline || '',
+          description: primaryTexts[0] || campaign.primaryText || '',
+          callToAction: ctas[0] || 'Learn More',
+        },
+      };
+
+      // Platform-specific adjustments
+      if (platform === 'tiktok' && platformToken) {
+        publishPayload.advertiserId = platformToken.accountId;
+      }
+      if (platform === 'yandex' && platformToken) {
+        publishPayload.clientLogin = platformToken.accountId;
+        publishPayload.keywords = targeting.keywords || [];
+      }
+      
+      // Note: accessToken will be fetched by backend from PlatformToken table
+      // We don't need to send it from frontend
+
+      // Call publish endpoint
+      const response = await apiPost(`/publishing/${platform.toLowerCase()}`, publishPayload, { auth: true });
+      
+      setPublishSuccess(`Campaign published to ${platform} successfully!`);
+      
+      // Reload campaign to get updated status
+      await loadCampaign();
+    } catch (err: any) {
+      console.error(`Failed to publish to ${platform}:`, err);
+      setPublishError(err.response?.data?.message || err.message || `Failed to publish to ${platform}`);
+    } finally {
+      setPublishing({ ...publishing, [platform]: false });
+    }
   }
 
   // Extract creatives from targeting.creativeAssets or from creatives array
@@ -387,24 +480,48 @@ export default function CampaignDetailPage() {
               </div>
             </div>
             
-            {/* Action Buttons - Only show for PENDING campaigns */}
-            {campaign.status === 'PENDING' && (
-              <div className="flex gap-3">
-                <button
-                  onClick={handleEdit}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
-                >
-                  ✏️ Edit
-                </button>
-                <button
-                  onClick={handleDelete}
-                  disabled={deleting}
-                  className="px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors disabled:opacity-50"
-                >
-                  {deleting ? "Deleting..." : showDeleteConfirm ? "Confirm Delete" : "🗑️ Delete"}
-                </button>
-              </div>
-            )}
+            {/* Action Buttons */}
+            <div className="flex gap-3 flex-wrap">
+              {/* Publish Buttons - Show for PENDING campaigns */}
+              {campaign.status === 'PENDING' && platforms.length > 0 && (
+                <>
+                  {platforms.map((platform: string) => {
+                    const platformLower = platform.toLowerCase();
+                    const isPublishing = publishing[platformLower] || false;
+                    
+                    return (
+                      <button
+                        key={platform}
+                        onClick={() => handlePublish(platformLower)}
+                        disabled={isPublishing}
+                        className="px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {isPublishing ? `Publishing to ${platform}...` : `🚀 Publish to ${platform}`}
+                      </button>
+                    );
+                  })}
+                </>
+              )}
+              
+              {/* Edit/Delete - Only for PENDING */}
+              {campaign.status === 'PENDING' && (
+                <>
+                  <button
+                    onClick={handleEdit}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
+                  >
+                    ✏️ Edit
+                  </button>
+                  <button
+                    onClick={handleDelete}
+                    disabled={deleting}
+                    className="px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors disabled:opacity-50"
+                  >
+                    {deleting ? "Deleting..." : showDeleteConfirm ? "Confirm Delete" : "🗑️ Delete"}
+                  </button>
+                </>
+              )}
+            </div>
           </div>
           
           {/* Delete Confirmation */}
@@ -452,6 +569,26 @@ export default function CampaignDetailPage() {
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
             <p className="text-red-700">{error}</p>
+          </div>
+        )}
+
+        {/* Publish Success Message */}
+        {publishSuccess && (
+          <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-6">
+            <p className="text-green-700 font-medium">{publishSuccess}</p>
+          </div>
+        )}
+
+        {/* Publish Error Message */}
+        {publishError && (
+          <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
+            <p className="text-red-700 font-medium">{publishError}</p>
+            <button
+              onClick={() => setPublishError(null)}
+              className="mt-2 text-sm text-red-600 hover:text-red-800 underline"
+            >
+              Dismiss
+            </button>
           </div>
         )}
 
