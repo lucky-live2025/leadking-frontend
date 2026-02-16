@@ -14,67 +14,119 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  // Handle URL parameters on mount (SECURITY: Never read password from URL)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    
+    // SECURITY: Immediately remove password from URL if present (do this FIRST, synchronously)
+    const currentUrl = window.location.href;
+    if (currentUrl.includes("password=") || currentUrl.includes("password%")) {
+      try {
+        const url = new URL(window.location.href);
+        url.searchParams.delete("password");
+        const cleanUrl = url.toString();
+        window.history.replaceState({}, "", cleanUrl);
+      } catch (err) {
+        // Fallback: use string replacement if URL parsing fails
+        const cleanUrl = currentUrl.split('&password=')[0].split('?password=')[0];
+        if (cleanUrl !== currentUrl) {
+          window.history.replaceState({}, "", cleanUrl);
+        }
+      }
+    }
+    
+    // Now read email from cleaned URL (after password is removed)
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlEmail = urlParams.get("email");
+      if (urlEmail) {
+        setEmail(decodeURIComponent(urlEmail));
+      }
+    } catch (err) {
+      // Silently handle decode errors
+    }
+  }, []);
+
+  const handleSubmit = async (e?: React.FormEvent<HTMLFormElement> | React.MouseEvent<HTMLButtonElement> | React.KeyboardEvent<HTMLInputElement>) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     
     setError("");
     setLoading(true);
 
+    // SECURITY: Clear any password from URL before submitting
+    if (typeof window !== "undefined") {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.has("password")) {
+        const newUrl = new URL(window.location.href);
+        newUrl.searchParams.delete("password");
+        window.history.replaceState({}, "", newUrl.toString());
+      }
+    }
+
     const loginEmail = email.trim().toLowerCase();
     const loginPassword = password.trim(); // Trim password to remove accidental whitespace
+    
+    // Validate inputs
+    if (!loginEmail || !loginPassword) {
+      setError("Please enter both email and password.");
+      setLoading(false);
+      return;
+    }
 
     try {
+      // Add explicit auth: false to skip auth token for login endpoint
       const response = await apiPost("/auth/login", {
         email: loginEmail,
         password: loginPassword,
-      });
+      }, { auth: false });
 
-      const token = response.accessToken || response.access_token;
+      // API may return { data: { accessToken, user } } or { accessToken, user } directly
+      const token = response.accessToken || response.access_token || response.data?.accessToken || response.data?.access_token;
       if (token) {
         // CRITICAL: Store token FIRST and verify it's stored
         localStorage.setItem("token", token);
         
-        // Verify token was stored
+          // Verify token was stored
         const storedToken = localStorage.getItem("token");
         if (!storedToken || storedToken !== token) {
-          console.error('[Login] Failed to store token in localStorage');
           setError("Failed to save authentication token. Please try again.");
           setLoading(false);
           return;
         }
         
-        console.log('[Login] Token stored successfully:', {
-          tokenLength: token.length,
-          tokenPrefix: token.substring(0, 30) + '...',
-          stored: !!storedToken,
-        });
+        const userData = response.user || response.data?.user || {};
+        // Normalize role to uppercase for consistent checking
+        const rawRole = userData.role || response.role || "USER";
+        const normalizedRole = typeof rawRole === 'string' ? rawRole.toUpperCase() : "USER";
         
-        const userData = response.user || {};
         const user = {
           userId: userData.id || response.userId,
           id: userData.id || response.userId,
           email: userData.email || loginEmail,
-          role: userData.role || response.role || "USER",
+          role: normalizedRole, // Store as uppercase for consistent checking
           status: userData.status || response.status || "PENDING", // CRITICAL: Store status
         };
         localStorage.setItem("user", JSON.stringify(user));
 
         // Ensure localStorage is written and token is available before redirect
         // Use window.location for a hard redirect to prevent race conditions
-        await new Promise(resolve => setTimeout(resolve, 100));
+        // Increased delay to ensure localStorage is fully persisted
+        await new Promise(resolve => setTimeout(resolve, 300));
 
         // Double-check token is still there before redirect
         const finalTokenCheck = localStorage.getItem("token");
-        if (!finalTokenCheck) {
-          console.error('[Login] Token disappeared before redirect!');
+        const finalUserCheck = localStorage.getItem("user");
+        if (!finalTokenCheck || !finalUserCheck) {
           setError("Authentication error. Please try again.");
           setLoading(false);
           return;
         }
 
         // Redirect based on role using window.location for reliability
-        if (user.role.toUpperCase() === "ADMIN") {
+        if (normalizedRole === "ADMIN") {
           window.location.href = "/admin";
         } else {
           window.location.href = "/dashboard";
@@ -159,7 +211,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-gradient-premium">
-      <PublicNav />
+        <PublicNav />
       <div className="flex items-center justify-center min-h-[calc(100vh-80px)] p-6">
         <div className="card-premium max-w-md w-full relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-ai opacity-30"></div>
@@ -172,7 +224,7 @@ export default function LoginPage() {
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-5" noValidate>
+            <div className="space-y-5">
               <div>
                 <label htmlFor="email-input" className="block text-sm font-medium text-gray-700 mb-2">
                   Email
@@ -182,11 +234,20 @@ export default function LoginPage() {
                   name="email"
                   type="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
+                  onChange={(e) => {
+                    e.stopPropagation();
+                    setEmail(e.target.value);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !loading) {
+                      e.preventDefault();
+                      handleSubmit(e);
+                    }
+                  }}
                   className="input-premium"
                   placeholder="you@example.com"
                   disabled={loading}
+                  autoComplete="email"
                 />
               </div>
 
@@ -200,16 +261,35 @@ export default function LoginPage() {
                     name="password"
                     type={showPassword ? "text" : "password"}
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
+                    onChange={(e) => {
+                      e.stopPropagation();
+                      setPassword(e.target.value);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && !loading) {
+                        e.preventDefault();
+                        handleSubmit(e);
+                      }
+                    }}
                     className="input-premium pr-12"
                     placeholder="••••••••"
                     disabled={loading}
+                    autoComplete="current-password"
                   />
                   <button
                     type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 text-sm"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setShowPassword((prev) => !prev);
+                    }}
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 text-sm z-50 cursor-pointer focus:outline-none pointer-events-auto"
+                    tabIndex={-1}
+                    aria-label={showPassword ? "Hide password" : "Show password"}
                   >
                     {showPassword ? "Hide" : "Show"}
                   </button>
@@ -218,13 +298,18 @@ export default function LoginPage() {
 
               <button
                 id="login-button"
-                type="submit"
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleSubmit(e);
+                }}
                 disabled={loading}
                 className="btn-premium w-full"
               >
                 {loading ? "Logging in..." : "Login"}
               </button>
-            </form>
+            </div>
 
             <div className="mt-6 text-center space-y-2">
               <Link

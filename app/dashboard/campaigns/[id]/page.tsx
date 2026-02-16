@@ -113,8 +113,16 @@ export default function CampaignDetailPage() {
       }
       
       console.log('[CampaignDetail] Loading campaign:', campaignId);
-      const data = await apiGet(`/campaigns/${campaignId}`, { auth: true });
-      console.log('[CampaignDetail] Campaign loaded:', data);
+      const response = await apiGet(`/campaigns/${campaignId}`, { auth: true });
+      console.log('[CampaignDetail] Campaign loaded:', response);
+      
+      // Handle different response formats
+      const data = response?.campaign || response || {};
+      
+      // Validate that we have at least an ID
+      if (!data.id && !data.campaignId) {
+        throw new Error('Invalid campaign data received');
+      }
       
       // IMPORTANT: Campaign status must NEVER block page rendering
       // Status is only used for UI display (badges, buttons)
@@ -193,7 +201,6 @@ export default function CampaignDetailPage() {
       'GOOGLE': 'Google Ads',
       'YOUTUBE': 'YouTube',
       'LINKEDIN': 'LinkedIn',
-      'YANDEX': 'Yandex',
       'EMAIL': 'Email',
     };
     return platformMap[platform] || platform;
@@ -295,24 +302,61 @@ export default function CampaignDetailPage() {
       if (platform === 'tiktok' && platformToken) {
         publishPayload.advertiserId = platformToken.accountId;
       }
-      if (platform === 'yandex' && platformToken) {
-        publishPayload.clientLogin = platformToken.accountId;
-        publishPayload.keywords = targeting.keywords || [];
-      }
       
       // Note: accessToken will be fetched by backend from PlatformToken table
       // We don't need to send it from frontend
 
+      // Validate budget before publishing
+      if (!publishPayload.budget || publishPayload.budget <= 0) {
+        setPublishError('Please set a valid budget for your campaign before publishing.');
+        setPublishing({ ...publishing, [platform]: false });
+        return;
+      }
+
+      // Validate creative content
+      if (!publishPayload.creative.primaryText && !publishPayload.creative.headline) {
+        setPublishError('Please add at least one headline or primary text to your campaign before publishing.');
+        setPublishing({ ...publishing, [platform]: false });
+        return;
+      }
+
       // Call publish endpoint
       const response = await apiPost(`/publishing/${platform.toLowerCase()}`, publishPayload, { auth: true });
       
-      setPublishSuccess(`Campaign published to ${platform} successfully!`);
+      // Check if response indicates success
+      if (response.success || response.campaignId || response.adId) {
+        setPublishSuccess(`Campaign published to ${platform} successfully! Your campaign is now live.`);
+        
+        // Update campaign status in UI immediately
+        if (campaign) {
+          setCampaign({ ...campaign, status: 'LAUNCHED' });
+        }
+      } else {
+        setPublishError(`Publishing completed but may not be fully active. Please check your ${platform} account.`);
+      }
       
       // Reload campaign to get updated status
       await loadCampaign();
     } catch (err: any) {
       console.error(`Failed to publish to ${platform}:`, err);
-      setPublishError(err.response?.data?.message || err.message || `Failed to publish to ${platform}`);
+      
+      // Extract user-friendly error message
+      let errorMessage = err.response?.data?.message || err.message || `Failed to publish to ${platform}`;
+      
+      // Provide helpful error messages
+      if (errorMessage.includes('not connected') || errorMessage.includes('connect')) {
+        errorMessage = `Please connect your ${platform} account first in Settings → Integrations.`;
+      } else if (errorMessage.includes('expired') || errorMessage.includes('token')) {
+        errorMessage = `Your ${platform} account connection has expired. Please reconnect in Settings → Integrations.`;
+      } else if (errorMessage.includes('subscription') || errorMessage.includes('active')) {
+        errorMessage = 'Your subscription is not active. Please activate your subscription to publish campaigns.';
+      } else if (errorMessage.includes('budget')) {
+        errorMessage = 'Invalid budget amount. Please check your campaign budget and try again.';
+      } else if (errorMessage.includes('targeting')) {
+        errorMessage = 'Invalid targeting settings. Please review your campaign targeting and try again.';
+      }
+      
+      setPublishError(errorMessage);
     } finally {
       setPublishing({ ...publishing, [platform]: false });
     }
@@ -464,9 +508,17 @@ export default function CampaignDetailPage() {
                 {campaign.name || `Campaign #${campaign.id}`}
               </h1>
               <div className="flex items-center gap-4 flex-wrap">
-                <span className={`px-4 py-2 rounded-lg text-sm font-semibold border-2 ${getStatusColor(campaign.status)}`}>
-                  {formatStatus(campaign.status)}
-                </span>
+                <div className="flex flex-col gap-1">
+                  <span className={`px-4 py-2 rounded-lg text-sm font-semibold border-2 ${getStatusColor(campaign.status)}`}>
+                    {formatStatus(campaign.status)}
+                  </span>
+                  {campaign.status === "PENDING" && (
+                    <span className="text-xs text-gray-500 ml-1">Ready to publish - not yet live</span>
+                  )}
+                  {(campaign.status === "ACTIVE" || campaign.status === "LAUNCHED") && (
+                    <span className="text-xs text-green-600 ml-1">✓ Live and running</span>
+                  )}
+                </div>
                 {campaign.budget && (
                   <span className="text-gray-600">
                     <span className="font-medium">Budget:</span> ${campaign.budget.toLocaleString()}
@@ -482,6 +534,24 @@ export default function CampaignDetailPage() {
             
             {/* Action Buttons */}
             <div className="flex gap-3 flex-wrap">
+              {/* Sync Button - Show for LAUNCHED/ACTIVE campaigns */}
+              {(campaign.status === 'LAUNCHED' || campaign.status === 'ACTIVE' || campaign.status === 'PAUSED') && (
+                <button
+                  onClick={async () => {
+                    try {
+                      await apiPost(`/campaigns/${campaign.id}/sync`, {}, { auth: true });
+                      alert('Campaign status synced successfully!');
+                      loadCampaign();
+                    } catch (err: any) {
+                      alert(err.message || 'Failed to sync campaign status');
+                    }
+                  }}
+                  className="px-4 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 transition-colors"
+                >
+                  🔄 Sync Status
+                </button>
+              )}
+              
               {/* Publish Buttons - Show for PENDING campaigns */}
               {campaign.status === 'PENDING' && platforms.length > 0 && (
                 <>

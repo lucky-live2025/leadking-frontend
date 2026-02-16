@@ -41,18 +41,6 @@ export default function CreativeBlock({ creatives, platforms }: CreativeBlockPro
             LinkedIn
           </button>
         )}
-        {creatives.yandex && (
-          <button
-            onClick={() => setActivePlatform("yandex")}
-            className={`px-4 py-2 rounded-lg font-semibold whitespace-nowrap transition-all ${
-              activePlatform === "yandex"
-                ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-500/50"
-                : "bg-gray-800 text-gray-300 hover:bg-gray-700"
-            }`}
-          >
-            Yandex
-          </button>
-        )}
         <button
           onClick={() => setActivePlatform("images")}
           className={`px-4 py-2 rounded-lg font-semibold whitespace-nowrap transition-all ${
@@ -198,31 +186,6 @@ export default function CreativeBlock({ creatives, platforms }: CreativeBlockPro
         </div>
       )}
 
-      {/* Yandex Creatives */}
-      {activePlatform === "yandex" && creatives.yandex && (
-        <div className="space-y-4">
-          {creatives.yandex.headlines && (
-            <div>
-              <h3 className="text-lg font-semibold text-blue-400 mb-3">Headlines</h3>
-              <div className="space-y-2">
-                {creatives.yandex.headlines.map((headline: string, i: number) => (
-                  <div key={i} className="bg-gray-900/50 rounded-lg p-3 text-gray-300">{headline}</div>
-                ))}
-              </div>
-            </div>
-          )}
-          {creatives.yandex.descriptions && (
-            <div>
-              <h3 className="text-lg font-semibold text-blue-400 mb-3">Descriptions</h3>
-              <div className="space-y-2">
-                {creatives.yandex.descriptions.map((desc: string, i: number) => (
-                  <div key={i} className="bg-gray-900/50 rounded-lg p-3 text-gray-300">{desc}</div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
 
       {/* Headlines (if available) */}
       {creatives.headlines && creatives.headlines.length > 0 && (

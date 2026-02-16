@@ -4,7 +4,7 @@ export const dynamic = 'force-dynamic'; // Prevent static generation
 
 export async function GET() {
   try {
-    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'https://lead-king-backend-production.up.railway.app';
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'https://leadkingapp.com/api';
     const response = await fetch(`${backendUrl}/campaigns`, {
       headers: {
         'Content-Type': 'application/json',

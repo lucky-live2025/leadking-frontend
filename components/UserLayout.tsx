@@ -178,6 +178,25 @@ export default function UserLayout({
         </div>
       </header>
       <main className="py-8">{children}</main>
+      
+      {/* Footer with Legal Links */}
+      <footer className="bg-gray-50 border-t border-gray-200 mt-auto">
+        <div className="max-w-7xl mx-auto px-6 py-6">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <p className="text-gray-600 text-sm">
+              © {new Date().getFullYear()} LeadKing. All rights reserved.
+            </p>
+            <div className="flex gap-6">
+              <Link href="/privacy-policy" className="text-gray-600 hover:text-gray-900 text-sm">
+                Privacy Policy
+              </Link>
+              <Link href="/terms-of-service" className="text-gray-600 hover:text-gray-900 text-sm">
+                Terms of Service
+              </Link>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

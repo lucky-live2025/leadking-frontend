@@ -43,7 +43,7 @@ export default function AIAdCampaignsProgrammaticPage() {
         "name": "What platforms support AI ad campaigns?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "AI ad campaigns can run on all major advertising platforms including Meta (Facebook and Instagram), Google Ads, YouTube, TikTok, LinkedIn, and Yandex. AI platforms like LeadKing manage campaigns across all these platforms from a single dashboard."
+          "text": "AI ad campaigns can run on all major advertising platforms including Meta (Facebook and Instagram), Google Ads, YouTube, TikTok, LinkedIn,. AI platforms like LeadKing manage campaigns across all these platforms from a single dashboard."
         }
       }
     ]

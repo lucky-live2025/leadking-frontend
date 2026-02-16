@@ -6,18 +6,18 @@ import PublicNav from "@/components/PublicNav";
 const steps = [
   {
     number: 1,
-    title: "Sign Up",
-    description: "Create your account in seconds. No credit card required to get started.",
+    title: "Connect Your Ad Accounts",
+    description: "Connect Meta, Google Ads, TikTok, LinkedIn, and other advertising platforms to LeadKingApp. Unlike managing separate Meta Ads Manager and Google Ads accounts, LeadKingApp provides unified multi-platform campaign management from one dashboard.",
   },
   {
     number: 2,
-    title: "Create Your Campaign",
-    description: "Use our Ultra Campaign Generator to create AI-powered campaigns in minutes.",
+    title: "AI Generates Complete Campaigns",
+    description: "LeadKingApp's AI automatically creates ad creatives, landing pages, targeting, and campaign strategy. This AI campaign generation replaces the need for media buyers, copywriters, designers, and landing page builders—all handled automatically by AI.",
   },
   {
     number: 3,
-    title: "Launch & Monitor",
-    description: "Launch your campaign and watch leads come in. Monitor performance in real-time.",
+    title: "AI Captures & Delivers Leads",
+    description: "LeadKingApp automatically captures leads from all platforms, scores lead quality, and delivers qualified leads to your dashboard. This automated lead generation system eliminates manual lead capture and management, providing 24/7 lead generation without human intervention.",
   },
 ];
 
@@ -27,9 +27,9 @@ export default function HowItWorksPage() {
       <PublicNav />
       <div className="container mx-auto px-6 py-24">
         <div className="text-center mb-20">
-          <h1 className="text-title mb-4 text-gray-900">How It Works</h1>
+          <h1 className="text-title mb-4 text-gray-900">How LeadKingApp Works</h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Get started in minutes with our streamlined workflow
+            LeadKingApp is an AI-powered lead generation platform that automates the entire lead generation workflow. Unlike traditional ad platforms that require media buyers, copywriters, and designers, LeadKingApp's AI handles campaign creation, optimization, and lead capture automatically.
           </p>
         </div>
 

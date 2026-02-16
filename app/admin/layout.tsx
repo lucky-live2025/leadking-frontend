@@ -61,12 +61,13 @@ export default function AdminLayout({
       return;
     }
 
-    // Check if user is admin (handle both ADMIN and admin)
+    // Check if user is admin (handle both ADMIN and admin - case insensitive)
     const role = parsedUser?.role?.toUpperCase();
     console.log("[AUTH GUARD] role (normalized):", role);
+    console.log("[AUTH GUARD] parsedUser object:", parsedUser);
 
     if (role !== "ADMIN") {
-      console.log("[AUTH GUARD] ❌ User is not admin, role:", role);
+      console.log("[AUTH GUARD] ❌ User is not admin, role:", role, "parsedUser.role:", parsedUser?.role);
       router.push("/login");
       setIsChecking(false);
       return;
@@ -142,6 +143,14 @@ export default function AdminLayout({
                 }`}
               >
                 Ultra Campaigns
+              </Link>
+              <Link
+                href="/dashboard/profile"
+                className={`text-gray-600 hover:text-gray-900 transition-colors ${
+                  pathname === "/dashboard/profile" ? "text-blue-600 font-semibold" : ""
+                }`}
+              >
+                Profile
               </Link>
             </nav>
           </div>

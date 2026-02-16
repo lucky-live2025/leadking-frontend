@@ -4,21 +4,7 @@ import { useState, useEffect } from "react";
 import { apiGet } from "@/lib/api";
 import { useRouter } from "next/navigation";
 import LeadTable from "@/components/leads/LeadTable";
-
-interface Lead {
-  id: number;
-  name?: string;
-  email?: string;
-  phone?: string;
-  country?: string;
-  state?: string;
-  city?: string;
-  zipCode?: string;
-  platform?: string;
-  status: string;
-  score?: number;
-  createdAt: string;
-}
+import { Lead } from "@/types/lead";
 
 export default function LeadsPage() {
   const router = useRouter();

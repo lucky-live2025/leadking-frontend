@@ -109,9 +109,6 @@ export async function getInterests(platform: string): Promise<Interest[]> {
     if (platform.includes('google') || platform === 'youtube') {
       return data.google || data;
     }
-    if (platform === 'yandex') {
-      return data.yandex || data;
-    }
     return data;
   } catch (error) {
     console.error("Failed to load interests:", error);

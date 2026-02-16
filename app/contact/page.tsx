@@ -22,8 +22,8 @@ export default function ContactPage() {
     setSuccess(false);
 
     try {
-      // In a real app, this would call a contact API endpoint
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Send to support endpoint
+      await apiPost("/support/contact", formData, { auth: false });
       setSuccess(true);
       setFormData({ name: "", email: "", subject: "", message: "" });
     } catch (err: any) {
@@ -110,6 +110,11 @@ export default function ContactPage() {
                 {loading ? "Sending..." : "Send Message"}
               </button>
             </form>
+
+            <div className="mt-8 pt-8 border-t border-gray-700 text-center">
+              <p className="text-gray-400 text-sm mb-2">Or contact us directly at:</p>
+              <p className="text-white font-semibold">support@leadkingapp.com</p>
+            </div>
           </div>
         </div>
       </div>

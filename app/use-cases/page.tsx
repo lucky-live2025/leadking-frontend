@@ -29,10 +29,10 @@ export default function UseCasesPage() {
 
         <article>
           <h1 className="text-4xl md:text-5xl font-bold mb-6 text-gray-900">
-            LeadKing Use Cases
+            LeadKingApp Use Cases
           </h1>
           <p className="text-xl text-gray-600 mb-12">
-            How businesses across industries use AI lead generation to grow their customer base.
+            LeadKingApp is an AI-powered lead generation platform used by businesses across industries to automate lead generation without media buyers, copywriters, or designers. See how different businesses use LeadKingApp's automated lead generation to grow their customer base.
           </p>
 
           <div className="prose prose-lg max-w-none">

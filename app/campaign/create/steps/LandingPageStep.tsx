@@ -19,39 +19,21 @@ export default function LandingPageStep({
   availableImages = [],
   availableVideos = [],
 }: LandingPageStepProps) {
-  const [activeTab, setActiveTab] = useState<"ai" | "upload" | "external">(
-    formData.landingPageType === "uploaded" ? "upload" :
-    formData.landingPageType === "external" ? "external" : "ai"
-  );
+  // Always use AI-generated - no tabs needed
 
-  // AI Generated Form State
+  // AI Generated Form State - simplified
   const [aiForm, setAiForm] = useState({
     businessName: "",
     productName: "",
     offer: "",
     benefits: [] as string[],
-    ctaText: "Get Started",
+    ctaText: "Get Started Now",
     theme: "modern" as "modern" | "clean" | "dark" | "corporate",
-    mainImage: "",
-    mainVideo: "",
   });
 
-  // Upload State
-  const [uploadFiles, setUploadFiles] = useState<File[]>([]);
-  const [uploadPreview, setUploadPreview] = useState<string | null>(null);
-
-  // External URL State
-  const [externalUrl, setExternalUrl] = useState("");
-
-  const handleTabChange = (tab: "ai" | "upload" | "external") => {
-    setActiveTab(tab);
-    const typeMap: Record<"ai" | "upload" | "external", "ai-generated" | "uploaded" | "external"> = {
-      ai: "ai-generated",
-      upload: "uploaded",
-      external: "external",
-    };
-    onChange({ landingPageType: typeMap[tab] });
-  };
+  // Auto-generate when required fields are filled
+  const [autoGenerating, setAutoGenerating] = useState(false);
+  const [lastGeneratedHash, setLastGeneratedHash] = useState("");
 
   const [generating, setGenerating] = useState(false);
   const [generatedUrl, setGeneratedUrl] = useState<string | null>(null);
@@ -59,11 +41,31 @@ export default function LandingPageStep({
   useEffect(() => {
     if (formData.landingPageData && formData.landingPageType === "ai-generated") {
       setAiForm(formData.landingPageData);
-    }
-    if (formData.landingPageData && formData.landingPageType === "external") {
-      setExternalUrl(formData.landingPageData.url || "");
+      if (formData.landingPageData.url) {
+        setGeneratedUrl(formData.landingPageData.url);
+      }
     }
   }, [formData]);
+
+  // Auto-generate when user fills required fields
+  useEffect(() => {
+    const hash = `${aiForm.businessName}-${aiForm.productName}-${aiForm.offer}`;
+    if (
+      aiForm.businessName &&
+      aiForm.productName &&
+      aiForm.offer &&
+      hash !== lastGeneratedHash &&
+      !generatedUrl &&
+      !generating &&
+      !autoGenerating
+    ) {
+      // Debounce auto-generation
+      const timer = setTimeout(() => {
+        handleGenerate(true);
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [aiForm.businessName, aiForm.productName, aiForm.offer]);
 
   const handleAiFormChange = (field: string, value: any) => {
     const updated = { ...aiForm, [field]: value };
@@ -74,24 +76,61 @@ export default function LandingPageStep({
     });
   };
 
-  const handleGenerate = async () => {
+  const handleGenerate = async (isAuto = false) => {
     if (!aiForm.businessName || !aiForm.productName || !aiForm.offer) {
-      alert("Please fill in all required fields");
+      if (!isAuto) {
+        alert("Please fill in all required fields");
+      }
       return;
     }
 
-    setGenerating(true);
+    if (isAuto) {
+      setAutoGenerating(true);
+    } else {
+      setGenerating(true);
+    }
+
+    const hash = `${aiForm.businessName}-${aiForm.productName}-${aiForm.offer}`;
+    setLastGeneratedHash(hash);
+
     try {
-      const response = await apiPost("/landing/generate", aiForm, { auth: true });
-      setGeneratedUrl(response.url);
+      // Always generate image - no manual upload option
+      const response = await apiPost("/landing/generate", {
+        ...aiForm,
+        // Remove mainImage/mainVideo - always auto-generate
+      }, { auth: true });
+      
+      const fullUrl = `${window.location.origin}${response.url}`;
+      setGeneratedUrl(fullUrl);
+      
       onChange({
         landingPageType: "ai-generated",
-        landingPageData: { ...aiForm, id: response.id, url: response.url },
+        landingPageData: { ...aiForm, id: response.id, url: response.url, fullUrl },
       });
     } catch (err: any) {
-      alert(err.message || "Failed to generate landing page");
+      if (!isAuto) {
+        alert(err.message || "Failed to generate landing page");
+      }
+      console.error("Landing page generation error:", err);
     } finally {
-      setGenerating(false);
+      if (isAuto) {
+        setAutoGenerating(false);
+      } else {
+        setGenerating(false);
+      }
+    }
+  };
+
+  const copyUrl = () => {
+    if (generatedUrl) {
+      navigator.clipboard.writeText(generatedUrl);
+      alert("URL copied to clipboard!");
+    }
+  };
+
+  const openUrl = () => {
+    if (generatedUrl) {
+      window.open(generatedUrl, '_blank');
     }
   };
 
@@ -106,128 +145,15 @@ export default function LandingPageStep({
     handleAiFormChange("benefits", aiForm.benefits.filter((_, i) => i !== index));
   };
 
-  const [uploading, setUploading] = useState(false);
-  const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
-
-  const handleFileUpload = async (files: FileList | null) => {
-    if (!files) return;
-    const fileArray = Array.from(files);
-    setUploadFiles([...uploadFiles, ...fileArray]);
-
-    // Preview index.html if present
-    const htmlFile = fileArray.find(f => f.name === "index.html" || f.name.endsWith(".html"));
-    if (htmlFile) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setUploadPreview(e.target?.result as string);
-      };
-      reader.readAsText(htmlFile);
-    }
-
-    // Upload to backend
-    setUploading(true);
-    try {
-      const formData = new FormData();
-      fileArray.forEach((file) => {
-        formData.append("files", file);
-      });
-
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://lead-king-backend-production.up.railway.app";
-      const response = await fetch(`${apiUrl}/landing/upload`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: formData,
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setUploadedUrl(data.url);
-        onChange({
-          landingPageType: "uploaded",
-          landingPageData: { id: data.id, url: data.url, files: fileArray.map(f => ({ name: f.name, size: f.size })) },
-        });
-      } else {
-        throw new Error("Upload failed");
-      }
-    } catch (err: any) {
-      alert(err.message || "Failed to upload landing page");
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  const [savingExternal, setSavingExternal] = useState(false);
-
-  const handleExternalUrlChange = async (url: string) => {
-    setExternalUrl(url);
-    if (url && validateUrl(url)) {
-      setSavingExternal(true);
-      try {
-        const response = await apiPost("/landing/external", { url }, { auth: true });
-        onChange({
-          landingPageType: "external",
-          landingPageData: { id: response.id, url: response.url },
-        });
-      } catch (err: any) {
-        alert(err.message || "Failed to save external landing page");
-      } finally {
-        setSavingExternal(false);
-      }
-    }
-  };
-
-  const validateUrl = (url: string): boolean => {
-    try {
-      new URL(url);
-      return true;
-    } catch {
-      return false;
-    }
-  };
-
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-gray-900 mb-6">Landing Page</h2>
-
-      {/* Tab Selection */}
-      <div className="flex gap-4 border-b border-gray-300">
-        <button
-          onClick={() => handleTabChange("ai")}
-                className={`px-4 py-2 font-semibold transition ${
-                  activeTab === "ai"
-                    ? "text-blue-600 border-b-2 border-blue-600"
-                    : "text-gray-600 hover:text-gray-900"
-                }`}
-        >
-          AI Generated
-        </button>
-        <button
-          onClick={() => handleTabChange("upload")}
-          className={`px-4 py-2 font-semibold transition ${
-            activeTab === "upload"
-              ? "text-blue-400 border-b-2 border-blue-400"
-              : "text-gray-400 hover:text-gray-300"
-          }`}
-        >
-          Upload
-        </button>
-        <button
-          onClick={() => handleTabChange("external")}
-          className={`px-4 py-2 font-semibold transition ${
-            activeTab === "external"
-              ? "text-blue-400 border-b-2 border-blue-400"
-              : "text-gray-400 hover:text-gray-300"
-          }`}
-        >
-          External URL
-        </button>
+      <div className="mb-6">
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">✨ AI Landing Page</h2>
+        <p className="text-gray-600">Fill in your business info and we'll create a stunning landing page instantly</p>
       </div>
 
-      {/* AI Generated Tab */}
-      {activeTab === "ai" && (
-        <div className="space-y-6">
+      {/* AI Generated - Always Active */}
+      <div className="space-y-6">
           <div>
                   <label className="block text-gray-900 font-semibold mb-2">Business Name *</label>
                   <input
@@ -309,177 +235,88 @@ export default function LandingPageStep({
             </select>
           </div>
 
-          {(availableImages.length > 0 || availableVideos.length > 0) && (
-            <div>
-              <label className="block text-gray-300 font-semibold mb-2">Main Image/Video</label>
-              <select
-                value={aiForm.mainImage || aiForm.mainVideo}
-                onChange={(e) => {
-                  if (e.target.value.startsWith("image:")) {
-                    handleAiFormChange("mainImage", e.target.value.replace("image:", ""));
-                    handleAiFormChange("mainVideo", "");
-                  } else if (e.target.value.startsWith("video:")) {
-                    handleAiFormChange("mainVideo", e.target.value.replace("video:", ""));
-                    handleAiFormChange("mainImage", "");
-                  }
-                }}
-                    className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">None</option>
-                {availableImages.map((url, index) => (
-                  <option key={`image-${index}`} value={`image:${url}`}>
-                    Image {index + 1}
-                  </option>
-                ))}
-                {availableVideos.map((url, index) => (
-                  <option key={`video-${index}`} value={`video:${url}`}>
-                    Video {index + 1}
-                  </option>
-                ))}
-              </select>
+          {/* Auto-generation indicator */}
+          {autoGenerating && (
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-4">
+              <div className="flex items-center gap-3">
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+                <p className="text-blue-800 font-medium">✨ Generating your landing page with AI...</p>
+              </div>
             </div>
           )}
 
-          <div className="mt-6">
-            <button
-              onClick={handleGenerate}
-              disabled={generating || !aiForm.businessName || !aiForm.productName || !aiForm.offer}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {generating ? "Generating..." : "Generate Landing Page"}
-            </button>
-          </div>
-
+          {/* Generated Landing Page URL Display */}
           {generatedUrl && (
-            <div className="mt-6">
-              <h3 className="text-gray-300 font-semibold mb-3">Preview</h3>
-                <div className="bg-white border border-gray-300 rounded-xl p-4 shadow-md">
+            <div className="mt-6 bg-gradient-to-r from-green-50 to-blue-50 border-2 border-green-200 rounded-xl p-6 shadow-lg">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-2xl">🎉</span>
+                <h3 className="text-xl font-bold text-gray-900">Your Landing Page is Ready!</h3>
+              </div>
+              
+              <div className="bg-white rounded-lg p-4 mb-4 border border-gray-200">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Landing Page URL:</label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={generatedUrl}
+                    readOnly
+                    className="flex-1 px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 font-mono text-sm"
+                  />
+                  <button
+                    onClick={copyUrl}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold transition-colors flex items-center gap-2"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                    Copy
+                  </button>
+                  <button
+                    onClick={openUrl}
+                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold transition-colors flex items-center gap-2"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                    Open
+                  </button>
+                </div>
+              </div>
+
+              {/* Live Preview */}
+              <div className="bg-white rounded-lg p-4 border border-gray-200">
+                <h4 className="text-sm font-semibold text-gray-700 mb-3">Live Preview:</h4>
+                <div className="relative rounded-lg overflow-hidden border-2 border-gray-300" style={{ aspectRatio: '16/9' }}>
                   <iframe
-                    src={`${process.env.NEXT_PUBLIC_API_URL || "https://lead-king-backend-production.up.railway.app"}${generatedUrl}`}
-                    className="w-full h-96 border border-gray-300 rounded-lg"
-                  title="Generated Landing Page Preview"
-                />
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Upload Tab */}
-      {activeTab === "upload" && (
-        <div className="space-y-6">
-          <div>
-            <label className="block text-gray-300 font-semibold mb-3">Upload Landing Page Files</label>
-            <div className="border-2 border-dashed border-gray-700 rounded-lg p-8 text-center">
-              <input
-                type="file"
-                multiple
-                accept=".html,.css,.js,.jpg,.jpeg,.png,.webp,.svg"
-                onChange={(e) => handleFileUpload(e.target.files)}
-                className="hidden"
-                id="landing-upload"
-              />
-              <label
-                htmlFor="landing-upload"
-                className="cursor-pointer flex flex-col items-center"
-              >
-                <div className="text-4xl mb-4">📁</div>
-                <p className="text-white font-semibold mb-2">Drag & drop files here</p>
-                <p className="text-gray-400 text-sm mb-4">or</p>
-                <button
-                  type="button"
-                    className="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-semibold shadow-md"
-                >
-                  Browse Files
-                </button>
-              </label>
-              <p className="text-gray-500 text-xs mt-4">
-                Supported: HTML, CSS, JS, Images (JPG, PNG, WebP, SVG)
-              </p>
-            </div>
-          </div>
-
-          {uploadFiles.length > 0 && (
-            <div>
-                    <h3 className="text-gray-900 font-semibold mb-3">Uploaded Files ({uploadFiles.length})</h3>
-                    <div className="space-y-2">
-                      {uploadFiles.map((file, index) => (
-                        <div
-                          key={index}
-                          className="flex items-center justify-between bg-gray-100 p-3 rounded-lg"
-                        >
-                          <span className="text-gray-900 text-sm">{file.name}</span>
-                          <span className="text-gray-600 text-xs">
-                      {(file.size / 1024).toFixed(1)} KB
-                    </span>
-                  </div>
-                ))}
+                    src={generatedUrl}
+                    className="w-full h-full"
+                    title="Generated Landing Page Preview"
+                  />
+                </div>
               </div>
             </div>
           )}
 
-          {uploading && (
-            <div className="text-center py-4">
-              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
-              <p className="text-gray-400 mt-2">Uploading files...</p>
-            </div>
-          )}
-
-          {uploadPreview && (
-            <div>
-              <h3 className="text-gray-300 font-semibold mb-3">HTML Preview</h3>
-              <div className="bg-[#0A1628] border border-gray-700 rounded-lg p-4 max-h-64 overflow-auto">
-                <pre className="text-xs text-gray-300 whitespace-pre-wrap">{uploadPreview}</pre>
-              </div>
-            </div>
-          )}
-
-          {uploadedUrl && (
+          {/* Manual Generate Button (if auto-gen didn't work) */}
+          {!generatedUrl && !autoGenerating && (
             <div className="mt-6">
-              <h3 className="text-gray-300 font-semibold mb-3">Landing Page Preview</h3>
-              <div className="bg-[#0A1628] border border-gray-700 rounded-lg p-4">
-                <iframe
-                  src={`${process.env.NEXT_PUBLIC_API_URL || "https://lead-king-backend-production.up.railway.app"}${uploadedUrl}`}
-                  className="w-full h-96 border border-gray-700 rounded"
-                  title="Uploaded Landing Page Preview"
-                />
-              </div>
+              <button
+                onClick={() => handleGenerate(false)}
+                disabled={generating || !aiForm.businessName || !aiForm.productName || !aiForm.offer}
+                className="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed font-bold text-lg shadow-lg transition-all transform hover:scale-105"
+              >
+                {generating ? (
+                  <span className="flex items-center gap-2">
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                    Generating...
+                  </span>
+                ) : (
+                  "✨ Generate Landing Page"
+                )}
+              </button>
             </div>
           )}
         </div>
-      )}
-
-      {/* External URL Tab */}
-      {activeTab === "external" && (
-        <div className="space-y-6">
-          <div>
-            <label className="block text-gray-300 font-semibold mb-2">Landing Page URL *</label>
-            <input
-              type="url"
-              value={externalUrl}
-              onChange={(e) => handleExternalUrlChange(e.target.value)}
-                    className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="https://example.com/landing"
-            />
-            {externalUrl && !validateUrl(externalUrl) && (
-              <p className="text-red-400 text-sm mt-2">Please enter a valid URL</p>
-            )}
-          </div>
-
-          {externalUrl && validateUrl(externalUrl) && (
-            <div>
-              <h3 className="text-gray-300 font-semibold mb-3">Preview</h3>
-              <div className="bg-[#0A1628] border border-gray-700 rounded-lg p-4">
-                <iframe
-                  src={externalUrl}
-                  className="w-full h-96 border border-gray-700 rounded"
-                  title="Landing Page Preview"
-                />
-              </div>
-            </div>
-          )}
-        </div>
-      )}
     </div>
   );
 }

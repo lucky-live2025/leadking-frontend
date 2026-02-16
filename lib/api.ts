@@ -2,7 +2,7 @@
 
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from "axios";
 
-export const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://lead-king-backend-production.up.railway.app";
+export const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://leadkingapp.com/api";
 
 // Create global axios instance
 const apiClient: AxiosInstance = axios.create({
@@ -21,11 +21,13 @@ apiClient.interceptors.request.use(
     if (typeof window !== "undefined") {
       const token = localStorage.getItem("token");
       
-      // Check if auth should be skipped (for public endpoints like /targeting)
+      // Check if auth should be skipped (for public endpoints like /targeting, /auth/login, /auth/register)
       const skipAuth = (config as any).skipAuth || 
                        config.url?.includes('/targeting/') ||
                        config.url?.includes('/health') ||
-                       config.url?.includes('/enterprise/request');
+                       config.url?.includes('/enterprise/request') ||
+                       config.url?.includes('/auth/login') ||
+                       config.url?.includes('/auth/register');
       
       // CRITICAL: ALWAYS remove any existing Authorization header first
       // This prevents browser from adding Basic auth automatically
@@ -144,6 +146,14 @@ function buildUrl(path: string): string {
   return API_BASE + path;
 }
 
+// Backend wraps responses as { success, data }. Unwrap so callers get the payload.
+function unwrap(res: any): any {
+  if (res && typeof res === "object" && "success" in res && res.success === true && "data" in res) {
+    return res.data;
+  }
+  return res;
+}
+
 function getAuthToken(): string | null {
   if (typeof window === "undefined") return null;
   return localStorage.getItem("token");
@@ -181,8 +191,9 @@ export async function apiGet(path: string, options: any = {}) {
       requestConfig.skipAuth = true;
     }
     
-    const response = await apiClient.get(buildUrl(path), requestConfig);
-    return response.data;
+    const apiPath = path.startsWith("/") ? path : `/${path}`;
+    const response = await apiClient.get(apiPath, requestConfig);
+    return unwrap(response.data);
   } catch (error: any) {
     if (error.response) {
       throw new Error(error.response.data?.message || error.response.statusText || `HTTP ${error.response.status}`);
@@ -208,8 +219,15 @@ export async function apiPost(path: string, data: any = {}, options: any = {}) {
       requestConfig.skipAuth = true;
     }
     
-    const response = await apiClient.post(buildUrl(path), data, requestConfig);
-    return response.data;
+    // IMPORTANT: axios already has baseURL set, so we only need the path (not full URL)
+    // Ensure path starts with / for proper URL construction
+    const apiPath = path.startsWith("/") ? path : `/${path}`;
+    console.log('[API] POST request to:', API_BASE + apiPath);
+    console.log('[API] Request data:', { email: data.email, password: '***' });
+    
+    const response = await apiClient.post(apiPath, data, requestConfig);
+    console.log('[API] Response received:', { status: response.status, hasToken: !!(response.data?.accessToken || response.data?.data?.accessToken) });
+    return unwrap(response.data);
   } catch (error: any) {
     // Handle network errors
     if (!error.response) {
@@ -242,11 +260,12 @@ export async function apiPost(path: string, data: any = {}, options: any = {}) {
 
 export async function apiPut(path: string, data: any = {}, options: any = {}) {
   try {
-    const response = await apiClient.put(buildUrl(path), data, {
+    const apiPath = path.startsWith("/") ? path : `/${path}`;
+    const response = await apiClient.put(apiPath, data, {
       ...options,
       headers: getHeaders(options),
     });
-    return response.data;
+    return unwrap(response.data);
   } catch (error: any) {
     if (error.response) {
       throw new Error(error.response.data?.message || error.response.statusText || `HTTP ${error.response.status}`);
@@ -257,11 +276,12 @@ export async function apiPut(path: string, data: any = {}, options: any = {}) {
 
 export async function apiPatch(path: string, data: any = {}, options: any = {}) {
   try {
-    const response = await apiClient.patch(buildUrl(path), data, {
+    const apiPath = path.startsWith("/") ? path : `/${path}`;
+    const response = await apiClient.patch(apiPath, data, {
       ...options,
       headers: getHeaders(options),
     });
-    return response.data;
+    return unwrap(response.data);
   } catch (error: any) {
     if (error.response) {
       throw new Error(error.response.data?.message || error.response.statusText || `HTTP ${error.response.status}`);
@@ -272,11 +292,12 @@ export async function apiPatch(path: string, data: any = {}, options: any = {}) 
 
 export async function apiDelete(path: string, options: any = {}) {
   try {
-    const response = await apiClient.delete(buildUrl(path), {
+    const apiPath = path.startsWith("/") ? path : `/${path}`;
+    const response = await apiClient.delete(apiPath, {
       ...options,
       headers: getHeaders(options),
     });
-    return response.data;
+    return unwrap(response.data);
   } catch (error: any) {
     if (error.response) {
       throw new Error(error.response.data?.message || error.response.statusText || `HTTP ${error.response.status}`);

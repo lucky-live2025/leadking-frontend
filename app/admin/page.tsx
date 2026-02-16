@@ -220,6 +220,15 @@ export default function AdminPage() {
               </h3>
               <p className="text-gray-600">System usage statistics</p>
             </Link>
+            <Link
+              href="/admin/tickets"
+              className="bg-white rounded-xl p-6 shadow-md border border-gray-200 hover:shadow-lg hover:border-blue-300 transition-all"
+            >
+              <h3 className="text-xl font-semibold mb-2 text-gray-900">
+                Support Tickets
+              </h3>
+              <p className="text-gray-600">View and respond to user support requests</p>
+            </Link>
           </div>
         </>
       )}

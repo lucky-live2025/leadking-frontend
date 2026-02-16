@@ -4,18 +4,18 @@ export default function Workflow() {
   const steps = [
     {
       number: "01",
-      title: "Create Account",
-      description: "Sign up in seconds and get instant access to the platform.",
+      title: "Connect Your Ad Accounts",
+      description: "Connect Meta, Google Ads, TikTok, LinkedIn, and other advertising platforms to LeadKingApp. The platform integrates directly with ad platforms—no need for separate Meta Ads Manager or Google Ads accounts.",
       icon: (
         <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
         </svg>
       )
     },
     {
       number: "02",
-      title: "Select Platform",
-      description: "Use our AI generator to create complete campaigns in minutes. AI selects platforms, creates ads, and builds landing pages.",
+      title: "AI Generates Complete Campaigns",
+      description: "LeadKingApp's AI automatically creates ad creatives, landing pages, targeting, and campaign strategy. Unlike traditional ad platforms, LeadKingApp replaces media buyers, copywriters, and designers with AI automation.",
       icon: (
         <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -24,8 +24,8 @@ export default function Workflow() {
     },
     {
       number: "03",
-      title: "Choose Targeting",
-      description: "Define your audience by location, demographics, interests, and behaviors.",
+      title: "AI Optimizes Targeting & Budget",
+      description: "LeadKingApp's AI automatically optimizes audience targeting, budget allocation, and bid strategies across all platforms. This multi-channel campaign automation eliminates manual optimization work.",
       icon: (
         <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
@@ -35,8 +35,8 @@ export default function Workflow() {
     },
     {
       number: "04",
-      title: "Generate AI Creatives",
-      description: "Deploy campaigns and start receiving qualified leads. AI optimizes for lead quality and cost.",
+      title: "Launch Across Multiple Platforms",
+      description: "Deploy campaigns simultaneously across Meta, Google Ads, TikTok, LinkedIn, YouTube, and other platforms. LeadKingApp's unified dashboard manages all platforms from one interface—no need to switch between Meta Ads Manager and Google Ads.",
       icon: (
         <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -45,8 +45,8 @@ export default function Workflow() {
     },
     {
       number: "05",
-      title: "Launch & Monitor",
-      description: "Deploy campaigns and track performance with real-time analytics and AI optimization.",
+      title: "AI Converts Traffic to Leads",
+      description: "LeadKingApp automatically captures leads from all platforms, scores lead quality, and delivers qualified leads to your dashboard. This automated lead generation system replaces manual lead capture and management.",
       icon: (
         <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -59,10 +59,10 @@ export default function Workflow() {
     <section className="py-24 bg-gradient-to-b from-white to-gray-50" id="how-it-works">
       <div className="container mx-auto px-6">
         <h2 className="text-4xl md:text-5xl font-bold text-center mb-4 text-gray-900">
-          How It <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Works</span>
+          How LeadKingApp <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Works</span>
         </h2>
         <p className="text-center text-gray-600 mb-16 text-lg max-w-2xl mx-auto">
-          Get started in minutes. Launch your first campaign in under 5 steps.
+          LeadKingApp is an AI lead generation platform that automates the entire lead generation workflow. Unlike traditional ad platforms that require media buyers, copywriters, and designers, LeadKingApp's AI handles campaign creation, optimization, and lead capture automatically.
         </p>
 
         <div className="max-w-5xl mx-auto">

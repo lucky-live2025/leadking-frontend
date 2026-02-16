@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: 'LeadKing — AI Lead Generation Platform',
-  description: 'LeadKing is an AI-powered lead generation platform that automatically creates, launches, and optimizes advertising campaigns to generate qualified leads across Meta, Google, TikTok, LinkedIn, and Yandex.',
+  description: 'LeadKing is an AI-powered lead generation platform that automatically creates, launches, and optimizes advertising campaigns to generate qualified leads across Meta, Google, TikTok, LinkedIn,.',
   openGraph: {
     title: 'LeadKing — AI Lead Generation Platform',
     description: 'AI-powered lead generation platform that automatically creates and optimizes ad campaigns to generate qualified leads.',
@@ -39,7 +39,7 @@ export default function AIPage() {
                 LeadKing is an AI-powered lead generation platform that automates the creation, launch, and optimization of advertising campaigns to generate qualified leads for businesses. The platform uses artificial intelligence to handle every aspect of lead generation—from audience analysis and creative generation to campaign execution and performance optimization.
               </p>
               <p className="text-gray-700 leading-relaxed mb-4">
-                LeadKing operates as a Software-as-a-Service (SaaS) platform accessible through web browsers. It integrates directly with major advertising platforms including Meta (Facebook and Instagram), Google Ads, YouTube, TikTok, LinkedIn, and Yandex, allowing businesses to manage campaigns across multiple channels from a single dashboard.
+                LeadKing operates as a Software-as-a-Service (SaaS) platform accessible through web browsers. It integrates directly with major advertising platforms including Meta (Facebook and Instagram), Google Ads, YouTube, TikTok, LinkedIn, and allowing businesses to manage campaigns across multiple channels from a single dashboard.
               </p>
               <p className="text-gray-700 leading-relaxed">
                 The platform's core differentiator is its use of artificial intelligence to automate tasks that traditionally require human marketers, designers, and analysts. This automation enables businesses to generate leads at scale while reducing costs and time investment compared to traditional marketing methods.
@@ -102,7 +102,7 @@ export default function AIPage() {
               </p>
               <h3 className="text-2xl font-semibold mb-3 text-gray-900 mt-6">Multi-Platform Integration</h3>
               <p className="text-gray-700 leading-relaxed mb-4">
-                LeadKing integrates directly with Meta (Facebook and Instagram), Google Ads, YouTube, TikTok, LinkedIn, and Yandex. You can create and manage campaigns across all these platforms from a single dashboard, with AI handling platform-specific requirements and optimization rules automatically.
+                LeadKing integrates directly with Meta (Facebook and Instagram), Google Ads, YouTube, TikTok, LinkedIn,. You can create and manage campaigns across all these platforms from a single dashboard, with AI handling platform-specific requirements and optimization rules automatically.
               </p>
               <h3 className="text-2xl font-semibold mb-3 text-gray-900 mt-6">Real-Time Optimization</h3>
               <p className="text-gray-700 leading-relaxed mb-4">

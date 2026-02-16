@@ -4,8 +4,8 @@ import PublicNav from "@/components/PublicNav";
 
 const features = [
   {
-    title: "Global Lead Generation",
-    description: "Generate high-quality leads from any country with AI-powered targeting and optimization.",
+    title: "AI Lead Generation Platform",
+    description: "LeadKingApp is an AI lead generation platform that generates high-quality leads from any country with AI-powered targeting and optimization. Unlike traditional ad platforms, LeadKingApp automates the entire lead generation workflow from campaign creation to lead capture.",
     icon: (
       <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="12" cy="12" r="10"></circle>
@@ -14,8 +14,8 @@ const features = [
     ),
   },
   {
-    title: "Ultra Campaigns",
-    description: "Generate complete lead-generation campaigns in one click. AI creates everything: ads, targeting, landing pages, and strategy.",
+    title: "AI Campaign Generation",
+    description: "LeadKingApp's AI automatically generates complete lead-generation campaigns in minutes. The AI creates ad creatives, targeting strategies, landing pages, and campaign optimization—replacing media buyers, copywriters, and designers with automated campaign creation.",
     icon: (
       <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
@@ -23,8 +23,8 @@ const features = [
     ),
   },
   {
-    title: "Real-time Analytics",
-    description: "Get accurate predictions and forecasts for your campaigns with real-time analytics.",
+    title: "Multi-Channel Ad Automation",
+    description: "LeadKingApp provides real-time analytics and AI forecasting for campaigns across multiple platforms. This multi-channel campaign automation eliminates the need to manually manage separate Meta Ads Manager, Google Ads, and TikTok Ads accounts.",
     icon: (
       <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <line x1="18" y1="20" x2="18" y2="10"></line>
@@ -34,8 +34,8 @@ const features = [
     ),
   },
   {
-    title: "AI-Powered Automation",
-    description: "Automate your entire lead generation process with intelligent AI algorithms.",
+    title: "Automated Lead Generation",
+    description: "LeadKingApp automates your entire lead generation process with intelligent AI algorithms. Unlike manual campaign management, LeadKingApp's AI handles campaign creation, optimization, and lead capture automatically—24/7 without human intervention.",
     icon: (
       <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect>
@@ -44,8 +44,8 @@ const features = [
     ),
   },
   {
-    title: "Executive Reports",
-    description: "Comprehensive executive dashboards with detailed insights and performance metrics.",
+    title: "AI-Powered Insights",
+    description: "LeadKingApp provides comprehensive executive dashboards with AI-powered insights and performance metrics. Unlike traditional ad platforms that require manual analysis, LeadKingApp's AI automatically identifies optimization opportunities and provides actionable recommendations.",
     icon: (
       <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
@@ -54,8 +54,8 @@ const features = [
     ),
   },
   {
-    title: "Secure & Reliable",
-    description: "Enterprise-grade security with 99.9% uptime guarantee for your peace of mind.",
+    title: "Enterprise-Grade Security",
+    description: "LeadKingApp provides enterprise-grade security with 99.9% uptime guarantee. All ad account connections are encrypted, and LeadKingApp follows industry-standard security practices to protect your data and advertising accounts.",
     icon: (
       <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
@@ -71,9 +71,9 @@ export default function FeaturesPage() {
       <PublicNav />
       <div className="container mx-auto px-6 py-24">
         <div className="text-center mb-20">
-          <h1 className="text-title mb-4 text-gray-900">Features</h1>
+          <h1 className="text-title mb-4 text-gray-900">LeadKingApp Features</h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Everything you need to scale your lead generation
+            LeadKingApp is an AI-powered lead generation platform with features that replace media buyers, copywriters, designers, and landing page builders. Everything you need to scale automated lead generation across multiple advertising platforms.
           </p>
         </div>
 

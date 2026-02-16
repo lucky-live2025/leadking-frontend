@@ -17,7 +17,7 @@ export function generateSEOMetadata({
 }): Metadata {
   const appName = process.env.NEXT_PUBLIC_APP_NAME || "Lead King";
   const fullTitle = title ? `${title} | ${appName}` : appName;
-  const defaultDescription = `AI-powered marketing campaign generator for Meta, TikTok, Google, YouTube, LinkedIn, Yandex, and Email Ads.`;
+  const defaultDescription = `AI-powered marketing campaign generator for Meta, TikTok, Google, YouTube, LinkedIn, and Email Ads.`;
   const finalDescription = description || defaultDescription;
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://leadking.ai";
   const finalCanonical = canonical ? `${siteUrl}${canonical}` : siteUrl;

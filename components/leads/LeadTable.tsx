@@ -1,24 +1,7 @@
 "use client";
 
 import { useState } from "react";
-
-interface Lead {
-  id: number;
-  name?: string;
-  email?: string;
-  phone?: string;
-  country?: string;
-  state?: string;
-  city?: string;
-  zipCode?: string;
-  platform?: string;
-  status: string;
-  source?: string;
-  campaign?: { name: string };
-  user?: { email: string };
-  notes?: string;
-  createdAt: string;
-}
+import { Lead } from "@/types/lead";
 
 interface LeadTableProps {
   leads: Lead[];
@@ -78,6 +61,7 @@ export default function LeadTable({ leads, onRowClick, sortable = true }: LeadTa
             <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">City</th>
             <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">ZIP</th>
             <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Platform</th>
+            <th className="px-4 py-3 text-left text-sm font-semibold text-gray-300">Score</th>
             <th
               className="px-4 py-3 text-left text-sm font-semibold text-gray-300 cursor-pointer hover:text-white"
               onClick={() => handleSort("status")}
@@ -110,6 +94,23 @@ export default function LeadTable({ leads, onRowClick, sortable = true }: LeadTa
               <td className="px-4 py-3 text-sm text-gray-300">{lead.zipCode || "—"}</td>
               <td className="px-4 py-3 text-sm text-gray-300">{lead.platform || "—"}</td>
               <td className="px-4 py-3">
+                {lead.score !== null && lead.score !== undefined ? (
+                  <span
+                    className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      lead.score >= 80
+                        ? "bg-green-500/20 text-green-300"
+                        : lead.score >= 60
+                        ? "bg-yellow-500/20 text-yellow-300"
+                        : "bg-red-500/20 text-red-300"
+                    }`}
+                  >
+                    {lead.score}/100
+                  </span>
+                ) : (
+                  <span className="text-gray-500 text-xs">—</span>
+                )}
+              </td>
+              <td className="px-4 py-3">
                 <span
                   className={`px-2 py-1 rounded-full text-xs font-medium ${
                     lead.status === "NEW"
@@ -118,6 +119,8 @@ export default function LeadTable({ leads, onRowClick, sortable = true }: LeadTa
                       ? "bg-yellow-500/20 text-yellow-300"
                       : lead.status === "QUALIFIED"
                       ? "bg-green-500/20 text-green-300"
+                      : lead.status === "CONVERTED"
+                      ? "bg-purple-500/20 text-purple-300"
                       : "bg-gray-500/20 text-gray-300"
                   }`}
                 >

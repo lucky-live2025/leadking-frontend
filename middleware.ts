@@ -4,6 +4,13 @@ import type { NextRequest } from 'next/server';
 export function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
+  // Block Server Action requests to prevent errors
+  if (request.headers.get('content-type')?.includes('text/plain') && 
+      request.method === 'POST' &&
+      pathname.includes('_next')) {
+    return new NextResponse('Server Actions disabled', { status: 404 });
+  }
+
   // Public routes that don't require authentication
   // Explicitly allow login, register, auth, and api/auth routes
   if (
@@ -20,7 +27,12 @@ export function middleware(request: NextRequest) {
     pathname.startsWith('/terms') ||
     pathname.startsWith('/support')
   ) {
-    return NextResponse.next();
+    const response = NextResponse.next();
+    // Disable Server Actions for login page
+    if (pathname.startsWith('/login')) {
+      response.headers.set('x-server-actions', 'disabled');
+    }
+    return response;
   }
 
   // For all other routes, let them through and let client-side handle auth

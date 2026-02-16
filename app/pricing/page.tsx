@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import PublicNav from "@/components/PublicNav";
+import Footer from "@/app/(marketing)/landing/components/Footer";
 import { isPricingUnlocked } from "@/lib/auth-check";
 
 export default function PricingPage() {
@@ -25,44 +26,68 @@ export default function PricingPage() {
   const pricingTiers = [
     {
       name: "Starter",
-      price: 250,
-      description: "For beginners validating ideas.",
+      price: 99,
+      priceDisplay: "$99",
+      description: "For founders & small teams validating demand",
       features: [
-        "10 campaigns per month",
-        "Global AI targeting",
-        "Starter analytics"
-      ]
+        "Up to 10 campaigns per month",
+        "AI image generation",
+        "Multi-platform automation",
+        "Real-time analytics",
+        "Email support",
+        "Basic AI targeting"
+      ],
+      ctaText: "Subscribe",
+      ctaType: "checkout" as const
     },
     {
       name: "Professional",
-      price: 750,
-      description: "For marketers scaling globally.",
+      price: 499,
+      priceDisplay: "$499",
+      description: "For businesses running paid traffic seriously",
+      popular: true,
       features: [
-        "50 campaigns per month",
-        "AI optimization engine",
-        "Forecast analytics"
-      ]
+        "Up to 50 campaigns per month",
+        "Full AI ad generation",
+        "Limited AI video (3/day)",
+        "Limited landing pages (1/day)",
+        "Advanced AI targeting",
+        "Priority email support"
+      ],
+      ctaText: "Subscribe",
+      ctaType: "checkout" as const
     },
     {
       name: "Ultra",
-      price: 7500,
-      description: "For agencies & serious power users.",
-      popular: true,
+      price: 4999,
+      priceDisplay: "$4,999",
+      description: "For agencies & advanced operators scaling aggressively",
       features: [
         "Unlimited campaigns",
-        "Full AI Engine access",
-        "Executive analytics dashboard"
-      ]
+        "Unlimited AI video generation",
+        "Unlimited landing pages",
+        "Priority processing",
+        "Dedicated support manager",
+        "Advanced analytics & forecasting"
+      ],
+      ctaText: "Request Access",
+      ctaType: "contact" as const
     },
     {
       name: "Enterprise",
-      price: 15000,
-      description: "For global-scale operations.",
+      price: null,
+      priceDisplay: "Custom",
+      description: "For global-scale operations",
       features: [
-        "Unlimited access",
-        "Direct API integration",
-        "Priority support"
-      ]
+        "Everything in Ultra",
+        "Dedicated infrastructure",
+        "White-glove onboarding",
+        "Custom integrations",
+        "Dedicated account manager",
+        "SLA guarantees"
+      ],
+      ctaText: "Contact Sales",
+      ctaType: "enterprise" as const
     }
   ];
 
@@ -72,21 +97,22 @@ export default function PricingPage() {
     <div className="bg-white min-h-screen">
       <PublicNav />
 
-      <section className="pt-24 pb-16 bg-gradient-premium">
+      <section className="pt-24 pb-16 bg-gradient-premium min-h-screen">
         <div className="text-center mb-14">
-          <h1 className="text-title mb-4 text-gray-900">Pricing</h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Scalable AI marketing power for teams who demand precision, speed, and global reach.
-            <br />
-            <span className="text-sm text-gray-500">Crypto-only subscriptions. Cancel anytime.</span>
+          <h1 className="text-title mb-4 text-gray-900">LeadKingApp Pricing</h1>
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-4">
+            LeadKingApp is an AI-powered lead generation platform that replaces media buyers, copywriters, designers, and landing page builders with AI automation. Our pricing is designed for businesses that want automated lead generation without the cost of hiring marketing teams.
+          </p>
+          <p className="text-sm text-gray-500">
+            Secure payments via card or crypto. Cancel anytime.
           </p>
         </div>
 
         <div className="relative max-w-7xl mx-auto px-6">
-          {/* Lock overlay */}
+          {/* Lock overlay - only covers pricing cards, not entire page */}
           {isLocked && (
-            <div className="absolute inset-0 bg-white/80 backdrop-blur-md z-20 rounded-3xl flex items-center justify-center min-h-[600px]">
-              <div className="text-center p-8">
+            <div className="absolute inset-0 bg-white/80 backdrop-blur-md z-20 rounded-3xl flex items-center justify-center min-h-[600px] pointer-events-none">
+              <div className="text-center p-8 pointer-events-auto bg-white rounded-2xl shadow-xl">
                 <div className="text-6xl mb-4">🔒</div>
                 <h3 className="text-2xl font-bold mb-4 text-gray-900">Pricing Unlocked After Account Approval</h3>
                 <p className="text-gray-600 mb-6 max-w-md mx-auto">
@@ -116,8 +142,8 @@ export default function PricingPage() {
                 <h3 className="text-2xl font-semibold text-gray-900 mb-2">{tier.name}</h3>
                 <p className="text-sm text-gray-600 mb-6">{tier.description}</p>
                 <p className="text-4xl font-bold text-gray-900 mb-6">
-                  ${tier.price.toLocaleString()}
-                  <span className="text-lg font-normal text-gray-600">/mo</span>
+                  {tier.priceDisplay}
+                  {tier.price !== null && <span className="text-lg font-normal text-gray-600">/mo</span>}
                 </p>
                 <ul className="space-y-3 text-sm text-gray-700 mb-10">
                   {tier.features.map((feature, idx) => (
@@ -129,23 +155,68 @@ export default function PricingPage() {
                     </li>
                   ))}
                 </ul>
-                <Link
-                  href={isUnlocked ? "/dashboard/subscription" : "/signup"}
-                  className={`block w-full text-center py-3 px-6 rounded-xl font-semibold transition-all duration-300 ${
-                    tier.popular
-                      ? "btn-premium"
-                      : index === 3
-                      ? "btn-premium-dark"
-                      : "btn-premium"
-                  }`}
-                >
-                  {isUnlocked ? "Subscribe (Crypto)" : "Get Started"}
-                </Link>
+                {tier.ctaType === "checkout" ? (
+                  <Link
+                    href={isUnlocked ? "/dashboard/subscription" : "/signup"}
+                    className={`block w-full text-center py-3 px-6 rounded-xl font-semibold transition-all duration-300 ${
+                      tier.popular
+                        ? "btn-premium"
+                        : "btn-premium"
+                    }`}
+                  >
+                    {tier.ctaText}
+                  </Link>
+                ) : tier.ctaType === "contact" ? (
+                  <Link
+                    href="/support"
+                    className={`block w-full text-center py-3 px-6 rounded-xl font-semibold transition-all duration-300 ${
+                      tier.popular
+                        ? "btn-premium"
+                        : "btn-premium"
+                    }`}
+                  >
+                    {tier.ctaText}
+                  </Link>
+                ) : (
+                  <Link
+                    href="/enterprise-request"
+                    className={`block w-full text-center py-3 px-6 rounded-xl font-semibold transition-all duration-300 ${
+                      tier.popular
+                        ? "btn-premium"
+                        : "btn-premium-dark"
+                    }`}
+                  >
+                    {tier.ctaText}
+                  </Link>
+                )}
               </div>
             ))}
           </div>
         </div>
       </section>
+
+      {/* Additional content below pricing to ensure page is scrollable */}
+      <section className="py-16 bg-white">
+        <div className="container mx-auto px-6 max-w-4xl">
+          <h2 className="text-3xl font-bold text-center mb-8 text-gray-900">Why Choose LeadKingApp?</h2>
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="text-center">
+              <h3 className="text-xl font-semibold mb-3 text-gray-900">No Media Buyers Needed</h3>
+              <p className="text-gray-600">LeadKingApp's AI automatically creates campaigns, optimizes targeting, and manages budgets across multiple platforms—replacing the need for media buyers.</p>
+            </div>
+            <div className="text-center">
+              <h3 className="text-xl font-semibold mb-3 text-gray-900">No Copywriters or Designers</h3>
+              <p className="text-gray-600">AI automatically generates ad creatives, builds landing pages, and creates all content—eliminating the need for copywriters and designers.</p>
+            </div>
+            <div className="text-center">
+              <h3 className="text-xl font-semibold mb-3 text-gray-900">Multi-Platform Automation</h3>
+              <p className="text-gray-600">Manage campaigns across Meta, Google Ads, TikTok, LinkedIn, and more from one unified dashboard with AI-powered automation.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <Footer />
     </div>
   );
 }

@@ -7,8 +7,8 @@ export default function Page() {
   const router = useRouter();
   
   useEffect(() => {
-    // Redirect to the actual Ultra Campaign page
-    router.replace("/ultra-campaign");
+    // Redirect to campaign creation with ULTRA mode
+    router.replace("/dashboard/campaigns/create?mode=ultra");
   }, [router]);
 
   return (

@@ -69,7 +69,7 @@ export default function LeadKingVsAgenciesPage() {
                   </tr>
                   <tr>
                     <td className="border border-gray-300 px-4 py-3 text-gray-700 font-medium">Platform Coverage</td>
-                    <td className="border border-gray-300 px-4 py-3 text-gray-700">9+ platforms simultaneously</td>
+                    <td className="border border-gray-300 px-4 py-3 text-gray-700">8+ platforms simultaneously</td>
                     <td className="border border-gray-300 px-4 py-3 text-gray-700">Typically 1-3 platforms</td>
                   </tr>
                   <tr className="bg-gray-50">

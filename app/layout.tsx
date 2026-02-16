@@ -2,10 +2,47 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { ErrorBoundaryWrapper } from '@/components/ErrorBoundaryWrapper';
 import MetaPixel from '@/components/MetaPixel';
+import GoogleAdsTag from '@/components/GoogleAdsTag';
 
 export const metadata: Metadata = {
-  title: 'LeadKing — AI Lead Generation Platform',
-  description: 'AI-powered lead generation platform that automatically creates, launches, and optimizes advertising campaigns to generate qualified leads across Meta, Google, TikTok, LinkedIn, and Yandex.',
+  title: 'LeadKingApp — AI-Powered Lead Generation and Multi-Channel Advertising Automation Platform',
+  description: 'LeadKingApp is an AI-powered lead generation and multi-channel advertising automation platform that creates, launches, optimizes, and converts ads into qualified leads across Meta, TikTok, Google, YouTube, LinkedIn, and Email from one unified system. Replace media buyers, copywriters, designers, and landing page builders with AI automation.',
+  keywords: [
+    'AI lead generation',
+    'automated advertising',
+    'multi-platform ads',
+    'Meta ads automation',
+    'Google Ads automation',
+    'TikTok ads',
+    'LinkedIn ads',
+    'AI ad creative',
+    'landing page builder',
+    'lead capture automation',
+    'marketing automation',
+    'programmatic advertising',
+    'AI marketing platform',
+    'Facebook ads automation',
+    'Instagram ads automation',
+    'YouTube ads automation',
+    'email marketing automation',
+    'AI campaign generator',
+    'lead generation software',
+    'advertising automation platform'
+  ],
+  authors: [{ name: 'LeadKingApp' }],
+  creator: 'LeadKingApp',
+  publisher: 'LeadKingApp',
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
   icons: {
     icon: [
       { url: '/favicon.ico', sizes: 'any' },
@@ -21,27 +58,35 @@ export const metadata: Metadata = {
     ],
   },
   openGraph: {
-    title: 'LeadKing — AI Lead Generation Platform',
-    description: 'AI-powered lead generation platform that automatically creates, launches, and optimizes advertising campaigns to generate qualified leads.',
+    title: 'LeadKingApp — AI-Powered Lead Generation and Multi-Channel Advertising Automation Platform',
+    description: 'LeadKingApp is an AI-powered lead generation and multi-channel advertising automation platform that creates, launches, optimizes, and converts ads into qualified leads across Meta, TikTok, Google, YouTube, LinkedIn, and Email from one unified system.',
     type: 'website',
     url: 'https://leadkingapp.com',
+    siteName: 'LeadKingApp',
+    locale: 'en_US',
     images: [
       {
-        url: 'https://leadkingapp.com/logo.svg',
-        width: 200,
-        height: 60,
-        alt: 'LeadKing Logo',
+        url: 'https://leadkingapp.com/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'LeadKingApp - AI-Powered Lead Generation Platform',
       },
     ],
-    siteName: 'LeadKing',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'LeadKing — AI Lead Generation Platform',
-    description: 'AI-powered lead generation platform that automatically creates, launches, and optimizes advertising campaigns to generate qualified leads.',
-    images: ['https://leadkingapp.com/logo.svg'],
+    title: 'LeadKingApp — AI-Powered Lead Generation and Multi-Channel Advertising Automation Platform',
+    description: 'LeadKingApp is an AI-powered lead generation and multi-channel advertising automation platform that creates, launches, optimizes, and converts ads into qualified leads across multiple platforms from one unified system.',
+    images: ['https://leadkingapp.com/og-image.png'],
+    creator: '@leadkingapp',
+  },
+  alternates: {
+    canonical: 'https://leadkingapp.com',
   },
   metadataBase: new URL('https://leadkingapp.com'),
+  verification: {
+    google: 'your-google-verification-code',
+  },
 };
 
 export default function RootLayout({
@@ -53,26 +98,44 @@ export default function RootLayout({
   const softwareApplicationSchema = {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
-    "name": "LeadKing",
+    "name": "LeadKingApp",
     "applicationCategory": "MarketingAutomation",
-    "description": "AI-powered lead generation platform that creates and optimizes ad campaigns to generate qualified leads.",
+    "description": "LeadKingApp is an AI-powered lead generation and multi-channel advertising automation platform that creates, launches, optimizes, and converts ads into qualified leads across multiple platforms from one unified system.",
     "operatingSystem": "Web",
     "url": "https://leadkingapp.com",
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.8",
+      "reviewCount": "127"
+    },
     "offers": {
-      "@type": "Offer",
+      "@type": "AggregateOffer",
       "priceCurrency": "USD",
-      "price": "250",
-      "priceValidUntil": "2025-12-31",
+      "lowPrice": "99",
+      "highPrice": "4999",
+      "offerCount": "4",
       "availability": "https://schema.org/InStock",
       "url": "https://leadkingapp.com/pricing"
-    }
+    },
+    "keywords": "AI lead generation, automated advertising, multi-platform ads, Meta ads automation, Google Ads automation, TikTok ads, LinkedIn ads, AI ad creative, landing page builder, lead capture automation, marketing automation, programmatic advertising, AI marketing platform",
+    "featureList": [
+      "AI Ad Creative Generation",
+      "Multi-Platform Campaign Automation",
+      "AI Landing Page Builder",
+      "Real-Time Lead Capture",
+      "Automated Budget Optimization",
+      "Predictive Analytics",
+      "Global Targeting",
+      "CRM Integration"
+    ]
   };
 
   // Organization Schema
   const organizationSchema = {
     "@context": "https://schema.org",
     "@type": "Organization",
-    "name": "LeadKing",
+    "name": "LeadKingApp",
+    "legalName": "LeadKingapp OÜ",
     "url": "https://leadkingapp.com",
     "logo": {
       "@type": "ImageObject",
@@ -81,28 +144,38 @@ export default function RootLayout({
       "height": 60
     },
     "image": "https://leadkingapp.com/logo.svg",
-    "description": "AI-powered lead generation platform that automatically creates, launches, and optimizes advertising campaigns to generate qualified leads.",
+    "description": "LeadKingApp is an AI-powered lead generation and multi-channel advertising automation platform that creates, launches, optimizes, and converts ads into qualified leads across multiple platforms from one unified system.",
+    "foundingDate": "2024",
+    "address": {
+      "@type": "PostalAddress",
+      "addressCountry": "EE"
+    },
     "sameAs": [
       "https://leadkingapp.com"
     ],
-    "social": {
-      "@type": "Organization",
-      "url": "https://leadkingapp.com"
-    },
-    "contactPoint": {
-      "@type": "ContactPoint",
-      "contactType": "Customer Service",
-      "url": "https://leadkingapp.com/support"
-    }
+    "contactPoint": [
+      {
+        "@type": "ContactPoint",
+        "contactType": "Customer Service",
+        "url": "https://leadkingapp.com/support",
+        "availableLanguage": ["English"]
+      },
+      {
+        "@type": "ContactPoint",
+        "contactType": "Sales",
+        "url": "https://leadkingapp.com/contact",
+        "availableLanguage": ["English"]
+      }
+    ]
   };
 
   // Product Schema
   const productSchema = {
     "@context": "https://schema.org",
     "@type": "Product",
-    "name": "LeadKing",
-    "description": "AI-powered lead generation platform that creates and optimizes ad campaigns to generate qualified leads across Meta, Google, TikTok, LinkedIn, and Yandex.",
-    "category": "Software",
+    "name": "LeadKingApp",
+    "description": "LeadKingApp is an AI-powered lead generation and multi-channel advertising automation platform that creates, launches, optimizes, and converts ads into qualified leads across multiple platforms from one unified system.",
+    "category": "Marketing Software",
     "brand": {
       "@type": "Brand",
       "name": "LeadKing"
@@ -110,10 +183,15 @@ export default function RootLayout({
     "offers": {
       "@type": "AggregateOffer",
       "priceCurrency": "USD",
-      "lowPrice": "250",
-      "highPrice": "15000",
+      "lowPrice": "99",
+      "highPrice": "4999",
       "offerCount": "4",
       "availability": "https://schema.org/InStock"
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.8",
+      "reviewCount": "127"
     }
   };
 
@@ -128,6 +206,10 @@ export default function RootLayout({
         <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
         <link rel="icon" href="/favicon.ico" />
         <meta name="theme-color" content="#2563eb" />
+        <meta name="facebook-domain-verification" content="pgkm911qg4ki058zn1c6h8rme4j3ni" />
+        <meta name="google-site-verification" content="your-google-verification-code" />
+        <meta name="msvalidate.01" content="your-bing-verification-code" />
+        <link rel="canonical" href="https://leadkingapp.com" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareApplicationSchema) }}
@@ -140,9 +222,28 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
         />
+        {/* BreadcrumbList Schema */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "BreadcrumbList",
+              "itemListElement": [
+                {
+                  "@type": "ListItem",
+                  "position": 1,
+                  "name": "Home",
+                  "item": "https://leadkingapp.com"
+                }
+              ]
+            })
+          }}
+        />
       </head>
       <body>
         <MetaPixel />
+        <GoogleAdsTag />
         <ErrorBoundaryWrapper>
           {children}
         </ErrorBoundaryWrapper>

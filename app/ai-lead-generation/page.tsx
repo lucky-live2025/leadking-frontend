@@ -44,7 +44,7 @@ export default function AILeadGenerationPage() {
         "name": "What platforms does LeadKing support?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "LeadKing supports Meta (Facebook and Instagram), Google Ads, YouTube, TikTok, LinkedIn, and Yandex. The platform manages campaigns across all these platforms from a single dashboard."
+          "text": "LeadKing supports Meta (Facebook and Instagram), Google Ads, YouTube, TikTok, LinkedIn,. The platform manages campaigns across all these platforms from a single dashboard."
         }
       },
       {
@@ -166,7 +166,7 @@ export default function AILeadGenerationPage() {
                 LeadKing was designed from the ground up as an AI-first lead generation platform. Unlike traditional marketing tools that have been retrofitted with AI features, LeadKing's architecture is built around artificial intelligence at every level. The platform uses AI for audience analysis, creative generation, campaign optimization, lead scoring, and performance forecasting.
               </p>
               <p className="text-gray-700 leading-relaxed mb-4">
-                The platform's multi-platform approach reflects the reality that modern businesses need to reach customers wherever they are. LeadKing integrates with Meta (Facebook and Instagram), Google Ads, YouTube, TikTok, LinkedIn, and Yandex, allowing businesses to launch coordinated campaigns across all major advertising channels. AI manages the complexity of different platform requirements, bidding strategies, and optimization rules, presenting a unified interface to users.
+                The platform's multi-platform approach reflects the reality that modern businesses need to reach customers wherever they are. LeadKing integrates with Meta (Facebook and Instagram), Google Ads, YouTube, TikTok, LinkedIn, and allowing businesses to launch coordinated campaigns across all major advertising channels. AI manages the complexity of different platform requirements, bidding strategies, and optimization rules, presenting a unified interface to users.
               </p>
               <p className="text-gray-700 leading-relaxed mb-4">
                 Real-time optimization is another core differentiator. While many platforms update campaigns daily or weekly, LeadKing's AI makes adjustments continuously based on live performance data. This means that if an ad starts underperforming, the AI can pause it and shift budget to better-performing ads within minutes, not days. This responsiveness can significantly improve campaign ROI.

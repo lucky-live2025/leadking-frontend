@@ -161,52 +161,133 @@ export default function LandingPageView() {
         </div>
       </header>
 
-      {/* Hero Section */}
-      <section className={`py-20 px-4 ${colors.bg}`}>
-        <div className="container mx-auto max-w-6xl">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-            <div>
-              <h1 className={`text-4xl md:text-5xl font-bold mb-6 ${colors.text}`}>
-                {productName}
-              </h1>
-              <p className={`text-xl md:text-2xl mb-8 ${colors.text} opacity-90`}>
-                {offer}
-              </p>
+      {/* Hero Section - Premium Design */}
+      <section className={`py-24 md:py-32 px-4 ${colors.bg} relative overflow-hidden`}>
+        {/* Premium gradient background with animation */}
+        <div className={`absolute inset-0 bg-gradient-to-br ${
+          theme === 'corporate' 
+            ? 'from-blue-600 via-indigo-700 to-blue-800' 
+            : theme === 'dark'
+            ? 'from-purple-900 via-indigo-900 to-pink-900'
+            : theme === 'clean'
+            ? 'from-blue-400 via-purple-500 to-pink-500'
+            : 'from-blue-600 via-purple-600 to-pink-500'
+        } opacity-95`}></div>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(255,255,255,0.15),transparent_60%)]"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(255,255,255,0.1),transparent_50%)]"></div>
+        
+        <div className="container mx-auto max-w-7xl relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            <div className="space-y-6">
+              <div>
+                <h1 className={`text-5xl md:text-7xl font-extrabold mb-6 ${colors.text} leading-tight tracking-tight`}>
+                  {productName}
+                </h1>
+                <p className={`text-xl md:text-2xl mb-8 ${colors.text} opacity-95 leading-relaxed font-medium`}>
+                  {offer}
+                </p>
+              </div>
               
               {Array.isArray(benefits) && benefits.length > 0 && (
-                <ul className="space-y-3 mb-8">
-                  {benefits.map((benefit: string, index: number) => (
-                    <li key={index} className="flex items-start">
-                      <span className="text-green-500 mr-3 text-xl">✓</span>
-                      <span className={`${colors.text} text-lg`}>{benefit}</span>
-                    </li>
-                  ))}
-                </ul>
+                <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 mb-8">
+                  <ul className="space-y-4">
+                    {benefits.map((benefit: string, index: number) => (
+                      <li key={index} className="flex items-start gap-4">
+                        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-green-500 flex items-center justify-center mt-0.5">
+                          <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                          </svg>
+                        </div>
+                        <span className={`${colors.text} text-lg font-medium flex-1`}>{benefit}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               )}
 
               <a
                 href="#cta"
-                className={`inline-block px-8 py-4 ${colors.accent} ${colors.accentHover} text-white font-semibold rounded-lg transition-colors shadow-lg`}
+                className={`inline-block px-10 py-5 ${colors.accent} ${colors.accentHover} text-white font-bold rounded-xl transition-all shadow-2xl hover:shadow-3xl hover:-translate-y-1 text-lg`}
+                style={{
+                  background: theme === 'corporate' 
+                    ? 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)'
+                    : theme === 'dark'
+                    ? 'linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%)'
+                    : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                }}
               >
                 {ctaText}
               </a>
             </div>
             
-            <div className="hidden md:block">
-              <div className={`${colors.card} rounded-xl p-8 shadow-2xl`}>
-                <div className="aspect-video bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white text-4xl">🎯</span>
-                </div>
+            <div className="hidden lg:block">
+              <div className="relative rounded-3xl overflow-hidden shadow-2xl transform hover:scale-105 transition-transform duration-300">
+                {landingPage.metadata?.mainImage ? (
+                  <div className="relative aspect-video">
+                    <img
+                      src={landingPage.metadata.mainImage}
+                      alt={productName}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        // Fallback to premium gradient
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        if (target.parentElement) {
+                          target.parentElement.innerHTML = `
+                            <div class="w-full h-full bg-gradient-to-br ${theme === 'corporate' ? 'from-blue-600 via-indigo-700 to-blue-800' : theme === 'dark' ? 'from-purple-900 via-indigo-900 to-pink-900' : 'from-blue-500 via-purple-600 to-pink-500'} flex items-center justify-center relative overflow-hidden">
+                              <div class="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent"></div>
+                              <span class="text-white text-7xl relative z-10">✨</span>
+                            </div>
+                          `;
+                        }
+                      }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+                  </div>
+                ) : (
+                  <div className={`aspect-video bg-gradient-to-br ${theme === 'corporate' ? 'from-blue-600 via-indigo-700 to-blue-800' : theme === 'dark' ? 'from-purple-900 via-indigo-900 to-pink-900' : 'from-blue-500 via-purple-600 to-pink-500'} flex items-center justify-center relative overflow-hidden`}>
+                    <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent"></div>
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.2),transparent_70%)]"></div>
+                    <span className="text-white text-7xl relative z-10 animate-pulse">✨</span>
+                  </div>
+                )}
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* CTA Form Section */}
-      <section id="cta" className={`py-16 px-4 ${colors.card}`}>
-        <div className="container mx-auto max-w-2xl">
-          <div className={`${colors.bg} rounded-xl p-8 shadow-lg border border-gray-200`}>
+      {/* Features/Sections Section - NEW */}
+      {Array.isArray(benefits) && benefits.length > 0 && (
+        <section className={`py-20 px-4 ${colors.bg}`}>
+          <div className="container mx-auto max-w-6xl">
+            <h2 className={`text-4xl font-bold text-center mb-12 ${colors.text}`}>
+              Why Choose {productName}?
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {benefits.map((benefit: string, index: number) => (
+                <div
+                  key={index}
+                  className={`${colors.card} rounded-2xl p-8 shadow-xl border border-gray-200 hover:shadow-2xl transition-all transform hover:-translate-y-2`}
+                >
+                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center mb-6 mx-auto">
+                    <span className="text-3xl">✨</span>
+                  </div>
+                  <h3 className={`text-xl font-bold text-center mb-4 ${colors.text}`}>
+                    {benefit}
+                  </h3>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* CTA Form Section - Enhanced */}
+      <section id="cta" className={`py-20 px-4 ${colors.card} relative overflow-hidden`}>
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-purple-50 opacity-50"></div>
+        <div className="container mx-auto max-w-2xl relative z-10">
+          <div className={`${colors.bg} rounded-2xl p-10 shadow-2xl border-2 border-gray-200`}>
             {submitted ? (
               <div className="text-center">
                 <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mb-4">
@@ -283,6 +364,9 @@ export default function LandingPageView() {
       {/* Footer */}
       <footer className={`${colors.card} py-8 px-4 border-t border-gray-700`}>
         <div className="container mx-auto max-w-6xl text-center">
+          <p className={`${colors.text} opacity-70 text-xs mb-4`}>
+            LeadKingapp OÜ · No. 17409590
+          </p>
           <p className={`${colors.text} opacity-70`}>
             © {new Date().getFullYear()} {businessName}. All rights reserved.
           </p>

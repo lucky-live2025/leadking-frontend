@@ -5,10 +5,37 @@ import { apiGet, apiPost } from "@/lib/api";
 import Link from "next/link";
 
 const TIERS = [
-  { id: 1, name: "Starter", price: 250, tier: "BASIC" },
-  { id: 2, name: "Pro", price: 750, tier: "PRO" },
-  { id: 3, name: "Ultra", price: 7500, tier: "TITANIUM" },
-  { id: 4, name: "Enterprise", price: 15000, tier: "INFINITY" },
+  { 
+    id: 1, 
+    name: "Starter", 
+    price: 99, 
+    tier: "BASIC", 
+    ctaType: "checkout" as const,
+    stripeLink: "https://buy.stripe.com/bJe14n4ll84981SdNM43S00"
+  },
+  { 
+    id: 2, 
+    name: "Professional", 
+    price: 499, 
+    tier: "PRO", 
+    ctaType: "checkout" as const,
+    stripeLink: "https://buy.stripe.com/14A5kD6tt4RXci8cJI43S01"
+  },
+  { 
+    id: 3, 
+    name: "Ultra", 
+    price: 4999, 
+    tier: "TITANIUM", 
+    ctaType: "checkout" as const,
+    stripeLink: "https://buy.stripe.com/6oU14nbNN5W14PG25443S03"
+  },
+  { 
+    id: 4, 
+    name: "Enterprise", 
+    price: null, 
+    tier: "INFINITY", 
+    ctaType: "enterprise" as const 
+  },
 ];
 
 interface PaymentData {
@@ -30,6 +57,7 @@ export default function SubscriptionPage() {
   const [txHash, setTxHash] = useState("");
   const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
   const [paymentStatus, setPaymentStatus] = useState<string | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<"card" | "crypto" | null>(null);
 
   useEffect(() => {
     loadSubscription();
@@ -70,10 +98,22 @@ export default function SubscriptionPage() {
     }
   }
 
-  async function handleSubscribe(tier: typeof TIERS[0]) {
+  function handlePaymentMethodSelect(tier: typeof TIERS[0], method: "card" | "crypto") {
+    if (method === "card" && tier.stripeLink) {
+      // Redirect to Stripe payment link - don't change state, just open link
+      window.open(tier.stripeLink, "_blank");
+      return;
+    }
+    
+    // For crypto, proceed directly to create payment
+    setPaymentMethod(method);
+    setSelectedTier(tier.id);
+    handleCryptoSubscribe(tier);
+  }
+
+  async function handleCryptoSubscribe(tier: typeof TIERS[0]) {
     setLoading(true);
     setError(null);
-    setSelectedTier(tier.id);
     setPaymentData(null);
     setTxHash("");
     setPaymentStatus(null);
@@ -101,6 +141,7 @@ export default function SubscriptionPage() {
       if (payment && (payment.status === 'disabled' || payment.status === 'error')) {
         setError(payment.message || "Crypto billing temporarily unavailable");
         setSelectedTier(null);
+        setPaymentMethod(null);
         setLoading(false);
         return;
       }
@@ -110,6 +151,7 @@ export default function SubscriptionPage() {
         console.error('[Subscription] Invalid payment response:', payment);
         setError("Crypto billing temporarily unavailable. Please try again or contact support.");
         setSelectedTier(null);
+        setPaymentMethod(null);
         setLoading(false);
         return;
       }
@@ -132,6 +174,7 @@ export default function SubscriptionPage() {
         setError(err.message || "Failed to create payment. Please try again.");
       }
       setSelectedTier(null);
+      setPaymentMethod(null);
     } finally {
       setLoading(false);
     }
@@ -239,6 +282,7 @@ export default function SubscriptionPage() {
                     setTxHash("");
                     setSelectedTier(null);
                     setPaymentStatus(null);
+                    setPaymentMethod(null);
                   }}
                   className="text-gray-400 hover:text-gray-600 text-2xl"
                 >
@@ -257,7 +301,10 @@ export default function SubscriptionPage() {
 
               <div className="text-center mb-4">
                 <p className="text-lg font-semibold text-gray-900 mb-2">
-                  Send {paymentData.amount} USDT to:
+                  Send {paymentData.amount} USDT ERC20 to:
+                </p>
+                <p className="text-sm text-red-600 font-medium mb-2">
+                  ⚠️ Important: Use ERC20 network only! Do NOT send TRC20.
                 </p>
                 <div className="bg-gray-50 rounded-lg p-4 mb-4">
                   <img src={paymentData.qrCode} alt="Payment QR Code" className="mx-auto mb-4 w-48 h-48" />
@@ -322,18 +369,56 @@ export default function SubscriptionPage() {
               className="bg-white rounded-xl p-6 border border-gray-200 shadow-md hover:shadow-lg transition-all"
             >
               <h3 className="text-xl font-bold text-gray-900 mb-2">{tier.name}</h3>
-              <p className="text-3xl font-bold text-blue-600 mb-4">{tier.price} USDT</p>
-              <button
-                onClick={() => handleSubscribe(tier)}
-                disabled={loading || (paymentData !== null && selectedTier === tier.id)}
-                className="w-full px-4 py-2 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loading && selectedTier === tier.id
-                  ? "Creating Payment..."
-                  : paymentData && selectedTier === tier.id
-                  ? "Payment in Progress"
-                  : "Subscribe"}
-              </button>
+              <p className="text-3xl font-bold text-blue-600 mb-4">
+                {tier.price !== null ? `$${tier.price}` : "Custom"}
+              </p>
+              {tier.price !== null && (
+                <p className="text-sm text-gray-500 mb-2">
+                  or {tier.price} USDT ERC20
+                </p>
+              )}
+              {tier.ctaType === "checkout" ? (
+                <div className="space-y-3">
+                  {/* Show buttons if no payment modal is open for this tier */}
+                  {!(paymentData && selectedTier === tier.id) && (
+                    <>
+                      <button
+                        onClick={() => handlePaymentMethodSelect(tier, "card")}
+                        disabled={loading && selectedTier === tier.id}
+                        className="w-full px-4 py-2 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors shadow-md flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                        </svg>
+                        Pay with Card
+                      </button>
+                      <button
+                        onClick={() => handlePaymentMethodSelect(tier, "crypto")}
+                        disabled={loading && selectedTier === tier.id}
+                        className="w-full px-4 py-2 bg-gray-800 text-white rounded-xl font-semibold hover:bg-gray-900 transition-colors shadow-md flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Pay with Crypto
+                      </button>
+                    </>
+                  )}
+                  {/* Show loading state only when actively processing this tier */}
+                  {selectedTier === tier.id && paymentMethod === "crypto" && loading && !paymentData && (
+                    <div className="text-center text-sm text-gray-600 py-2">
+                      Creating Payment...
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <Link
+                  href="/enterprise-request"
+                  className="block w-full px-4 py-2 bg-gray-800 text-white rounded-xl font-semibold hover:bg-gray-900 transition-colors shadow-md text-center"
+                >
+                  Contact Sales
+                </Link>
+              )}
             </div>
           ))}
         </div>

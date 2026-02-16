@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: 'About LeadKing — AI Lead Generation Platform',
-  description: 'Learn about LeadKing, an AI-powered lead generation platform that creates and optimizes ad campaigns to generate qualified leads across Meta, Google, TikTok, LinkedIn, and Yandex.',
+  description: 'Learn about LeadKing, an AI-powered lead generation platform that creates and optimizes ad campaigns to generate qualified leads across Meta, Google, TikTok, LinkedIn,.',
   openGraph: {
     title: 'About LeadKing — AI Lead Generation Platform',
     description: 'AI-powered lead generation platform that creates and optimizes ad campaigns to generate qualified leads.',
@@ -55,7 +55,7 @@ export default function AboutPage() {
                 This focused approach allows us to excel at what we do. Our AI systems are specifically trained and optimized for lead generation use cases, enabling superior performance compared to general-purpose marketing tools. Every feature we build, every optimization we make, is designed to improve lead generation outcomes.
               </p>
               <p className="text-gray-700 leading-relaxed mb-4">
-                The platform integrates with major advertising platforms—Meta (Facebook and Instagram), Google Ads, YouTube, TikTok, LinkedIn, and Yandex—allowing businesses to generate leads across all channels from a single interface. Our AI handles the complexity of different platform requirements, optimization rules, and best practices automatically.
+                The platform integrates with major advertising platforms—Meta (Facebook and Instagram), Google Ads, YouTube, TikTok, LinkedIn,—allowing businesses to generate leads across all channels from a single interface. Our AI handles the complexity of different platform requirements, optimization rules, and best practices automatically.
               </p>
               <p className="text-gray-700 leading-relaxed">
                 LeadKing's AI continuously learns and improves. Every campaign provides data that makes our systems smarter, enabling better results for all users. This network effect means that businesses using LeadKing benefit from the accumulated knowledge gained from all campaigns run on the platform.

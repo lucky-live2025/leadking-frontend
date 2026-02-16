@@ -3,7 +3,7 @@ export interface Interest {
   id: string;
   name: string;
   category: string;
-  platform: 'meta' | 'tiktok' | 'google' | 'yandex' | 'all';
+  platform: 'meta' | 'tiktok' | 'google' | 'all';
 }
 
 // Meta (Facebook/Instagram) Interests (sample - full list has 400+)
@@ -70,17 +70,6 @@ export const googleInterests: Interest[] = [
   { id: 'music-lovers', name: 'Music Lovers', category: 'Entertainment', platform: 'google' },
 ];
 
-// Yandex Targeting Categories
-export const yandexInterests: Interest[] = [
-  { id: 'бизнес', name: 'Бизнес', category: 'Business & Industry', platform: 'yandex' },
-  { id: 'технологии', name: 'Технологии', category: 'Technology', platform: 'yandex' },
-  { id: 'образование', name: 'Образование', category: 'Education', platform: 'yandex' },
-  { id: 'здоровье', name: 'Здоровье', category: 'Lifestyle', platform: 'yandex' },
-  { id: 'путешествия', name: 'Путешествия', category: 'Lifestyle', platform: 'yandex' },
-  { id: 'развлечения', name: 'Развлечения', category: 'Entertainment', platform: 'yandex' },
-  { id: 'спорт', name: 'Спорт', category: 'Entertainment', platform: 'yandex' },
-  { id: 'мода', name: 'Мода', category: 'Lifestyle', platform: 'yandex' },
-];
 
 export function getInterestsByPlatform(platform: string): Interest[] {
   switch (platform.toLowerCase()) {
@@ -95,8 +84,6 @@ export function getInterestsByPlatform(platform: string): Interest[] {
     case 'youtube':
     case 'google':
       return googleInterests;
-    case 'yandex':
-      return yandexInterests;
     default:
       return [...metaInterests, ...tiktokInterests, ...googleInterests];
   }

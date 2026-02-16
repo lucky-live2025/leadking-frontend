@@ -21,7 +21,7 @@ export default function RefundPolicyPage() {
             <section className="rounded-lg p-8" style={{ backgroundColor: "#111827" }}>
               <h2 className="text-2xl font-bold mb-4 text-white">How to Request a Refund</h2>
               <p>
-                To request a refund, please contact our support team at support@leadking.com with your account details and reason for refund.
+                To request a refund, please contact our support team at support@leadkingapp.com with your account details and reason for refund.
               </p>
             </section>
 
@@ -35,7 +35,7 @@ export default function RefundPolicyPage() {
             <section className="rounded-lg p-8" style={{ backgroundColor: "#111827" }}>
               <h2 className="text-2xl font-bold mb-4 text-white">Contact</h2>
               <p>
-                For questions about refunds, please contact us at support@leadking.com
+                For questions about refunds, please contact us at support@leadkingapp.com
               </p>
             </section>
           </div>

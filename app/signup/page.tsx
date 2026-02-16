@@ -34,7 +34,7 @@ export default function SignUpPage() {
     }
 
     try {
-      await apiPost("/auth/register", {
+      const response = await apiPost("/auth/register", {
         name: formData.name,
         email: formData.email,
         password: formData.password,
@@ -48,6 +48,18 @@ export default function SignUpPage() {
         value: 0,
         currency: "USD",
       });
+
+      // Auto-login: Store tokens and redirect to dashboard
+      if (response.accessToken) {
+        localStorage.setItem("token", response.accessToken);
+        if (response.refreshToken) {
+          localStorage.setItem("refreshToken", response.refreshToken);
+        }
+        
+        // Redirect to dashboard immediately
+        router.push("/dashboard");
+        return;
+      }
 
       setSuccess(true);
     } catch (err: any) {
@@ -84,10 +96,10 @@ export default function SignUpPage() {
             <div className="relative">
               <h1 className="text-title mb-4 text-gray-900">Account Created!</h1>
               <p className="text-gray-600 mb-6">
-                Your account is pending admin approval. You'll receive an email when it's approved.
+                Welcome to LeadKing! Redirecting you to your dashboard...
               </p>
-              <Link href="/login" className="btn-premium inline-block">
-                Go to Login
+              <Link href="/dashboard" className="btn-premium inline-block">
+                Go to Dashboard
               </Link>
             </div>
           </div>

@@ -53,7 +53,7 @@ export default function DashboardBillingPage() {
 
       const [userData, plansData] = await Promise.all([
         apiGet("/auth/me", { auth: true }).catch(() => null),
-        apiGet("/subscriptions/plans", { auth: true }).catch(() => []),
+        apiGet("/subscription/plans", { auth: true }).catch(() => []),
       ]);
 
       if (userData) {
@@ -129,7 +129,13 @@ export default function DashboardBillingPage() {
 
       <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200">
         <h2 className="text-xl font-semibold mb-4 text-gray-900">Payment Methods</h2>
-        <p className="text-gray-600">Payment method management coming soon.</p>
+        <p className="text-gray-600 mb-4">Manage your subscription and payment options.</p>
+        <Link
+          href="/dashboard/subscription"
+          className="px-6 py-3 bg-blue-600 text-white rounded-xl font-semibold inline-block hover:bg-blue-700 transition-colors shadow-md"
+        >
+          Manage Subscription
+        </Link>
       </div>
     </div>
   );

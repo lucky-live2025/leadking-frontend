@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: 'Enterprise AI Advertising Platform | LeadKing',
-  description: 'Enterprise AI advertising platform for agencies, B2B companies, and high-spend teams. Unified campaign management, global scale, and AI automation across Meta, Google, TikTok, LinkedIn, and Yandex.',
+  description: 'Enterprise AI advertising platform for agencies, B2B companies, and high-spend teams. Unified campaign management, global scale, and AI automation across Meta, Google, TikTok, LinkedIn,.',
   openGraph: {
     title: 'Enterprise AI Advertising Platform | LeadKing',
     description: 'Enterprise AI advertising platform for agencies, B2B companies, and high-spend teams. Unified campaign management, global scale, and AI automation.',
@@ -79,7 +79,7 @@ export default function EnterprisePage() {
             <div>
               <h3 className="text-xl font-semibold text-gray-900 mb-4">Platform Chaos</h3>
               <p className="text-gray-600 leading-relaxed">
-                Managing campaigns across Meta, Google, TikTok, LinkedIn, and Yandex requires multiple interfaces, different optimization rules, and fragmented reporting. Enterprise teams waste time switching between platforms.
+                Managing campaigns across Meta, Google, TikTok, LinkedIn, requires multiple interfaces, different optimization rules, and fragmented reporting. Enterprise teams waste time switching between platforms.
               </p>
             </div>
             <div>
@@ -126,7 +126,7 @@ export default function EnterprisePage() {
             <div>
               <h3 className="text-2xl font-semibold text-gray-900 mb-4">Unified Control</h3>
               <p className="text-gray-600 leading-relaxed mb-4">
-                Single dashboard for all advertising platforms. View performance, manage budgets, and optimize campaigns across Meta, Google, TikTok, LinkedIn, and Yandex without switching interfaces.
+                Single dashboard for all advertising platforms. View performance, manage budgets, and optimize campaigns across Meta, Google, TikTok, LinkedIn, without switching interfaces.
               </p>
               <p className="text-gray-600 leading-relaxed">
                 Enterprise-grade permissions, role-based access control, and audit logs. Maintain oversight and control while delegating execution to AI systems and team members.

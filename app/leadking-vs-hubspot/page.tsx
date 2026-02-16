@@ -64,7 +64,7 @@ export default function LeadKingVsHubSpotPage() {
                   </tr>
                   <tr className="bg-gray-50">
                     <td className="border border-gray-300 px-4 py-3 text-gray-700 font-medium">Platform Integration</td>
-                    <td className="border border-gray-300 px-4 py-3 text-gray-700">Direct integration with 9+ ad platforms</td>
+                    <td className="border border-gray-300 px-4 py-3 text-gray-700">Direct integration with 8+ ad platforms</td>
                     <td className="border border-gray-300 px-4 py-3 text-gray-700">Integrations via third-party apps</td>
                   </tr>
                   <tr>

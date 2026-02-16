@@ -209,15 +209,6 @@ export default function EnterpriseRequestPage() {
                 />
                 <span className="text-gray-700">LinkedIn</span>
               </label>
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  checked={formData.platforms.includes('yandex')}
-                  onChange={() => handlePlatformChange('yandex')}
-                  className="mr-3"
-                />
-                <span className="text-gray-700">Yandex</span>
-              </label>
             </div>
           </div>
 
@@ -250,9 +241,9 @@ export default function EnterpriseRequestPage() {
         <div className="mt-12 pt-8 border-t border-gray-200 text-center">
           <p className="text-gray-600">
             Questions? Contact us at{' '}
-            <Link href="/support" className="text-gray-900 hover:underline">
-              support
-            </Link>
+            <a href="mailto:support@leadkingapp.com" className="text-gray-900 hover:underline font-semibold">
+              support@leadkingapp.com
+            </a>
           </p>
         </div>
       </div>

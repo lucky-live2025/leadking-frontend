@@ -189,6 +189,7 @@ export default function DynamicLandingPage() {
       {/* Footer */}
       <footer className="bg-gray-900 text-white py-8 px-4">
         <div className="container mx-auto max-w-4xl text-center">
+          <p className="text-gray-400 text-xs mb-4">LeadKingapp OÜ · No. 17409590</p>
           <p className="text-gray-400">© {new Date().getFullYear()} LeadKing. All rights reserved.</p>
         </div>
       </footer>

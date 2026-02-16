@@ -6,7 +6,6 @@ const platforms = [
   { id: 'meta', name: 'Meta (Facebook/Instagram)' },
   { id: 'tiktok', name: 'TikTok Ads' },
   { id: 'google', name: 'Google Ads' },
-  { id: 'yandex', name: 'Yandex Direct' },
 ]
 
 export default function PlatformConnector() {

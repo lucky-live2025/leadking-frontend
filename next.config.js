@@ -1,72 +1,127 @@
-const { withSentryConfig } = require('@sentry/nextjs');
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: "standalone",
+  output: 'standalone',
   reactStrictMode: true,
-  compress: true,
-  images: {
-    domains: [],
-    formats: ['image/avif', 'image/webp'],
-  },
   swcMinify: true,
-  generateBuildId: async () => String(Date.now()),
-  // Disable RSC prefetching for client components to prevent fetch errors
-  onDemandEntries: {
-    maxInactiveAge: 25 * 1000,
-    pagesBufferLength: 2,
+  
+  // Image optimization
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'upload.wikimedia.org',
+      },
+      {
+        protocol: 'https',
+        hostname: 'leadkingapp.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.leadkingapp.com',
+      },
+      {
+        protocol: 'http',
+        hostname: '84.32.59.147',
+      },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+      },
+    ],
+    domains: [
+      'leadkingapp.com',
+      'www.leadkingapp.com',
+      '84.32.59.147',
+      'localhost',
+      'upload.wikimedia.org',
+      's3.amazonaws.com',
+      '*.s3.amazonaws.com',
+      's3.*.amazonaws.com',
+    ],
+    formats: ['image/avif', 'image/webp'],
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    minimumCacheTTL: 60,
   },
-  // Suppress webpack warnings
+
+  // Performance optimizations
+  compress: true,
+  poweredByHeader: false,
+  
+  // Experimental features for better performance
+  experimental: {
+    optimizeCss: true,
+    optimizePackageImports: ['@heroicons/react', 'lucide-react'],
+  },
+
+  // Webpack optimizations
   webpack: (config, { isServer }) => {
+    // Optimize bundle size
     if (!isServer) {
-      config.resolve.fallback = {
-        ...config.resolve.fallback,
-        fs: false,
-        url: false,
+      config.optimization = {
+        ...config.optimization,
+        splitChunks: {
+          chunks: 'all',
+          cacheGroups: {
+            default: false,
+            vendors: false,
+            // Vendor chunk
+            vendor: {
+              name: 'vendor',
+              chunks: 'all',
+              test: /node_modules/,
+              priority: 20,
+            },
+            // Common chunk
+            common: {
+              name: 'common',
+              minChunks: 2,
+              chunks: 'all',
+              priority: 10,
+              reuseExistingChunk: true,
+              enforce: true,
+            },
+            // React and React DOM
+            react: {
+              name: 'react',
+              test: /[\\/]node_modules[\\/](react|react-dom)[\\/]/,
+              chunks: 'all',
+              priority: 30,
+            },
+          },
+        },
       };
     }
-    // Suppress ALL webpack warnings
-    config.ignoreWarnings = [
-      { module: /node_modules/ },
-      { message: /Custom webpack configuration/ },
-      { message: /webpack/ },
-    ];
     return config;
   },
-  // Suppress Next.js warnings
-  experimental: {
-    optimizeCss: false,
+
+  // Headers for performance and security
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          {
+            key: 'X-DNS-Prefetch-Control',
+            value: 'on',
+          },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+        ],
+      },
+      {
+        source: '/images/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+    ];
   },
-  // Suppress client-side rendering warnings (these pages use 'use client' which is correct)
-  logging: {
-    fetches: {
-      fullUrl: false,
-    },
-  },
-}
+};
 
-// Only use Sentry if DSN is configured
-const sentryOptions = process.env.SENTRY_DSN || process.env.NEXT_PUBLIC_SENTRY_DSN
-  ? {
-      silent: true,
-      org: process.env.SENTRY_ORG,
-      project: process.env.SENTRY_PROJECT,
-    }
-  : null;
-
-if (sentryOptions) {
-  module.exports = withSentryConfig(
-    nextConfig,
-    sentryOptions,
-    {
-      widenClientFileUpload: true,
-      transpileClientSDK: true,
-      tunnelRoute: '/monitoring',
-      hideSourceMaps: true,
-      disableLogger: true,
-    }
-  );
-} else {
-  module.exports = nextConfig;
-}
-
+module.exports = nextConfig;

@@ -19,7 +19,7 @@ async function checkBackendUrl(): Promise<boolean> {
   } catch (error: any) {
     console.log('❌ NEXT_PUBLIC_API_URL: Invalid URL format');
     console.log(`   Error: ${error.message}`);
-    console.log('   FIX: Ensure URL format is correct (e.g., https://backend.up.railway.app)');
+    console.log('   FIX: Ensure URL format is correct (e.g., https://leadkingapp.com/api)');
     return false;
   }
 }
@@ -54,7 +54,7 @@ async function checkHealthEndpoint(): Promise<boolean> {
     
     console.log(`❌ Backend health endpoint: All endpoints failed`);
     console.log(`   Last error: ${lastError?.message || 'Unknown'}`);
-    console.log('   FIX: Verify backend is deployed and running on Railway');
+    console.log('   FIX: Verify backend is deployed and running on Cherry Servers');
     return false;
   } catch (error: any) {
     console.log('❌ Backend health endpoint: Connection failed');
@@ -114,7 +114,7 @@ async function checkCORS(): Promise<boolean> {
       return true;
     } else {
       console.log('⚠️  CORS: Headers not detected (may need backend configuration)');
-      console.log('   FIX: Verify FRONTEND_URL is set correctly in Railway backend');
+      console.log('   FIX: Verify FRONTEND_URL is set correctly in server environment variables');
       return true; // Not blocking if endpoint works
     }
   } catch (error: any) {
@@ -184,7 +184,7 @@ async function runChecks() {
   });
   
   if (allCriticalPass) {
-    console.log('\n✅ VERCEL + RAILWAY READY — Only DNS setup remains.');
+    console.log('\n✅ DEPLOYMENT READY — Only DNS setup remains.');
     process.exit(0);
   } else {
     console.log('\n❌ Some critical checks failed. Review errors above and fix before deploying.');

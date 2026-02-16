@@ -22,7 +22,7 @@ export default function Footer() {
 
   const legalLinks = [
     { name: "Privacy Policy", href: "/privacy-policy" },
-    { name: "Terms of Service", href: "/terms" },
+    { name: "Terms of Service", href: "/terms-of-service" },
     { name: "Cookie Policy", href: "/cookies" },
     { name: "Refund Policy", href: "/refund-policy" }
   ];
@@ -35,7 +35,7 @@ export default function Footer() {
           <div>
             <h3 className="text-2xl font-bold text-white mb-4">LeadKing</h3>
             <p className="text-gray-400 leading-relaxed">
-              AI-powered global advertising platform. Scale your campaigns across 9 major platforms with intelligent automation.
+              AI-powered global advertising platform. Scale your campaigns across 8 major platforms with intelligent automation.
             </p>
           </div>
 
@@ -92,17 +92,20 @@ export default function Footer() {
         </div>
 
         {/* Bottom Bar */}
-        <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center">
-          <p className="text-gray-400 text-sm">
-            © {currentYear} LeadKing. All rights reserved.
-          </p>
-          <div className="flex gap-6 mt-4 md:mt-0">
-            <Link href="/privacy" className="text-gray-400 hover:text-white text-sm transition-colors">
-              Privacy
-            </Link>
-            <Link href="/terms" className="text-gray-400 hover:text-white text-sm transition-colors">
-              Terms
-            </Link>
+        <div className="border-t border-gray-800 pt-8">
+          <div className="flex flex-col md:flex-row justify-between items-center">
+            <p className="text-gray-400 text-sm">
+              © {currentYear} LeadKing. All rights reserved.
+            </p>
+            <div className="flex gap-6 mt-4 md:mt-0">
+              <Link href="/privacy-policy" className="text-gray-400 hover:text-white text-sm transition-colors">
+                Privacy Policy
+              </Link>
+              <span className="text-gray-600">|</span>
+              <Link href="/terms-of-service" className="text-gray-400 hover:text-white text-sm transition-colors">
+                Terms of Service
+              </Link>
+            </div>
           </div>
         </div>
       </div>

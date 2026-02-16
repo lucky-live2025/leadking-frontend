@@ -2,7 +2,16 @@
 
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from "axios";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_BACKEND_URL || "https://lead-king-backend-production.up.railway.app";
+// Get API base URL - should be just the domain (e.g., https://leadkingapp.com)
+// We'll add /api in the path normalization
+const API_BASE_RAW = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_BACKEND_URL || "https://leadkingapp.com/api";
+// Remove /api suffix if present - we add it in path normalization
+let API_BASE = API_BASE_RAW.replace(/\/api\/?$/, '');
+// If it's still a full URL with path, extract just the origin
+if (API_BASE.includes('://') && API_BASE.split('/').length > 3) {
+  const url = new URL(API_BASE);
+  API_BASE = `${url.protocol}//${url.host}`;
+}
 
 // Create admin-specific axios instance
 export const adminApi: AxiosInstance = axios.create({
@@ -80,13 +89,23 @@ export function handleAdminError(error: any): never {
   throw error;
 }
 
+// Backend wraps all responses as { success, data }. Unwrap so pages get the payload.
+function unwrap(res: any): any {
+  if (res && typeof res === "object" && "success" in res && res.success === true && "data" in res) {
+    return res.data;
+  }
+  return res;
+}
+
 // Admin API methods
 export async function adminGet(path: string, config?: any) {
   try {
-    // Ensure path starts with /
-    const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+    let normalizedPath = path.startsWith('/') ? path : `/${path}`;
+    if (!normalizedPath.startsWith('/api/')) {
+      normalizedPath = `/api${normalizedPath}`;
+    }
     const response = await adminApi.get(normalizedPath, config);
-    return response.data;
+    return unwrap(response.data);
   } catch (error) {
     handleAdminError(error);
   }
@@ -94,9 +113,12 @@ export async function adminGet(path: string, config?: any) {
 
 export async function adminPost(path: string, data?: any, config?: any) {
   try {
-    const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+    let normalizedPath = path.startsWith('/') ? path : `/${path}`;
+    if (!normalizedPath.startsWith('/api/')) {
+      normalizedPath = `/api${normalizedPath}`;
+    }
     const response = await adminApi.post(normalizedPath, data, config);
-    return response.data;
+    return unwrap(response.data);
   } catch (error) {
     handleAdminError(error);
   }
@@ -104,9 +126,12 @@ export async function adminPost(path: string, data?: any, config?: any) {
 
 export async function adminPut(path: string, data?: any, config?: any) {
   try {
-    const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+    let normalizedPath = path.startsWith('/') ? path : `/${path}`;
+    if (!normalizedPath.startsWith('/api/')) {
+      normalizedPath = `/api${normalizedPath}`;
+    }
     const response = await adminApi.put(normalizedPath, data, config);
-    return response.data;
+    return unwrap(response.data);
   } catch (error) {
     handleAdminError(error);
   }
@@ -114,9 +139,12 @@ export async function adminPut(path: string, data?: any, config?: any) {
 
 export async function adminPatch(path: string, data?: any, config?: any) {
   try {
-    const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+    let normalizedPath = path.startsWith('/') ? path : `/${path}`;
+    if (!normalizedPath.startsWith('/api/')) {
+      normalizedPath = `/api${normalizedPath}`;
+    }
     const response = await adminApi.patch(normalizedPath, data, config);
-    return response.data;
+    return unwrap(response.data);
   } catch (error) {
     handleAdminError(error);
   }
@@ -124,9 +152,12 @@ export async function adminPatch(path: string, data?: any, config?: any) {
 
 export async function adminDelete(path: string, config?: any) {
   try {
-    const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+    let normalizedPath = path.startsWith('/') ? path : `/${path}`;
+    if (!normalizedPath.startsWith('/api/')) {
+      normalizedPath = `/api${normalizedPath}`;
+    }
     const response = await adminApi.delete(normalizedPath, config);
-    return response.data;
+    return unwrap(response.data);
   } catch (error) {
     handleAdminError(error);
   }

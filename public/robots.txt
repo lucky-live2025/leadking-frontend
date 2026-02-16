@@ -1,4 +1,33 @@
 User-agent: *
 Allow: /
+Disallow: /dashboard/
+Disallow: /admin/
+Disallow: /api/
+Disallow: /account/
+Disallow: /settings/
+Disallow: /reset-password/
+Disallow: /forgot-password/
+
+# Allow important pages
+Allow: /pricing
+Allow: /features
+Allow: /how-it-works
+Allow: /ai-lead-generation
+Allow: /faq
+Allow: /about
+Allow: /contact
+Allow: /support
+Allow: /enterprise
+
+# Sitemap
 Sitemap: https://leadkingapp.com/sitemap.xml
 
+# Crawl-delay for aggressive bots
+User-agent: AhrefsBot
+Crawl-delay: 10
+
+User-agent: SemrushBot
+Crawl-delay: 10
+
+User-agent: DotBot
+Crawl-delay: 10

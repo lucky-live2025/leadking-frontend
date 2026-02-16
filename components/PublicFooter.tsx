@@ -32,12 +32,12 @@ export default function PublicFooter() {
             <h4 className="text-white font-semibold mb-4">Legal</h4>
             <ul className="space-y-2">
               <li>
-                <Link href="/terms" className="text-gray-400 hover:text-white text-sm">
+                <Link href="/terms-of-service" className="text-gray-400 hover:text-white text-sm">
                   Terms of Service
                 </Link>
               </li>
               <li>
-                <Link href="/privacy" className="text-gray-400 hover:text-white text-sm">
+                <Link href="/privacy-policy" className="text-gray-400 hover:text-white text-sm">
                   Privacy Policy
                 </Link>
               </li>
@@ -59,8 +59,13 @@ export default function PublicFooter() {
             </ul>
           </div>
         </div>
-        <div className="mt-8 pt-8 border-t border-gray-800 text-center text-gray-400 text-sm">
-          © {new Date().getFullYear()} Lead King. All rights reserved.
+        <div className="mt-8 pt-8 border-t border-gray-800">
+          <p className="text-gray-400 text-xs text-left md:text-center mb-4">
+            LeadKingapp OÜ · No. 17409590
+          </p>
+          <p className="text-center text-gray-400 text-sm">
+            © {new Date().getFullYear()} Lead King. All rights reserved.
+          </p>
         </div>
       </div>
     </footer>

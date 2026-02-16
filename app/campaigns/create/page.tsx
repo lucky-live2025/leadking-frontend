@@ -92,13 +92,6 @@ export default function CreateCampaign() {
           { id: "videoGoal", label: "Video Goal", type: "select", options: ["VIEWS", "SUBSCRIBERS", "ENGAGEMENT"] },
         ],
       },
-      yandex: {
-        fields: [
-          { id: "name", label: "Campaign Name", type: "text", required: true },
-          { id: "budget", label: "Budget (RUB)", type: "number", required: true },
-          { id: "region", label: "Target Region", type: "text", placeholder: "Russia, CIS" },
-        ],
-      },
       linkedin: {
         fields: [
           { id: "name", label: "Campaign Name", type: "text", required: true },

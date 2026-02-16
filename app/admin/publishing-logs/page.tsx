@@ -69,8 +69,6 @@ export default function AdminPublishingLogsPage() {
                         ? "bg-blue-500/20 text-blue-300"
                         : log.platform === "GOOGLE"
                           ? "bg-green-500/20 text-green-300"
-                          : log.platform === "YANDEX"
-                            ? "bg-yellow-500/20 text-yellow-300"
                             : "bg-gray-500/20 text-gray-300"
                     }`}
                   >

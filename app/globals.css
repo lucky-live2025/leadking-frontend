@@ -9,6 +9,19 @@
   --background-start-rgb: 248, 250, 252;
   --background-end-rgb: 255, 255, 255;
   
+  /* Unified Color System */
+  --primary: 37, 99, 235;           /* #2563eb - LeadKing Blue */
+  --primary-dark: 30, 64, 175;      /* #1e40af */
+  --primary-light: 59, 130, 246;     /* #3b82f6 */
+  --secondary: 100, 116, 139;       /* #64748b */
+  --success: 16, 185, 129;          /* #10b981 */
+  --warning: 245, 158, 11;          /* #f59e0b */
+  --error: 239, 68, 68;             /* #ef4444 */
+  --background: 248, 250, 252;      /* #f8fafc */
+  --surface: 255, 255, 255;         /* #ffffff */
+  --text-primary: 15, 23, 42;        /* #0f172a */
+  --text-secondary: 100, 116, 139;  /* #64748b */
+  
   /* Premium Color Tokens */
   --slate-50: 248, 250, 252;
   --slate-100: 241, 245, 249;
@@ -48,6 +61,8 @@ html {
 
 body {
   color: rgb(var(--foreground-rgb));
+  overflow-y: auto;
+  overflow-x: hidden;
   background: linear-gradient(
       to bottom,
       rgb(var(--background-start-rgb)),

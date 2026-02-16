@@ -39,7 +39,7 @@ export default function PressPage() {
                 LeadKing is an AI-powered lead generation platform that automatically creates, launches, and optimizes advertising campaigns to generate qualified leads for businesses. The platform uses artificial intelligence to handle every aspect of lead generation—from audience analysis and creative generation to campaign execution and performance optimization.
               </p>
               <p className="text-gray-700 leading-relaxed mb-4">
-                LeadKing integrates directly with major advertising platforms including Meta (Facebook and Instagram), Google Ads, YouTube, TikTok, LinkedIn, and Yandex, allowing businesses to manage campaigns across all these channels from a single dashboard. The platform's AI creates ad creatives, optimizes targeting, and qualifies leads automatically, enabling businesses to generate leads at scale while reducing costs and time investment.
+                LeadKing integrates directly with major advertising platforms including Meta (Facebook and Instagram), Google Ads, YouTube, TikTok, LinkedIn, and allowing businesses to manage campaigns across all these channels from a single dashboard. The platform's AI creates ad creatives, optimizes targeting, and qualifies leads automatically, enabling businesses to generate leads at scale while reducing costs and time investment.
               </p>
               <p className="text-gray-700 leading-relaxed">
                 The platform operates as a Software-as-a-Service (SaaS) solution accessible through web browsers. LeadKing uses machine learning algorithms to analyze campaign performance data, predict customer behavior, and optimize campaigns continuously based on real-time results.

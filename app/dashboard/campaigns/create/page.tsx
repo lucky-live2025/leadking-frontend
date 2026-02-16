@@ -10,6 +10,8 @@ import CreativeUploader from "@/components/campaign/Create/CreativeUploader";
 import CreativeTextInputs from "@/components/campaign/Create/CreativeTextInputs";
 import CreativePreview from "@/components/campaign/Create/CreativePreview";
 import LandingPageStep from "@/app/campaign/create/steps/LandingPageStep";
+import UltraStrategyPanel from "@/components/campaign/UltraStrategyPanel";
+import ProgressIndicator from "@/components/ProgressIndicator";
 
 const platforms = [
   {
@@ -62,13 +64,6 @@ const platforms = [
     objectives: ["LEADS", "CONVERSIONS", "ENGAGEMENT", "AWARENESS"],
   },
   {
-    id: "yandex",
-    name: "Yandex Ads",
-    icon: "🔷",
-    description: "Yandex Direct",
-    objectives: ["CLICKS", "CONVERSIONS", "TRAFFIC", "LEADS"],
-  },
-  {
     id: "email",
     name: "Email AI Campaigns",
     icon: "📧",
@@ -79,13 +74,39 @@ const platforms = [
 
 export default function CreateCampaignPage() {
   const router = useRouter();
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(0); // Start at step 0: Choose Campaign Mode
   const [selectedPlatform, setSelectedPlatform] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
+  // Campaign Mode: 'standard' or 'ultra'
+  const [campaignMode, setCampaignMode] = useState<"standard" | "ultra" | null>(null);
+  
+  // ULTRA Analysis State
+  const [ultraForm, setUltraForm] = useState({
+    businessName: "",
+    productDescription: "",
+    industry: "",
+    location: "",
+    goal: "leads",
+    budget: "",
+  });
+  const [ultraAnalyzing, setUltraAnalyzing] = useState(false);
+  const [ultraStrategy, setUltraStrategy] = useState<any>(null);
+  const [ultraCampaignId, setUltraCampaignId] = useState<number | null>(null);
+  
   // Creative mode: 'ai-only', 'manual-only', 'hybrid'
   const [creativeMode, setCreativeMode] = useState<"ai-only" | "manual-only" | "hybrid">("hybrid");
+
+  // AI Generation State
+  const [aiPrompts, setAiPrompts] = useState({
+    imagePrompt: "",
+    videoPrompt: "",
+    generatingImage: false,
+    generatingVideo: false,
+    generatedImages: [] as string[],
+    generatedVideos: [] as { jobId: string; status: string; url?: string }[],
+  });
   
   // Form data
   const [formData, setFormData] = useState({
@@ -190,20 +211,12 @@ export default function CreateCampaignPage() {
 
     async function checkAiEngine() {
       try {
-        const backendUrl = process.env.NEXT_PUBLIC_API_URL || "https://lead-king-backend-production.up.railway.app";
-        const response = await fetch(`${backendUrl}/health/ai`, {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-        });
-        if (response.ok) {
-          const data = await response.json();
-          setAiEngineStatus(data.status === "ok" ? "online" : "offline");
-        } else {
-          setAiEngineStatus("offline");
-        }
+        // Use the API helper which handles /api prefix correctly
+        const data = await apiGet("/health/ai");
+        setAiEngineStatus(data.status === "ok" ? "online" : "offline");
       } catch (err) {
         console.warn("Failed to check AI engine status:", err);
-        setAiEngineStatus("unknown");
+        setAiEngineStatus("offline");
       }
     }
 
@@ -222,7 +235,6 @@ export default function CreateCampaignPage() {
       'google-display': 'GOOGLE',
       'youtube': 'GOOGLE',
       'linkedin': 'LINKEDIN',
-      'yandex': 'YANDEX',
     };
 
     const backendPlatform = platformMap[platform.id] || platform.id.toUpperCase();
@@ -247,6 +259,14 @@ export default function CreateCampaignPage() {
   };
 
   const handleNext = () => {
+    if (step === 0 && !campaignMode) {
+      setError("Please select a campaign mode");
+      return;
+    }
+    if (step === 1 && !selectedPlatform) {
+      setError("Please select a platform");
+      return;
+    }
     if (step === 2 && !formData.objective) {
       setError("Please select an objective");
       return;
@@ -262,23 +282,213 @@ export default function CreateCampaignPage() {
       }
     }
     if (step === 4) {
-      // Landing page step - validation is optional
+      // Creative step - validation is optional
     }
-    if (step === 5 && !formData.dailyBudget) {
-      setError("Please enter a daily budget");
-      return;
+    if (step === 5) {
+      // Landing page step - validation is optional
     }
     setError(null);
     setStep(step + 1);
   };
 
+  const handleRunUltraAnalysis = async () => {
+    if (!ultraForm.businessName || !ultraForm.productDescription || !ultraForm.industry || !ultraForm.location || !ultraForm.budget) {
+      setError("Please fill in all required fields");
+      return;
+    }
+
+    setUltraAnalyzing(true);
+    setError(null);
+    try {
+      const response = await apiPost("/ultra/analyze", ultraForm, { auth: true });
+      setUltraStrategy(response.analysis || response);
+      setUltraCampaignId(response.campaignId || null);
+    } catch (err: any) {
+      setError(err.message || "Failed to run ULTRA analysis");
+      setUltraAnalyzing(false);
+    } finally {
+      setUltraAnalyzing(false);
+    }
+  };
+
+  const handleApplyUltraStrategy = async () => {
+    if (!ultraStrategy) return;
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      // Extract strategy recommendations
+      const strategy = ultraStrategy.campaignStrategy || {};
+      const platformSuitability = ultraStrategy.platformSuitability || {};
+      const competitiveAngle = ultraStrategy.competitiveAngle || {};
+      const buyerPersona = ultraStrategy.buyerPersona || {};
+
+      // Auto-fill campaign form based on ULTRA strategy
+      // 1. Select best platform (highest score)
+      const bestPlatform = Object.entries(platformSuitability)
+        .sort(([, a]: [string, any], [, b]: [string, any]) => (b.score || 0) - (a.score || 0))[0];
+      
+      if (bestPlatform) {
+        const platformId = bestPlatform[0].toLowerCase();
+        const platformMap: Record<string, string> = {
+          'meta': 'meta-facebook',
+          'tiktok': 'tiktok',
+          'google': 'google-search',
+          'youtube': 'youtube',
+          'linkedin': 'linkedin',
+        };
+        const mappedPlatform = platforms.find(p => p.id === platformMap[platformId] || p.id === platformId);
+        if (mappedPlatform) {
+          setSelectedPlatform(mappedPlatform);
+          setFormData((prev) => ({ ...prev, platform: mappedPlatform.id }));
+        }
+      }
+
+      // 2. Set objective based on goal
+      const objectiveMap: Record<string, string> = {
+        'leads': 'LEADS',
+        'sales': 'CONVERSIONS',
+        'traffic': 'TRAFFIC',
+        'awareness': 'AWARENESS',
+      };
+      const objective = objectiveMap[ultraForm.goal] || 'LEADS';
+      setFormData((prev) => ({ ...prev, objective }));
+
+      // 3. Set targeting from persona
+      if (buyerPersona.demographics) {
+        const ageRange = buyerPersona.demographics.age?.match(/(\d+)-(\d+)/);
+        if (ageRange) {
+          setFormData((prev) => ({
+            ...prev,
+            ageMin: parseInt(ageRange[1]) || 22,
+            ageMax: parseInt(ageRange[2]) || 65,
+          }));
+        }
+      }
+
+      // 4. Set location
+      if (ultraForm.location) {
+        const countries = ultraForm.location.split(',').map(c => c.trim()).filter(Boolean);
+        setFormData((prev) => ({ ...prev, countries }));
+      }
+
+      // 5. Set interests from persona
+      if (buyerPersona.psychographics?.interests) {
+        setFormData((prev) => ({
+          ...prev,
+          interests: buyerPersona.psychographics.interests.slice(0, 5),
+        }));
+      }
+
+      // 6. Set budget
+      const budgetMatch = ultraForm.budget.match(/\$?(\d+)/);
+      if (budgetMatch) {
+        setFormData((prev) => ({ ...prev, dailyBudget: budgetMatch[1] }));
+      }
+
+      // 7. Generate creatives from strategy
+      if (competitiveAngle.keyMessages && competitiveAngle.keyMessages.length > 0) {
+        setFormData((prev) => ({
+          ...prev,
+          aiHeadlines: competitiveAngle.keyMessages.slice(0, 3),
+          aiPrimaryTexts: competitiveAngle.keyMessages.slice(0, 2),
+        }));
+      }
+
+      // Move to next step
+      setStep(1);
+    } catch (err: any) {
+      setError(err.message || "Failed to apply strategy");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleBack = () => {
+    if (step === 1) {
+      // If going back from platform selection, return to mode selection
+      setStep(0);
+      return;
+    }
     if (step === 2) {
       setSelectedPlatform(null);
       setFormData((prev) => ({ ...prev, platform: "", objective: "" }));
     }
     setStep(step - 1);
     setError(null);
+  };
+
+  const handleGenerateImage = async () => {
+    if (!aiPrompts.imagePrompt) {
+      setError("Please enter an image prompt");
+      return;
+    }
+
+    setAiPrompts((prev) => ({ ...prev, generatingImage: true }));
+    setError(null);
+    try {
+      const response = await apiPost("/creatives/images", {
+        prompt: aiPrompts.imagePrompt,
+        businessType: selectedPlatform?.name || "general",
+        count: 1,
+      }, { auth: true });
+
+      const imageUrls = response.creatives?.map((c: any) => c.url).filter(Boolean) ?? [];
+      if (imageUrls.length > 0) {
+        setAiPrompts((prev) => ({
+          ...prev,
+          generatingImage: false,
+          generatedImages: [...prev.generatedImages, ...imageUrls],
+          imagePrompt: "",
+        }));
+      } else {
+        const msg = response.creatives?.[0]?.placeholder
+          ? "Image generation is not available. Please try again later or contact support."
+          : "No images generated. Please try again.";
+        setError(msg);
+        setAiPrompts((prev) => ({ ...prev, generatingImage: false }));
+      }
+    } catch (err: any) {
+      const msg = err?.response?.data?.message || err?.message || "Failed to generate image. Check your connection and try again.";
+      setError(msg);
+      setAiPrompts((prev) => ({ ...prev, generatingImage: false }));
+    }
+  };
+
+  const handleGenerateVideo = async () => {
+    if (!aiPrompts.videoPrompt) {
+      setError("Please enter a video prompt");
+      return;
+    }
+
+    setAiPrompts((prev) => ({ ...prev, generatingVideo: true }));
+    setError(null);
+    try {
+      const response = await apiPost("/creatives/videos", {
+        script: aiPrompts.videoPrompt,
+        businessType: selectedPlatform?.name || "general",
+      }, { auth: true });
+
+      const creatives = response.creatives ?? [];
+      const hasRealJob = creatives.some((c: any) => c.url || (c.jobId && !String(c.jobId).startsWith("video_")));
+      if (creatives.length > 0 && (hasRealJob || creatives.some((c: any) => c.status === "processing"))) {
+        setAiPrompts((prev) => ({
+          ...prev,
+          generatingVideo: false,
+          generatedVideos: [...prev.generatedVideos, ...creatives],
+          videoPrompt: "",
+        }));
+      } else {
+        const msg = creatives[0]?.message || "Video generation is not available. Please try again later or contact support.";
+        setError(msg);
+        setAiPrompts((prev) => ({ ...prev, generatingVideo: false }));
+      }
+    } catch (err: any) {
+      const msg = err?.response?.data?.message || err?.message || "Failed to generate video. Check your connection and try again.";
+      setError(msg);
+      setAiPrompts((prev) => ({ ...prev, generatingVideo: false }));
+    }
   };
 
   const handleFilesChange = async (files: { images: File[]; videos: File[] }) => {
@@ -296,7 +506,7 @@ export default function CreateCampaignPage() {
       });
 
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://lead-king-backend-production.up.railway.app";
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://leadkingapp.com/api";
         const response = await fetch(`${apiUrl}/uploads/creative`, {
           method: "POST",
           headers: {
@@ -420,22 +630,13 @@ export default function CreateCampaignPage() {
         </div>
 
         {/* Progress Steps */}
-        <div className="mb-8 flex items-center justify-between">
-          {[1, 2, 3, 4, 5].map((s) => (
-            <div key={s} className="flex items-center flex-1">
-              <div
-                className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold ${
-                  step >= s ? "bg-blue-600 text-white" : "bg-gray-300 text-gray-600"
-                }`}
-              >
-                {s}
-              </div>
-              {s < 6 && (
-                <div className={`flex-1 h-1 mx-2 ${step > s ? "bg-blue-600" : "bg-gray-300"}`} />
-              )}
-            </div>
-          ))}
-        </div>
+        {step > 0 && (
+          <ProgressIndicator
+            currentStep={step}
+            totalSteps={6}
+            stepLabels={["Mode", "Platform", "Objective", "Targeting", "Creative", "Landing"]}
+          />
+        )}
 
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-900 p-4 rounded-xl mb-6 shadow-md">
@@ -444,6 +645,238 @@ export default function CreateCampaignPage() {
         )}
 
         <div className="bg-white rounded-xl p-8 shadow-md border border-gray-200">
+          {/* Step 0: Choose Campaign Mode */}
+          {step === 0 && (
+            <div className="space-y-8">
+              <div>
+                <h2 className="text-3xl font-bold text-gray-900 mb-2">Choose Campaign Mode</h2>
+                <p className="text-gray-600">Select how you want to create your campaign</p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Standard Campaign */}
+                <button
+                  onClick={() => {
+                    setCampaignMode("standard");
+                    setStep(1);
+                  }}
+                  className="p-8 rounded-2xl border-2 border-gray-300 bg-white hover:border-blue-500 hover:shadow-xl transition-all transform hover:scale-105 text-left"
+                >
+                  <div className="text-5xl mb-4">⚡</div>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2">Standard Campaign</h3>
+                  <p className="text-gray-600 mb-4">Fast AI generation - Get started quickly</p>
+                  <ul className="space-y-2 text-sm text-gray-600">
+                    <li className="flex items-center gap-2">
+                      <span className="text-green-500">✓</span>
+                      Quick setup
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-green-500">✓</span>
+                      AI-powered creatives
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-green-500">✓</span>
+                      Standard targeting
+                    </li>
+                  </ul>
+                </button>
+
+                {/* ULTRA Campaign */}
+                <button
+                  onClick={() => {
+                    setCampaignMode("ultra");
+                    // Stay on step 0 to show ULTRA form
+                  }}
+                  className={`p-8 rounded-2xl border-2 transition-all transform hover:scale-105 text-left ${
+                    campaignMode === "ultra"
+                      ? "border-purple-600 bg-gradient-to-br from-purple-50 to-indigo-50 shadow-xl ring-2 ring-purple-500"
+                      : "border-gray-300 bg-white hover:border-purple-500 hover:shadow-xl"
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="text-5xl">✨</div>
+                    <span className="px-3 py-1 bg-purple-600 text-white rounded-full text-xs font-bold">
+                      PREMIUM
+                    </span>
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2">ULTRA Campaign</h3>
+                  <p className="text-gray-600 mb-4">AI Strategist - Pre-campaign analysis & strategy</p>
+                  <ul className="space-y-2 text-sm text-gray-600">
+                    <li className="flex items-center gap-2">
+                      <span className="text-purple-500">✓</span>
+                      Market & competitor analysis
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-purple-500">✓</span>
+                      Buyer persona building
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-purple-500">✓</span>
+                      Platform recommendations
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-purple-500">✓</span>
+                      Budget optimization
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-purple-500">✓</span>
+                      Strategy before spending
+                    </li>
+                  </ul>
+                </button>
+              </div>
+
+              {/* ULTRA Form (shown when ULTRA is selected) */}
+              {campaignMode === "ultra" && (
+                <div className="mt-8 bg-gradient-to-br from-purple-50 to-indigo-50 rounded-2xl p-8 border-2 border-purple-200">
+                  <h3 className="text-2xl font-bold text-gray-900 mb-6">🎯 ULTRA Strategy Analysis</h3>
+                  <p className="text-gray-700 mb-6">
+                    Tell us about your business and we'll analyze the market, competitors, and create a winning strategy before you spend a dollar.
+                  </p>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-900 mb-2">
+                        Business Name *
+                      </label>
+                      <input
+                        type="text"
+                        value={ultraForm.businessName}
+                        onChange={(e) => setUltraForm({ ...ultraForm, businessName: e.target.value })}
+                        className="w-full px-4 py-3 bg-white border-2 border-gray-300 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        placeholder="Your Company Name"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-900 mb-2">
+                        Industry *
+                      </label>
+                      <input
+                        type="text"
+                        value={ultraForm.industry}
+                        onChange={(e) => setUltraForm({ ...ultraForm, industry: e.target.value })}
+                        className="w-full px-4 py-3 bg-white border-2 border-gray-300 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        placeholder="e.g., SaaS, E-commerce, Real Estate"
+                      />
+                    </div>
+
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-semibold text-gray-900 mb-2">
+                        Product / Service Description *
+                      </label>
+                      <textarea
+                        value={ultraForm.productDescription}
+                        onChange={(e) => setUltraForm({ ...ultraForm, productDescription: e.target.value })}
+                        className="w-full px-4 py-3 bg-white border-2 border-gray-300 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
+                        rows={3}
+                        placeholder="Describe what you're selling and who it's for..."
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-900 mb-2">
+                        Target Location *
+                      </label>
+                      <input
+                        type="text"
+                        value={ultraForm.location}
+                        onChange={(e) => setUltraForm({ ...ultraForm, location: e.target.value })}
+                        className="w-full px-4 py-3 bg-white border-2 border-gray-300 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        placeholder="e.g., United States, New York, London"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-900 mb-2">
+                        Goal *
+                      </label>
+                      <select
+                        value={ultraForm.goal}
+                        onChange={(e) => setUltraForm({ ...ultraForm, goal: e.target.value })}
+                        className="w-full px-4 py-3 bg-white border-2 border-gray-300 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      >
+                        <option value="leads">Generate Leads</option>
+                        <option value="sales">Drive Sales</option>
+                        <option value="traffic">Increase Traffic</option>
+                        <option value="awareness">Brand Awareness</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-900 mb-2">
+                        Budget (Daily or Monthly) *
+                      </label>
+                      <input
+                        type="text"
+                        value={ultraForm.budget}
+                        onChange={(e) => setUltraForm({ ...ultraForm, budget: e.target.value })}
+                        className="w-full px-4 py-3 bg-white border-2 border-gray-300 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        placeholder="e.g., $50/day or $1500/month"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="mt-6 flex gap-4">
+                    <button
+                      onClick={handleRunUltraAnalysis}
+                      disabled={
+                        ultraAnalyzing ||
+                        !ultraForm.businessName ||
+                        !ultraForm.productDescription ||
+                        !ultraForm.industry ||
+                        !ultraForm.location ||
+                        !ultraForm.budget
+                      }
+                      className="px-8 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl font-bold hover:from-purple-700 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform hover:scale-105 shadow-xl"
+                    >
+                      {ultraAnalyzing ? (
+                        <span className="flex items-center gap-2">
+                          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                          Analyzing Strategy...
+                        </span>
+                      ) : (
+                        "🚀 Run ULTRA Analysis"
+                      )}
+                    </button>
+                    <button
+                      onClick={() => {
+                        setCampaignMode("standard");
+                        setUltraStrategy(null);
+                      }}
+                      className="px-6 py-4 bg-gray-200 text-gray-900 rounded-xl font-semibold hover:bg-gray-300 transition-colors"
+                    >
+                      Use Standard Mode
+                    </button>
+                  </div>
+
+                  {/* ULTRA Strategy Results */}
+                  {ultraStrategy && (
+                    <div className="mt-8">
+                      <UltraStrategyPanel
+                        strategy={ultraStrategy}
+                        onApplyStrategy={handleApplyUltraStrategy}
+                        applying={loading}
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Navigation for Standard Mode */}
+              {campaignMode === "standard" && (
+                <div className="flex justify-end mt-6">
+                  <button
+                    onClick={() => setStep(1)}
+                    className="px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-bold hover:from-blue-700 hover:to-purple-700 transition-all transform hover:scale-105 shadow-xl"
+                  >
+                    Continue to Platform Selection →
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Step 1: Platform Selection */}
           {step === 1 && (
             <div>
@@ -461,7 +894,6 @@ export default function CreateCampaignPage() {
                     'google-display': 'GOOGLE',
                     'youtube': 'GOOGLE',
                     'linkedin': 'LINKEDIN',
-                    'yandex': 'YANDEX',
                   };
                   const backendPlatform = platformMap[platform.id] || platform.id.toUpperCase();
                   const isConnected = platformConnections[backendPlatform];
@@ -611,111 +1043,271 @@ export default function CreateCampaignPage() {
             </div>
           )}
 
-          {/* Step 5: Creative */}
-          {step === 5 && (
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Creative Assets</h2>
+          {/* Step 4: Creative Assets - Premium Redesign */}
+          {step === 4 && (
+            <div className="space-y-8">
+              <div>
+                <h2 className="text-3xl font-bold text-gray-900 mb-2">✨ Creative Assets</h2>
+                <p className="text-gray-600">Generate stunning visuals with AI or upload your own</p>
+              </div>
               
-              {/* Creative Mode Selection */}
-              <div className="mb-6">
-                <label className="block text-gray-900 font-semibold mb-3">Creative Mode</label>
-                <div className="grid grid-cols-3 gap-4">
+              {/* Creative Mode Selection - Premium Cards */}
+              <div className="mb-8">
+                <label className="block text-gray-900 font-bold text-lg mb-4">Choose Your Creative Mode</label>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <button
                     onClick={() => setCreativeMode("ai-only")}
-                    className={`p-4 rounded-xl border-2 transition-all ${
+                    className={`p-6 rounded-2xl border-2 transition-all transform hover:scale-105 ${
                       creativeMode === "ai-only"
-                        ? "border-blue-500 bg-blue-50 shadow-md"
-                        : "border-gray-300 bg-white hover:border-gray-400"
+                        ? "border-blue-600 bg-gradient-to-br from-blue-50 to-purple-50 shadow-xl ring-2 ring-blue-500"
+                        : "border-gray-300 bg-white hover:border-blue-400 hover:shadow-lg"
                     }`}
                   >
-                    <div className="text-gray-900 font-semibold">AI Only</div>
-                    <div className="text-gray-600 text-sm">Generate with AI</div>
+                    <div className="text-4xl mb-3">🤖</div>
+                    <div className="text-gray-900 font-bold text-lg mb-1">AI Only</div>
+                    <div className="text-gray-600 text-sm">Fully AI-generated content</div>
+                    {creativeMode === "ai-only" && (
+                      <div className="mt-3 text-xs text-blue-600 font-semibold">✓ Selected</div>
+                    )}
                   </button>
                   <button
                     onClick={() => setCreativeMode("manual-only")}
-                    className={`p-4 rounded-xl border-2 transition-all ${
+                    className={`p-6 rounded-2xl border-2 transition-all transform hover:scale-105 ${
                       creativeMode === "manual-only"
-                        ? "border-blue-500 bg-blue-50 shadow-md"
-                        : "border-gray-300 bg-white hover:border-gray-400"
+                        ? "border-blue-600 bg-gradient-to-br from-blue-50 to-purple-50 shadow-xl ring-2 ring-blue-500"
+                        : "border-gray-300 bg-white hover:border-blue-400 hover:shadow-lg"
                     }`}
                   >
-                    <div className="text-gray-900 font-semibold">Manual Only</div>
-                    <div className="text-gray-600 text-sm">Upload your own</div>
+                    <div className="text-4xl mb-3">📤</div>
+                    <div className="text-gray-900 font-bold text-lg mb-1">Manual Only</div>
+                    <div className="text-gray-600 text-sm">Upload your own assets</div>
+                    {creativeMode === "manual-only" && (
+                      <div className="mt-3 text-xs text-blue-600 font-semibold">✓ Selected</div>
+                    )}
                   </button>
                   <button
                     onClick={() => setCreativeMode("hybrid")}
-                    className={`p-4 rounded-xl border-2 transition-all ${
+                    className={`p-6 rounded-2xl border-2 transition-all transform hover:scale-105 ${
                       creativeMode === "hybrid"
-                        ? "border-blue-500 bg-blue-50 shadow-md"
-                        : "border-gray-300 bg-white hover:border-gray-400"
+                        ? "border-blue-600 bg-gradient-to-br from-blue-50 to-purple-50 shadow-xl ring-2 ring-blue-500"
+                        : "border-gray-300 bg-white hover:border-blue-400 hover:shadow-lg"
                     }`}
                   >
-                    <div className="text-gray-900 font-semibold">Hybrid</div>
-                    <div className="text-gray-600 text-sm">AI + Manual</div>
+                    <div className="text-4xl mb-3">⚡</div>
+                    <div className="text-gray-900 font-bold text-lg mb-1">Hybrid</div>
+                    <div className="text-gray-600 text-sm">AI + Your Content</div>
+                    {creativeMode === "hybrid" && (
+                      <div className="mt-3 text-xs text-blue-600 font-semibold">✓ Selected</div>
+                    )}
                   </button>
                 </div>
               </div>
 
-              {/* AI Creative Option */}
+              {/* AI Generation Section - Premium Design */}
               {(creativeMode === "ai-only" || creativeMode === "hybrid") && (
-                <div className="mb-6">
-                  <div className="flex items-center justify-between mb-3">
-                    <label className="flex items-center gap-3 text-gray-900">
+                <div className="bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 rounded-2xl p-8 border-2 border-blue-200 shadow-xl">
+                  <div className="flex items-center justify-between mb-6">
+                    <div>
+                      <h3 className="text-2xl font-bold text-gray-900 mb-2">🎨 AI Generation</h3>
+                      <p className="text-gray-600">Describe what you want and AI will create it</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {aiEngineStatus === "online" && (
+                        <span className="px-4 py-2 bg-green-100 text-green-700 rounded-full text-sm font-semibold flex items-center gap-2">
+                          <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                          AI Engine Online
+                        </span>
+                      )}
+                      {aiEngineStatus === "offline" && (
+                        <span className="px-4 py-2 bg-red-100 text-red-700 rounded-full text-sm font-semibold flex items-center gap-2">
+                          <span className="w-2 h-2 bg-red-500 rounded-full"></span>
+                          AI Engine Offline
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* AI Image Generation */}
+                  <div className="bg-white rounded-xl p-6 mb-6 border border-gray-200 shadow-lg">
+                    <div className="flex items-center gap-3 mb-4">
+                      <span className="text-3xl">🖼️</span>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <h4 className="text-lg font-bold text-gray-900">Generate Images</h4>
+                          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            <span className="w-2 h-2 rounded-full bg-green-500" aria-hidden />
+                            AI
+                          </span>
+                        </div>
+                        <p className="text-sm text-gray-600">Create stunning visuals with AI</p>
+                      </div>
+                    </div>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                          Image Prompt *
+                        </label>
+                        <textarea
+                          value={aiPrompts.imagePrompt}
+                          onChange={(e) => setAiPrompts({ ...aiPrompts, imagePrompt: e.target.value })}
+                          placeholder="e.g., A modern tech product on a sleek background, professional photography style, vibrant colors..."
+                          className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-300 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                          rows={3}
+                          disabled={aiEngineStatus === "offline"}
+                        />
+                        <p className="text-xs text-gray-500 mt-1">
+                          Be specific: style, colors, mood, composition
+                        </p>
+                      </div>
+                      <button
+                        onClick={handleGenerateImage}
+                        disabled={!aiPrompts.imagePrompt || aiPrompts.generatingImage || aiEngineStatus === "offline"}
+                        className="w-full px-6 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-bold hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform hover:scale-105 shadow-lg"
+                      >
+                        {aiPrompts.generatingImage ? (
+                          <span className="flex items-center justify-center gap-2">
+                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                            Generating Image...
+                          </span>
+                        ) : (
+                          "✨ Generate Image"
+                        )}
+                      </button>
+                      {aiPrompts.generatedImages.length > 0 && (
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
+                          {aiPrompts.generatedImages.map((url, idx) => (
+                            <div key={idx} className="relative group">
+                              <img
+                                src={url}
+                                alt={`Generated ${idx + 1}`}
+                                className="w-full h-32 object-cover rounded-lg border-2 border-gray-200 hover:border-blue-500 transition-all"
+                              />
+                              <button
+                                onClick={() => {
+                                  setUploadedImageUrls([...uploadedImageUrls, url]);
+                                  setAiPrompts({ ...aiPrompts, generatedImages: aiPrompts.generatedImages.filter((_, i) => i !== idx) });
+                                }}
+                                className="absolute top-2 right-2 bg-green-600 text-white px-3 py-1 rounded-lg text-xs font-semibold opacity-0 group-hover:opacity-100 transition-opacity"
+                              >
+                                + Add
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* AI Video Generation */}
+                  <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-lg">
+                    <div className="flex items-center gap-3 mb-4">
+                      <span className="text-3xl">🎬</span>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <h4 className="text-lg font-bold text-gray-900">Generate Videos</h4>
+                          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            <span className="w-2 h-2 rounded-full bg-green-500" aria-hidden />
+                            AI
+                          </span>
+                        </div>
+                        <p className="text-sm text-gray-600">Create engaging videos with AI</p>
+                      </div>
+                    </div>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                          Video Prompt *
+                        </label>
+                        <textarea
+                          value={aiPrompts.videoPrompt}
+                          onChange={(e) => setAiPrompts({ ...aiPrompts, videoPrompt: e.target.value })}
+                          placeholder="e.g., A dynamic product showcase with smooth camera movement, modern aesthetic, professional lighting..."
+                          className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-300 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                          rows={3}
+                          disabled={aiEngineStatus === "offline"}
+                        />
+                        <p className="text-xs text-gray-500 mt-1">
+                          Describe the video: motion, style, mood, duration
+                        </p>
+                      </div>
+                      <button
+                        onClick={handleGenerateVideo}
+                        disabled={!aiPrompts.videoPrompt || aiPrompts.generatingVideo || aiEngineStatus === "offline"}
+                        className="w-full px-6 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-bold hover:from-purple-700 hover:to-pink-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform hover:scale-105 shadow-lg"
+                      >
+                        {aiPrompts.generatingVideo ? (
+                          <span className="flex items-center justify-center gap-2">
+                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                            Generating Video...
+                          </span>
+                        ) : (
+                          "🎬 Generate Video"
+                        )}
+                      </button>
+                      {aiPrompts.generatedVideos.length > 0 && (
+                        <div className="space-y-3 mt-4">
+                          {aiPrompts.generatedVideos.map((video, idx) => (
+                            <div key={idx} className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <p className="font-semibold text-gray-900">Video {idx + 1}</p>
+                                  <p className="text-xs text-gray-600">Status: {video.status}</p>
+                                </div>
+                                {video.url && (
+                                  <button
+                                    onClick={() => {
+                                      setUploadedVideoUrls([...uploadedVideoUrls, video.url!]);
+                                    }}
+                                    className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-semibold hover:bg-green-700"
+                                  >
+                                    + Add Video
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* AI Text Generation Toggle */}
+                  <div className="mt-6 bg-white rounded-xl p-6 border border-gray-200 shadow-lg">
+                    <label className="flex items-center justify-between cursor-pointer">
+                      <div>
+                        <div className="font-bold text-gray-900 mb-1">Generate AI Text Creatives</div>
+                        <div className="text-sm text-gray-600">Headlines, descriptions, CTAs, hooks</div>
+                      </div>
                       <input
                         type="checkbox"
                         checked={formData.generateCreative}
                         onChange={(e) =>
                           setFormData((prev) => ({ ...prev, generateCreative: e.target.checked }))
                         }
-                        className="w-5 h-5"
+                        className="w-12 h-6 bg-gray-200 rounded-full appearance-none checked:bg-blue-600 transition-colors relative cursor-pointer"
                         disabled={aiEngineStatus === "offline"}
                       />
-                      Generate AI Creative (Hooks, Scripts, Headlines)
                     </label>
-                    <div className="flex items-center gap-2">
-                      {aiEngineStatus === "checking" && (
-                        <span className="text-xs text-gray-500">Checking AI Engine...</span>
-                      )}
-                      {aiEngineStatus === "online" && (
-                        <span className="text-xs text-green-600 font-medium flex items-center gap-1">
-                          <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                          AI Engine Online
-                        </span>
-                      )}
-                      {aiEngineStatus === "offline" && (
-                        <span className="text-xs text-red-600 font-medium flex items-center gap-1">
-                          <span className="w-2 h-2 bg-red-500 rounded-full"></span>
-                          AI Engine Offline
-                        </span>
-                      )}
-                      {aiEngineStatus === "unknown" && (
-                        <span className="text-xs text-yellow-600 font-medium flex items-center gap-1">
-                          <span className="w-2 h-2 bg-yellow-500 rounded-full"></span>
-                          AI Engine Status Unknown
-                        </span>
-                      )}
-                    </div>
                   </div>
-                  {aiEngineStatus === "offline" && (
-                    <p className="text-xs text-red-600 ml-8">
-                      AI creative generation is currently unavailable. Please use manual creatives or try again later.
-                    </p>
-                  )}
                 </div>
               )}
 
-              {/* Manual Upload */}
+              {/* Manual Upload Section - Enhanced */}
               {(creativeMode === "manual-only" || creativeMode === "hybrid") && (
-                <div className="space-y-6 mb-6">
-                  <CreativeUploader onFilesChange={handleFilesChange} />
-                  <CreativeTextInputs onTextsChange={handleTextsChange} />
+                <div className="bg-white rounded-2xl p-8 border-2 border-gray-200 shadow-xl">
+                  <h3 className="text-2xl font-bold text-gray-900 mb-6">📤 Upload Your Assets</h3>
+                  <div className="space-y-6">
+                    <CreativeUploader onFilesChange={handleFilesChange} />
+                    <CreativeTextInputs onTextsChange={handleTextsChange} />
+                  </div>
                 </div>
               )}
 
-              {/* Preview */}
-              <div className="mb-6">
+              {/* Preview Section - Enhanced */}
+              <div className="bg-gradient-to-br from-gray-50 to-blue-50 rounded-2xl p-8 border-2 border-gray-200 shadow-xl">
+                <h3 className="text-2xl font-bold text-gray-900 mb-6">👁️ Preview</h3>
                 <CreativePreview
-                  images={uploadedImageUrls}
+                  images={[...uploadedImageUrls, ...aiPrompts.generatedImages]}
                   videos={uploadedVideoUrls}
                   headlines={[...formData.manualHeadlines, ...formData.aiHeadlines]}
                   primaryTexts={[...formData.manualPrimaryTexts, ...formData.aiPrimaryTexts]}
@@ -724,18 +1316,19 @@ export default function CreateCampaignPage() {
                 />
               </div>
 
-              <div className="mt-6 flex gap-4">
+              {/* Navigation */}
+              <div className="flex gap-4 pt-4">
                 <button
                   onClick={handleBack}
-                  className="px-6 py-2 bg-gray-200 text-gray-900 rounded-xl hover:bg-gray-300 font-semibold transition-colors"
+                  className="px-8 py-3 bg-gray-200 text-gray-900 rounded-xl hover:bg-gray-300 font-bold transition-all transform hover:scale-105 shadow-md"
                 >
-                  Back
+                  ← Back
                 </button>
                 <button
                   onClick={handleNext}
-                  className="px-6 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-semibold transition-colors shadow-md"
+                  className="px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:from-blue-700 hover:to-purple-700 font-bold transition-all transform hover:scale-105 shadow-xl ml-auto"
                 >
-                  Next
+                  Next →
                 </button>
               </div>
             </div>

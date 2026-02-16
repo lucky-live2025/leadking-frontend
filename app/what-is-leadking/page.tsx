@@ -39,7 +39,7 @@ export default function WhatIsLeadKingPage() {
                 LeadKing is an AI-powered lead generation platform that automatically creates, launches, and optimizes advertising campaigns to generate qualified leads for businesses. The platform uses artificial intelligence to handle every aspect of lead generation—from audience analysis and creative generation to campaign execution and performance optimization.
               </p>
               <p className="text-gray-700 leading-relaxed mb-4">
-                LeadKing operates as a Software-as-a-Service (SaaS) platform accessible through web browsers. It integrates directly with major advertising platforms including Meta (Facebook and Instagram), Google Ads, YouTube, TikTok, LinkedIn, and Yandex, allowing businesses to manage campaigns across all these channels from a single dashboard.
+                LeadKing operates as a Software-as-a-Service (SaaS) platform accessible through web browsers. It integrates directly with major advertising platforms including Meta (Facebook and Instagram), Google Ads, YouTube, TikTok, LinkedIn, and allowing businesses to manage campaigns across all these channels from a single dashboard.
               </p>
               <p className="text-gray-700 leading-relaxed">
                 The platform's core differentiator is its use of artificial intelligence to automate tasks that traditionally require human marketers, designers, and analysts. This automation enables businesses to generate leads at scale while reducing costs and time investment compared to traditional marketing methods.
@@ -54,7 +54,7 @@ export default function WhatIsLeadKingPage() {
               </p>
               <h3 className="text-2xl font-semibold mb-3 text-gray-900 mt-6">Multi-Platform Management</h3>
               <p className="text-gray-700 leading-relaxed mb-4">
-                LeadKing manages campaigns across Meta, Google, TikTok, LinkedIn, Yandex, and other platforms simultaneously. The AI handles platform-specific requirements, optimization rules, and best practices for each platform automatically, presenting a unified interface to users while managing complexity behind the scenes.
+                LeadKing manages campaigns across Meta, Google, TikTok, LinkedIn, and other platforms simultaneously. The AI handles platform-specific requirements, optimization rules, and best practices for each platform automatically, presenting a unified interface to users while managing complexity behind the scenes.
               </p>
               <h3 className="text-2xl font-semibold mb-3 text-gray-900 mt-6">Real-Time Optimization</h3>
               <p className="text-gray-700 leading-relaxed mb-4">
